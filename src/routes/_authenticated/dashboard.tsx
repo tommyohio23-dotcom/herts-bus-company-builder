@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BusSide } from "@/components/BusSide";
-import { operatorPhoto, realOperatorPhoto } from "@/lib/bus-photos";
+import { realOperatorPhoto } from "@/lib/bus-photos";
 import { BusPhoto } from "@/components/BusPhoto";
 import { HERTS_TOWNS, PRESETS, type Preset } from "@/lib/herts";
 
@@ -82,7 +82,7 @@ function Dashboard() {
         <div className="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {PRESETS.map((p) => (
             <div key={p.key} className="rounded-lg border bg-card p-3">
-              {realOperatorPhoto(p.key) ? <BusPhoto model={p.name} presetKey={p.key} credit={realOperatorPhoto(p.key)} className="overflow-hidden rounded-md" /> : <img src={operatorPhoto(p.key)} alt={`${p.name} bus`} width={1024} height={640} loading="lazy" className="aspect-[16/10] w-full rounded-md object-cover" />}
+              <BusPhoto model={p.name} presetKey={p.key} credit={realOperatorPhoto(p.key)} className="overflow-hidden rounded-md" />
               <p className="font-display text-2xl">{p.name}</p>
               <p className="text-xs text-muted-foreground">{p.livery} · {p.routes.length} routes · {p.fleet.length} buses</p>
               <Button size="sm" className="mt-2 w-full" onClick={() => startPreset(p)}>Take control</Button>
