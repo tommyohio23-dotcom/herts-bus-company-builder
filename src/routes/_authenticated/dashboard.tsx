@@ -33,7 +33,19 @@ function Dashboard() {
     queryFn: async () => (await supabase.from("companies").select("*").order("created_at")).data ?? [],
   });
 
+  const [busy, setBusy] = useState<string | null>(null);
   async function startPreset(p: Preset) {
+    if (busy) return;
+    setBusy(p.key);
+    const t = toast.loading(`Setting up ${p.name}…`);
+    try { await setupPreset(p); } finally { toast.dismiss(t); setBusy(null); }
+  }
+  async function removeCompany(id: string, name: string) {
+    if (!confirm(`Delete ${name}? This removes its fleet, routes and staff.`)) return;
+    await supabase.from("companies").delete().eq("id", id);
+    qc.invalidateQueries({ queryKey: ["companies"] });
+  }
+  async function setupPreset(p: Preset) {
     const { data: c, error } = await supabase.from("companies").insert({
       name: p.name, short_name: p.short, primary_color: p.primary, secondary_color: p.secondary, preset_key: p.key, hq_town: p.hq,
     }).select().single();
@@ -67,11 +79,14 @@ function Dashboard() {
         {companies.length === 0 && <p className="text-muted-foreground">None yet — pick a classic operator or found your own below.</p>}
         <div className="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {companies.map((c) => (
-            <Link key={c.id} to="/company/$id" params={{ id: c.id }} className="card-raised rounded-lg bg-card p-3 transition hover:-translate-y-0.5">
+            <div key={c.id} className="card-raised rounded-lg bg-card p-3">
+            <Link to="/company/$id" params={{ id: c.id }} className="block">
               <BusSide primary={c.primary_color} secondary={c.secondary_color} label={c.short_name} className="w-full" />
               <p className="font-display text-2xl">{c.name}</p>
               <p className="text-sm text-muted-foreground">Day {c.day} · £{Number(c.balance).toLocaleString()}</p>
             </Link>
+            <Button size="sm" variant="ghost" className="mt-1 text-destructive" onClick={() => removeCompany(c.id, c.name)}>Delete</Button>
+            </div>
           ))}
         </div>
 
@@ -85,7 +100,7 @@ function Dashboard() {
               <BusPhoto model={p.name} presetKey={p.key} credit={realOperatorPhoto(p.key)} className="overflow-hidden rounded-md" />
               <p className="font-display text-2xl">{p.name}</p>
               <p className="text-xs text-muted-foreground">{p.livery} · {p.routes.length} routes · {p.fleet.length} buses</p>
-              <Button size="sm" className="mt-2 w-full" onClick={() => startPreset(p)}>Take control</Button>
+              <Button size="sm" className="mt-2 w-full" disabled={!!busy} onClick={() => startPreset(p)}>{busy === p.key ? "Setting up…" : "Take control"}</Button>
             </div>
           ))}
         </div>

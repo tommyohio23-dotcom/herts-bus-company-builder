@@ -228,6 +228,7 @@ function Routes({ companyId, routes, buses, refresh }: { companyId: string; rout
               <p className="font-semibold">{r.origin} → {r.destination}</p>
               <p className="text-xs text-muted-foreground">{r.via && `via ${r.via} · `}every {r.frequency_mins} min · £{Number(r.fare).toFixed(2)} · {n} bus{n === 1 ? "" : "es"}</p>
             </div>
+            <EditStops route={r} refresh={refresh} />
             <Button size="sm" variant="ghost" onClick={async () => { await supabase.from("routes").delete().eq("id", r.id); refresh(); }}>Withdraw</Button>
           </div>
         );
@@ -238,7 +239,9 @@ function Routes({ companyId, routes, buses, refresh }: { companyId: string; rout
           <div><Label>Number</Label><Input value={f.number} onChange={(e) => setF({ ...f, number: e.target.value })} /></div>
           <div><Label>From</Label>{townSelect("origin")}</div>
           <div><Label>To</Label>{townSelect("destination")}</div>
-          <div><Label>Via</Label><Input value={f.via} onChange={(e) => setF({ ...f, via: e.target.value })} /></div>
+          <div className="sm:col-span-3"><Label>Stops in between (in order)</Label>
+            <StopPicker value={f.via ? f.via.split(", ") : []} onChange={(v) => setF({ ...f, via: v.join(", ") })} />
+          </div>
           <div><Label>Every (min)</Label><Input type="number" min={5} value={f.frequency_mins} onChange={(e) => setF({ ...f, frequency_mins: Number(e.target.value) })} /></div>
           <div><Label>Fare £</Label><Input type="number" step="0.1" min={0} value={f.fare} onChange={(e) => setF({ ...f, fare: Number(e.target.value) })} /></div>
         </div>
@@ -290,5 +293,44 @@ function FeaturePicker({ value, onChange }: { value: string[]; onChange: (v: str
         );
       })}
     </div>
+  );
+}
+
+function StopPicker({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
+  const [pick, setPick] = useState("");
+  const move = (i: number, d: number) => { const v = [...value]; const j = i + d; if (j < 0 || j >= v.length) return; [v[i], v[j]] = [v[j]!, v[i]!]; onChange(v); };
+  return (
+    <div className="space-y-2">
+      <ol className="space-y-1">
+        {value.map((s, i) => (
+          <li key={`${s}-${i}`} className="flex items-center gap-1 rounded-md border bg-background px-2 py-1 text-sm">
+            <span className="w-5 text-muted-foreground">{i + 1}.</span><span className="flex-1">{s}</span>
+            <button type="button" aria-label="Move up" className="px-1" onClick={() => move(i, -1)}>↑</button>
+            <button type="button" aria-label="Move down" className="px-1" onClick={() => move(i, 1)}>↓</button>
+            <button type="button" aria-label="Remove stop" className="px-1 text-destructive" onClick={() => onChange(value.filter((_, k) => k !== i))}>✕</button>
+          </li>
+        ))}
+      </ol>
+      <div className="flex gap-2">
+        <div className="flex-1"><Select value={pick} onValueChange={setPick}><SelectTrigger><SelectValue placeholder="Choose a stop" /></SelectTrigger>
+          <SelectContent>{HERTS_TOWNS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
+        <Button type="button" variant="secondary" disabled={!pick} onClick={() => { onChange([...value, pick]); setPick(""); }}>Add stop</Button>
+      </div>
+    </div>
+  );
+}
+
+function EditStops({ route, refresh }: { route: Rt; refresh: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [stops, setStops] = useState<string[]>(route.via ? route.via.split(", ") : []);
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild><Button size="sm" variant="outline">Stops</Button></DialogTrigger>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogHeader><DialogTitle className="font-display text-3xl">{route.number}: {route.origin} → {route.destination}</DialogTitle></DialogHeader>
+        <StopPicker value={stops} onChange={setStops} />
+        <Button onClick={async () => { await supabase.from("routes").update({ via: stops.join(", ") }).eq("id", route.id); setOpen(false); refresh(); }}>Save stops</Button>
+      </DialogContent>
+    </Dialog>
   );
 }
