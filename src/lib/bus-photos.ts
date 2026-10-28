@@ -11,6 +11,7 @@ import gDouble from "@/assets/buses/generic-double.jpg";
 import gSingle from "@/assets/buses/generic-single.jpg";
 import gMini from "@/assets/buses/generic-mini.jpg";
 import gElectric from "@/assets/buses/generic-electric.jpg";
+import real from "./bus-photos-real.json";
 import { modelKind, PRESETS, type PhotoKind } from "./herts";
 
 const OPERATOR: Record<string, string> = {
@@ -27,3 +28,10 @@ export function busPhoto(presetKey: string | null, model: string) {
   return GENERIC[kind];
 }
 export const operatorPhoto = (key: string) => OPERATOR[key] ?? gSingle;
+
+export type PhotoCredit = { url: string; page: string; author: string; license: string };
+const MODELS = real.models as Record<string, PhotoCredit>;
+const OPS = real.operators as Record<string, PhotoCredit>;
+/** Real Wikimedia Commons photo of the exact model, if we have one. */
+export const realModelPhoto = (model: string): PhotoCredit | undefined => MODELS[model];
+export const realOperatorPhoto = (key: string): PhotoCredit | undefined => OPS[key];
