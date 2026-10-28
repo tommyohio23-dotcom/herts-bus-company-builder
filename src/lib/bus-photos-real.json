@@ -346,11 +346,139 @@
    "title": "File:Uno 318 BF59 NJE on 614.jpg"
   },
   "centrebus": {
-   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Centrebus_Olympus.jpg/960px-Centrebus_Olympus.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-   "page": "https://commons.wikimedia.org/wiki/File:Centrebus_Olympus.jpg",
-   "author": "Dan Sellers",
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/Centrebus_579_%28YX09_AEU%29.jpg/960px-Centrebus_579_%28YX09_AEU%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Centrebus_579_(YX09_AEU).jpg",
+   "author": "joieman",
+   "license": "CC BY-SA 2.0",
+   "title": "File:Centrebus 579 (YX09 AEU).jpg"
+  },
+  "trustybus": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Centrebus_%28Trustybus%29_LK07_GTF.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+   "page": "https://commons.wikimedia.org/wiki/File:Centrebus_(Trustybus)_LK07_GTF.jpg",
+   "author": "BigToe7000",
+   "license": "Public domain",
+   "title": "File:Centrebus (Trustybus) LK07 GTF.jpg"
+  },
+  "carousel": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/15/Carousel_Buses_809_on_Route_A30%2C_Heathrow_Central_%2813020945444%29.jpg/960px-Carousel_Buses_809_on_Route_A30%2C_Heathrow_Central_%2813020945444%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Carousel_Buses_809_on_Route_A30,_Heathrow_Central_(13020945444).jpg",
+   "author": "Au Morandarte from London, Middlesex, England",
+   "license": "CC BY-SA 2.0",
+   "title": "File:Carousel Buses 809 on Route A30, Heathrow Central (13020945444).jpg"
+  },
+  "red-rose": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ec/Red_Rose_Travel_bus_%28KX09_ACU%29%2C_Showbus_2009_%283%29.jpg/960px-Red_Rose_Travel_bus_%28KX09_ACU%29%2C_Showbus_2009_%283%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Red_Rose_Travel_bus_(KX09_ACU),_Showbus_2009_(3).jpg",
+   "author": "Pimlico Badger",
+   "license": "CC BY-SA 2.0",
+   "title": "File:Red Rose Travel bus (KX09 ACU), Showbus 2009 (3).jpg"
+  },
+  "red-eagle": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1e/St_Albans_-_Red_Eagle_Bus_-_geograph.org.uk_-_5274228.jpg/960px-St_Albans_-_Red_Eagle_Bus_-_geograph.org.uk_-_5274228.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:St_Albans_-_Red_Eagle_Bus_-_geograph.org.uk_-_5274228.jpg",
+   "author": "Colin Smith",
+   "license": "CC BY-SA 2.0",
+   "title": "File:St Albans - Red Eagle Bus - geograph.org.uk - 5274228.jpg"
+  },
+  "redline": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/Redline_Buses_K576_NHC.JPG/960px-Redline_Buses_K576_NHC.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Redline_Buses_K576_NHC.JPG",
+   "author": "Arriva436",
+   "license": "CC BY 3.0",
+   "title": "File:Redline Buses K576 NHC.JPG"
+  },
+  "sullivan": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/86/Sullivan_Buses_WVL1.JPG/960px-Sullivan_Buses_WVL1.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Sullivan_Buses_WVL1.JPG",
+   "author": "Arriva436",
    "license": "CC BY-SA 3.0",
-   "title": "File:Centrebus Olympus.jpg"
+   "title": "File:Sullivan Buses WVL1.JPG"
+  }
+ },
+ "fleet": {
+  "arriva-shires|VDL SB200 / Wright Pulsar 2": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d8/Arriva_the_Shires_Wright_Pulsar_%28VDL_SB200%29_3773_MX13_ALO_%2840023470350%29.jpg/960px-Arriva_the_Shires_Wright_Pulsar_%28VDL_SB200%29_3773_MX13_ALO_%2840023470350%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Arriva_the_Shires_Wright_Pulsar_(VDL_SB200)_3773_MX13_ALO_(40023470350).jpg",
+   "author": "Kat's Transport Photography",
+   "license": "CC BY 2.0",
+   "title": "File:Arriva the Shires Wright Pulsar (VDL SB200) 3773 MX13 ALO (40023470350).jpg"
+  },
+  "arriva-shires|ADL Enviro400": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/78/Arriva_Alexander_Dennis_Enviro400_%28SN58_EOO%29_in_Frideswide_Square%2C_Oxford.jpg/960px-Arriva_Alexander_Dennis_Enviro400_%28SN58_EOO%29_in_Frideswide_Square%2C_Oxford.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Arriva_Alexander_Dennis_Enviro400_(SN58_EOO)_in_Frideswide_Square,_Oxford.jpg",
+   "author": "Au Morandarte from London, Middlesex, England",
+   "license": "CC BY-SA 2.0",
+   "title": "File:Arriva Alexander Dennis Enviro400 (SN58 EOO) in Frideswide Square, Oxford.jpg"
+  },
+  "arriva-shires|Dennis Dart SLF / Plaxton Pointer": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2a/Arriva_Dennis_Dart_SLF_%28W482_YGS%29.jpg/960px-Arriva_Dennis_Dart_SLF_%28W482_YGS%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Arriva_Dennis_Dart_SLF_(W482_YGS).jpg",
+   "author": "Au Morandarte from London, Middlesex, England",
+   "license": "CC BY-SA 2.0",
+   "title": "File:Arriva Dennis Dart SLF (W482 YGS).jpg"
+  },
+  "uno|ADL Enviro400 MMC": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Uno_289_YX67_VFT_%2836827017943%29.jpg/960px-Uno_289_YX67_VFT_%2836827017943%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Uno_289_YX67_VFT_(36827017943).jpg",
+   "author": "Kat's Transport Photography",
+   "license": "CC BY 2.0",
+   "title": "File:Uno 289 YX67 VFT (36827017943).jpg"
+  },
+  "uno|Optare Solo SR": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3d/Uno_optare_solo_bus.jpg/960px-Uno_optare_solo_bus.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Uno_optare_solo_bus.jpg",
+   "author": "BigToe7000",
+   "license": "Public domain",
+   "title": "File:Uno optare solo bus.jpg"
+  },
+  "centrebus|ADL Enviro200": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/Centrebus_579_%28YX09_AEU%29.jpg/960px-Centrebus_579_%28YX09_AEU%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Centrebus_579_(YX09_AEU).jpg",
+   "author": "joieman",
+   "license": "CC BY-SA 2.0",
+   "title": "File:Centrebus 579 (YX09 AEU).jpg"
+  },
+  "centrebus|Optare Solo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d7/Centrebus_Optare_Solo_366_YG52_DFX_%2841689140235%29.jpg/960px-Centrebus_Optare_Solo_366_YG52_DFX_%2841689140235%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Centrebus_Optare_Solo_366_YG52_DFX_(41689140235).jpg",
+   "author": "Kat's Transport Photography",
+   "license": "CC BY 2.0",
+   "title": "File:Centrebus Optare Solo 366 YG52 DFX (41689140235).jpg"
+  },
+  "sullivan|ADL Enviro400": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/24/BW17SUL_Sullivan_Buses_E72_ADL_Enviro400MMC.jpg/960px-BW17SUL_Sullivan_Buses_E72_ADL_Enviro400MMC.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:BW17SUL_Sullivan_Buses_E72_ADL_Enviro400MMC.jpg",
+   "author": "km30192002",
+   "license": "CC BY 2.0",
+   "title": "File:BW17SUL Sullivan Buses E72 ADL Enviro400MMC.jpg"
+  },
+  "sullivan|ADL Enviro200": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fd/Sullivan_Buses_bus_AE2_%28SN57_DXH%29%2C_26_August_2013.jpg/960px-Sullivan_Buses_bus_AE2_%28SN57_DXH%29%2C_26_August_2013.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Sullivan_Buses_bus_AE2_(SN57_DXH),_26_August_2013.jpg",
+   "author": "Au Morandarte from Chiswick/Romford, London, England",
+   "license": "CC BY-SA 2.0",
+   "title": "File:Sullivan Buses bus AE2 (SN57 DXH), 26 August 2013.jpg"
+  },
+  "carousel|ADL Enviro200 MMC": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e8/Carousel_Buses_ADL_Enviro200_MMC_in_Maidenhead.jpg/960px-Carousel_Buses_ADL_Enviro200_MMC_in_Maidenhead.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Carousel_Buses_ADL_Enviro200_MMC_in_Maidenhead.jpg",
+   "author": "Aubrey",
+   "license": "CC BY 2.0",
+   "title": "File:Carousel Buses ADL Enviro200 MMC in Maidenhead.jpg"
+  },
+  "redline|Dennis Dart SLF / Plaxton Pointer": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bd/Redline_Dennis_Dart_SLF_%28Plaxton_Pointer_2%29_Y251_NLK_%2838961292095%29.jpg/960px-Redline_Dennis_Dart_SLF_%28Plaxton_Pointer_2%29_Y251_NLK_%2838961292095%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Redline_Dennis_Dart_SLF_(Plaxton_Pointer_2)_Y251_NLK_(38961292095).jpg",
+   "author": "Kat's Transport Photography",
+   "license": "CC BY 2.0",
+   "title": "File:Redline Dennis Dart SLF (Plaxton Pointer 2) Y251 NLK (38961292095).jpg"
+  },
+  "trustybus|Dennis Dart / Caetano Nimbus": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Centrebus_%28Trustybus%29_LK07_GTF.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+   "page": "https://commons.wikimedia.org/wiki/File:Centrebus_(Trustybus)_LK07_GTF.jpg",
+   "author": "BigToe7000",
+   "license": "Public domain",
+   "title": "File:Centrebus (Trustybus) LK07 GTF.jpg"
   }
  }
 }

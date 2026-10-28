@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { BusSide } from "@/components/BusSide";
+import { BusPhoto } from "@/components/BusPhoto";
+import { realOperatorPhoto } from "@/lib/bus-photos";
 import { PRESETS } from "@/lib/herts";
 
 export const Route = createFileRoute("/")({
@@ -32,9 +33,9 @@ function Index() {
         <Button asChild size="lg" className="mt-6"><Link to="/dashboard">Start managing</Link></Button>
       </section>
       <section className="mx-auto grid max-w-6xl grid-cols-2 gap-4 px-4 pb-16 md:grid-cols-3">
-        {PRESETS.map((p, i) => (
-          <div key={p.key} className="card-raised rounded-lg bg-card p-3">
-            <BusSide primary={p.primary} secondary={p.secondary} label={p.short} double={i % 2 === 0} className="w-full" />
+        {PRESETS.map((p) => (
+          <div key={p.key} className="card-raised overflow-hidden rounded-lg bg-card p-3">
+            <BusPhoto model={p.name} presetKey={p.key} credit={realOperatorPhoto(p.key)} className="overflow-hidden rounded-md" />
             <p className="mt-2 font-display text-xl">{p.name}</p>
             <p className="text-xs text-muted-foreground">{p.livery}</p>
           </div>
