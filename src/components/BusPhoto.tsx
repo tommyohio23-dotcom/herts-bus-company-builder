@@ -1,7 +1,7 @@
 import { busPhoto, realModelPhoto, type PhotoCredit } from "@/lib/bus-photos";
 
 /** Shows a real photo of the model (with credit) or falls back to an illustration. */
-export function BusPhoto({ model, presetKey, credit, className = "" }: { model: string; presetKey: string | null; credit?: PhotoCredit; className?: string }) {
+export function BusPhoto({ model, presetKey, credit, className = "" }: { model: string; presetKey: string | null; credit?: PhotoCredit | undefined; className?: string }) {
   const real = credit ?? realModelPhoto(model);
   return (
     <figure className={className}>
