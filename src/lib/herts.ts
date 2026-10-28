@@ -31,18 +31,58 @@ export function modelKind(model: string): PhotoKind {
   const m = model.toLowerCase();
   if (/ev|electric|yutong|byd|switch/.test(m)) return "electric";
   if (/solo|sprinter|tempo|versa/.test(m)) return "mini";
-  if (/400|olympian|gemini|streetdeck|b5lh|b9tl|b7tl|n230ud|omnicity/.test(m)) return "double";
+  if (/400|olympian|gemini|streetdeck|b5lh|b9tl|b7tl|n230ud|omnicity|atlantean|bristol vr|trident|routemaster|titan|metrobus|dominator/.test(m)) return "double";
   return "single";
 }
 
 export const BUS_MODELS = [
-  "ADL Enviro200", "ADL Enviro200 MMC", "ADL Enviro400", "ADL Enviro400 MMC", "Dennis Dart SLF / Plaxton Pointer",
-  "Dennis Dart / Caetano Nimbus", "Leyland Olympian / ECW", "Leyland National", "Leyland Lynx",
-  "Volvo B7TL / Wright Eclipse Gemini", "Volvo B9TL / Wright Gemini 2", "Volvo B5LH / Wright Gemini 3",
-  "Scania OmniCity", "Scania N230UD / ADL Enviro400", "VDL SB200 / Wright Pulsar 2", "Wright StreetLite",
-  "Wright StreetDeck", "Optare Solo", "Optare Solo SR", "Optare Versa", "Optare Tempo",
-  "Mercedes-Benz Citaro", "Mercedes-Benz Sprinter", "MAN EcoCity / Caetano", "Switch Metrocity EV",
-  "Yutong E10", "BYD / ADL Enviro200EV",
+  "ADL Enviro200",
+  "ADL Enviro200 MMC",
+  "ADL Enviro300",
+  "ADL Enviro400",
+  "ADL Enviro400 MMC",
+  "ADL Enviro400EV",
+  "BYD / ADL Enviro200EV",
+  "Bristol VR",
+  "Dennis Dart / Caetano Nimbus",
+  "Dennis Dart SLF / Plaxton Pointer",
+  "Dennis Dominator",
+  "Dennis Trident / ADL ALX400",
+  "Dennis Trident / Plaxton President",
+  "Leyland Atlantean",
+  "Leyland Lynx",
+  "Leyland National",
+  "Leyland Olympian / ECW",
+  "Leyland Titan",
+  "MAN EcoCity / Caetano",
+  "MCW Metrobus",
+  "Mercedes-Benz Citaro",
+  "Mercedes-Benz Citaro G (bendy)",
+  "Mercedes-Benz Sprinter",
+  "New Routemaster",
+  "Optare Excel",
+  "Optare MetroCity",
+  "Optare Solo",
+  "Optare Solo SR",
+  "Optare Tempo",
+  "Optare Versa",
+  "Routemaster (AEC)",
+  "Scania N230UD / ADL Enviro400",
+  "Scania OmniCity",
+  "Switch Metrocity EV",
+  "VDL SB200 / Wright Pulsar 2",
+  "Volvo B10BLE / Wright Renown",
+  "Volvo B5LH / Wright Gemini 3",
+  "Volvo B7TL / Wright Eclipse Gemini",
+  "Volvo B8RLE / MCV Evora",
+  "Volvo B9TL / Wright Gemini 2",
+  "Volvo Olympian",
+  "Wright Eclipse Urban",
+  "Wright GB Kite",
+  "Wright StreetDeck",
+  "Wright StreetDeck Electroliner",
+  "Wright StreetLite",
+  "Yutong E10"
 ];
 
 export const STATUSES = ["In service", "Spare", "Workshop", "MOT due", "Withdrawn", "Preserved"];

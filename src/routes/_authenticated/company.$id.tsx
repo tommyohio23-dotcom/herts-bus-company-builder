@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BusSide } from "@/components/BusSide";
 import { BUS_MODELS, FEATURES, HERTS_TOWNS, STAFF_ROLES, STATUSES } from "@/lib/herts";
-import { busPhoto } from "@/lib/bus-photos";
+import { BusPhoto } from "@/components/BusPhoto";
 import { simulateDay } from "@/lib/sim";
 
 export const Route = createFileRoute("/_authenticated/company/$id")({
@@ -127,7 +127,7 @@ function Fleet({ companyId, company, buses, routes, refresh, spend }: { companyI
       <div className="mt-3 grid gap-3 md:grid-cols-2">
         {buses.map((b) => (
           <div key={b.id} className="overflow-hidden rounded-lg border bg-card">
-            <img src={busPhoto(company.preset_key, b.model)} alt={`${b.model} bus ${b.fleet_no}`} width={1024} height={640} loading="lazy" className="aspect-[16/10] w-full object-cover" />
+            <BusPhoto model={b.model} presetKey={company.preset_key} />
             <div className="p-3">
             <div className="flex items-start justify-between gap-2">
               <div>
@@ -197,7 +197,7 @@ function AddBus({ companyId, company, routes, refresh, spend }: { companyId: str
               <SelectContent><SelectItem value="none">Unallocated</SelectItem>{routes.map((r) => <SelectItem key={r.id} value={r.id}>{r.number}</SelectItem>)}</SelectContent></Select>
           </div>
           <div><Label>Spec & extras</Label><FeaturePicker value={f.features} onChange={(v) => setF({ ...f, features: v })} /></div>
-          <img src={busPhoto(company.preset_key, f.model)} alt="Bus preview" width={1024} height={640} className="aspect-[16/10] w-full rounded-md object-cover" />
+          <BusPhoto model={f.model} presetKey={company.preset_key} className="overflow-hidden rounded-md" />
           <Button onClick={save}>Buy for £{price.toLocaleString()}</Button>
         </div>
       </DialogContent>
