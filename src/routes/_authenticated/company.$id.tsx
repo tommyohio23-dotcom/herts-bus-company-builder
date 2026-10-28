@@ -156,13 +156,13 @@ function Fleet({ companyId, company, buses, routes, refresh, spend }: { companyI
 
 function AddBus({ companyId, company, routes, refresh, spend }: { companyId: string; company: Co; routes: Rt[]; refresh: () => void; spend: (n: number) => Promise<boolean> }) {
   const [open, setOpen] = useState(false);
-  const [f, setF] = useState({ fleet_no: "", registration: "", model: BUS_MODELS[0], year: 2012, depot: company.hq_town, livery: "", route_id: "none" });
+  const [f, setF] = useState({ fleet_no: "", registration: "", model: BUS_MODELS[0] ?? "", year: 2012, depot: company.hq_town, livery: "", route_id: "none" });
   const price = busPrice(f.year);
   async function save() {
-    if (!f.fleet_no) return toast.error("Fleet number needed");
+    if (!f.fleet_no) { toast.error("Fleet number needed"); return; }
     if (!(await spend(price))) return;
     const { error } = await supabase.from("buses").insert({ ...f, company_id: companyId, route_id: f.route_id === "none" ? null : f.route_id });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(`${f.fleet_no} joins the fleet`); setOpen(false); refresh();
   }
   return (
@@ -201,9 +201,9 @@ function AddBus({ companyId, company, routes, refresh, spend }: { companyId: str
 function Routes({ companyId, routes, buses, refresh }: { companyId: string; routes: Rt[]; buses: Bus[]; refresh: () => void }) {
   const [f, setF] = useState({ number: "", origin: "Hertford", destination: "Stevenage", via: "", frequency_mins: 30, fare: 2 });
   async function add() {
-    if (!f.number) return toast.error("Route number needed");
+    if (!f.number) { toast.error("Route number needed"); return; }
     const { error } = await supabase.from("routes").insert({ ...f, company_id: companyId });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setF({ ...f, number: "", via: "" }); refresh();
   }
   const townSelect = (k: "origin" | "destination") => (
@@ -245,7 +245,7 @@ function Drivers({ companyId, drivers, refresh }: { companyId: string; drivers: 
   const [name, setName] = useState("");
   const [depot, setDepot] = useState("Hertford");
   async function hire() {
-    if (!name) return toast.error("Driver name needed");
+    if (!name) { toast.error("Driver name needed"); return; }
     await supabase.from("drivers").insert({ company_id: companyId, name, depot, staff_no: String(1000 + drivers.length + Math.floor(Math.random() * 900)) });
     setName(""); refresh();
   }

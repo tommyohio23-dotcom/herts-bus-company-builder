@@ -35,14 +35,14 @@ function Dashboard() {
     const { data: c, error } = await supabase.from("companies").insert({
       name: p.name, short_name: p.short, primary_color: p.primary, secondary_color: p.secondary, preset_key: p.key, hq_town: p.hq,
     }).select().single();
-    if (error || !c) return toast.error(error?.message ?? "Failed");
+    if (error || !c) { toast.error(error?.message ?? "Failed"); return; }
     const { data: routes } = await supabase.from("routes").insert(
       p.routes.map((r) => ({ company_id: c.id, number: r.number, origin: r.origin, destination: r.destination, via: r.via, frequency_mins: r.frequency, fare: r.fare })),
     ).select();
     await supabase.from("buses").insert(p.fleet.map((b, i) => ({
-      company_id: c.id, ...b, livery: p.livery, depot: p.depots[i % p.depots.length], route_id: routes?.[i % (routes?.length || 1)]?.id ?? null,
+      company_id: c.id, ...b, livery: p.livery, depot: p.depots[i % p.depots.length] ?? "", route_id: routes?.[i % (routes?.length || 1)]?.id ?? null,
     })));
-    await supabase.from("drivers").insert(p.fleet.map((_, i) => ({ company_id: c.id, name: `Driver ${i + 1}`, depot: p.depots[i % p.depots.length], staff_no: String(1000 + i) })));
+    await supabase.from("drivers").insert(p.fleet.map((_, i) => ({ company_id: c.id, name: `Driver ${i + 1}`, depot: p.depots[i % p.depots.length] ?? "", staff_no: String(1000 + i) })));
     qc.invalidateQueries({ queryKey: ["companies"] });
     navigate({ to: "/company/$id", params: { id: c.id } });
   }
@@ -99,11 +99,11 @@ function CustomCompany({ onDone }: { onDone: (id: string) => void }) {
   const [secondary, setSecondary] = useState("#f2e6b8");
   const [hq, setHq] = useState("Hertford");
   async function create() {
-    if (!name.trim()) return toast.error("Give your company a name");
+    if (!name.trim()) { toast.error("Give your company a name"); return; }
     const { data, error } = await supabase.from("companies").insert({
       name, short_name: short || name.slice(0, 8), primary_color: primary, secondary_color: secondary, hq_town: hq, balance: 150000,
     }).select().single();
-    if (error || !data) return toast.error(error?.message ?? "Failed");
+    if (error || !data) { toast.error(error?.message ?? "Failed"); return; }
     onDone(data.id);
   }
   return (
