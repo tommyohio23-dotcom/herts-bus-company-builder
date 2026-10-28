@@ -19,6 +19,7 @@ export type Database = {
           company_id: string
           created_at: string
           depot: string
+          features: string[]
           fleet_no: string
           id: string
           livery: string
@@ -35,6 +36,7 @@ export type Database = {
           company_id: string
           created_at?: string
           depot?: string
+          features?: string[]
           fleet_no: string
           id?: string
           livery?: string
@@ -51,6 +53,7 @@ export type Database = {
           company_id?: string
           created_at?: string
           depot?: string
+          features?: string[]
           fleet_no?: string
           id?: string
           livery?: string
@@ -129,6 +132,7 @@ export type Database = {
           depot: string
           id: string
           name: string
+          role: string
           staff_no: string
           user_id: string
           wage: number
@@ -139,6 +143,7 @@ export type Database = {
           depot?: string
           id?: string
           name: string
+          role?: string
           staff_no?: string
           user_id?: string
           wage?: number
@@ -149,6 +154,7 @@ export type Database = {
           depot?: string
           id?: string
           name?: string
+          role?: string
           staff_no?: string
           user_id?: string
           wage?: number

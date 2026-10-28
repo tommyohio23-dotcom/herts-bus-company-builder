@@ -8,6 +8,13 @@
       "when": 1793227298101,
       "tag": "0000_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793227887296,
+      "tag": "0001_bus_features_staff_roles",
+      "breakpoints": true
     }
   ]
 }
