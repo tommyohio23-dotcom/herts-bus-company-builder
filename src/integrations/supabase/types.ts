@@ -14,7 +14,202 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      buses: {
+        Row: {
+          company_id: string
+          created_at: string
+          depot: string
+          fleet_no: string
+          id: string
+          livery: string
+          mileage: number
+          model: string
+          notes: string
+          registration: string
+          route_id: string | null
+          status: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          depot?: string
+          fleet_no: string
+          id?: string
+          livery?: string
+          mileage?: number
+          model: string
+          notes?: string
+          registration?: string
+          route_id?: string | null
+          status?: string
+          user_id?: string
+          year?: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          depot?: string
+          fleet_no?: string
+          id?: string
+          livery?: string
+          mileage?: number
+          model?: string
+          notes?: string
+          registration?: string
+          route_id?: string | null
+          status?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buses_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "buses_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      companies: {
+        Row: {
+          balance: number
+          created_at: string
+          day: number
+          hq_town: string
+          id: string
+          name: string
+          preset_key: string | null
+          primary_color: string
+          secondary_color: string
+          short_name: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          day?: number
+          hq_town?: string
+          id?: string
+          name: string
+          preset_key?: string | null
+          primary_color?: string
+          secondary_color?: string
+          short_name?: string
+          user_id?: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          day?: number
+          hq_town?: string
+          id?: string
+          name?: string
+          preset_key?: string | null
+          primary_color?: string
+          secondary_color?: string
+          short_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      drivers: {
+        Row: {
+          company_id: string
+          created_at: string
+          depot: string
+          id: string
+          name: string
+          staff_no: string
+          user_id: string
+          wage: number
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          depot?: string
+          id?: string
+          name: string
+          staff_no?: string
+          user_id?: string
+          wage?: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          depot?: string
+          id?: string
+          name?: string
+          staff_no?: string
+          user_id?: string
+          wage?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drivers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      routes: {
+        Row: {
+          company_id: string
+          created_at: string
+          destination: string
+          fare: number
+          frequency_mins: number
+          id: string
+          number: string
+          origin: string
+          user_id: string
+          via: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          destination: string
+          fare?: number
+          frequency_mins?: number
+          id?: string
+          number: string
+          origin: string
+          user_id?: string
+          via?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          destination?: string
+          fare?: number
+          frequency_mins?: number
+          id?: string
+          number?: string
+          origin?: string
+          user_id?: string
+          via?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "routes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
