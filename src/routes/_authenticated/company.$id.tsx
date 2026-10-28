@@ -10,7 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BusSide } from "@/components/BusSide";
-import { BUS_MODELS, HERTS_TOWNS, STATUSES } from "@/lib/herts";
+import { BUS_MODELS, FEATURES, HERTS_TOWNS, STAFF_ROLES, STATUSES } from "@/lib/herts";
+import { busPhoto } from "@/lib/bus-photos";
 import { simulateDay } from "@/lib/sim";
 
 export const Route = createFileRoute("/_authenticated/company/$id")({
@@ -78,14 +79,14 @@ function CompanyPage() {
           </div>
         </div>
         <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-          <Stat label="Buses" value={buses.length} /><Stat label="Routes" value={routes.length} /><Stat label="Drivers" value={drivers.length} />
+          <Stat label="Buses" value={buses.length} /><Stat label="Routes" value={routes.length} /><Stat label="Staff" value={drivers.length} />
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 pb-16">
         <Tabs defaultValue="fleet">
           <TabsList className="w-full justify-start overflow-x-auto">
             <TabsTrigger value="fleet">Fleet</TabsTrigger><TabsTrigger value="routes">Routes</TabsTrigger>
-            <TabsTrigger value="drivers">Roster</TabsTrigger><TabsTrigger value="ops">Operations</TabsTrigger>
+            <TabsTrigger value="drivers">Employees</TabsTrigger><TabsTrigger value="ops">Operations</TabsTrigger>
           </TabsList>
           <TabsContent value="fleet"><Fleet companyId={id} company={company} buses={buses} routes={routes} refresh={refresh} spend={spend} /></TabsContent>
           <TabsContent value="routes"><Routes companyId={id} routes={routes} buses={buses} refresh={refresh} /></TabsContent>
@@ -125,7 +126,9 @@ function Fleet({ companyId, company, buses, routes, refresh, spend }: { companyI
       <AddBus companyId={companyId} company={company} routes={routes} refresh={refresh} spend={spend} />
       <div className="mt-3 grid gap-3 md:grid-cols-2">
         {buses.map((b) => (
-          <div key={b.id} className="rounded-lg border bg-card p-3">
+          <div key={b.id} className="overflow-hidden rounded-lg border bg-card">
+            <img src={busPhoto(company.preset_key, b.model)} alt={`${b.model} bus ${b.fleet_no}`} width={1024} height={640} loading="lazy" className="aspect-[16/10] w-full object-cover" />
+            <div className="p-3">
             <div className="flex items-start justify-between gap-2">
               <div>
                 <p className="font-display text-2xl leading-none">{b.fleet_no} <span className="rounded bg-accent px-1.5 text-base text-accent-foreground">{b.registration}</span></p>
@@ -147,6 +150,8 @@ function Fleet({ companyId, company, buses, routes, refresh, spend }: { companyI
                 </SelectContent>
               </Select>
             </div>
+            <FeaturePicker value={b.features} onChange={(v) => update(b.id, { features: v })} />
+            </div>
           </div>
         ))}
       </div>
@@ -156,7 +161,7 @@ function Fleet({ companyId, company, buses, routes, refresh, spend }: { companyI
 
 function AddBus({ companyId, company, routes, refresh, spend }: { companyId: string; company: Co; routes: Rt[]; refresh: () => void; spend: (n: number) => Promise<boolean> }) {
   const [open, setOpen] = useState(false);
-  const [f, setF] = useState({ fleet_no: "", registration: "", model: BUS_MODELS[0] ?? "", year: 2012, depot: company.hq_town, livery: "", route_id: "none" });
+  const [f, setF] = useState({ fleet_no: "", registration: "", model: BUS_MODELS[0] ?? "", year: 2012, depot: company.hq_town, livery: "", route_id: "none", features: [] as string[] });
   const price = busPrice(f.year);
   async function save() {
     if (!f.fleet_no) { toast.error("Fleet number needed"); return; }
@@ -191,6 +196,8 @@ function AddBus({ companyId, company, routes, refresh, spend }: { companyId: str
             <Select value={f.route_id} onValueChange={(v) => setF({ ...f, route_id: v })}><SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent><SelectItem value="none">Unallocated</SelectItem>{routes.map((r) => <SelectItem key={r.id} value={r.id}>{r.number}</SelectItem>)}</SelectContent></Select>
           </div>
+          <div><Label>Spec & extras</Label><FeaturePicker value={f.features} onChange={(v) => setF({ ...f, features: v })} /></div>
+          <img src={busPhoto(company.preset_key, f.model)} alt="Bus preview" width={1024} height={640} className="aspect-[16/10] w-full rounded-md object-cover" />
           <Button onClick={save}>Buy for £{price.toLocaleString()}</Button>
         </div>
       </DialogContent>
@@ -244,25 +251,44 @@ function Routes({ companyId, routes, buses, refresh }: { companyId: string; rout
 function Drivers({ companyId, drivers, refresh }: { companyId: string; drivers: Drv[]; refresh: () => void }) {
   const [name, setName] = useState("");
   const [depot, setDepot] = useState("Hertford");
+  const [role, setRole] = useState("Driver");
   async function hire() {
-    if (!name) { toast.error("Driver name needed"); return; }
-    await supabase.from("drivers").insert({ company_id: companyId, name, depot, staff_no: String(1000 + drivers.length + Math.floor(Math.random() * 900)) });
+    if (!name) { toast.error("Employee name needed"); return; }
+    await supabase.from("drivers").insert({ company_id: companyId, name, depot, role, wage: STAFF_ROLES[role] ?? 140, staff_no: String(1000 + drivers.length + Math.floor(Math.random() * 900)) });
     setName(""); refresh();
   }
   return (
     <div className="mt-2 space-y-2">
       <div className="flex flex-wrap gap-2 rounded-lg border bg-card p-3">
-        <Input className="flex-1" placeholder="Driver name" value={name} onChange={(e) => setName(e.target.value)} />
+        <div className="w-40"><Select value={role} onValueChange={setRole}><SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>{Object.keys(STAFF_ROLES).map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent></Select></div>
+        <Input className="flex-1" placeholder="Employee name" value={name} onChange={(e) => setName(e.target.value)} />
         <div className="w-44"><Select value={depot} onValueChange={setDepot}><SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>{HERTS_TOWNS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
-        <Button onClick={hire}>Hire (£140/day)</Button>
+        <Button onClick={hire}>Hire (£{STAFF_ROLES[role]}/day)</Button>
       </div>
       {drivers.map((d) => (
         <div key={d.id} className="flex items-center justify-between rounded-md border bg-card px-3 py-2">
-          <span><b>{d.name}</b> <span className="text-sm text-muted-foreground">#{d.staff_no} · {d.depot} · £{Number(d.wage)}/day</span></span>
+          <span><b>{d.name}</b> <span className="rounded bg-secondary px-1.5 text-xs">{d.role}</span> <span className="text-sm text-muted-foreground">#{d.staff_no} · {d.depot} · £{Number(d.wage)}/day</span></span>
           <Button size="sm" variant="ghost" onClick={async () => { await supabase.from("drivers").delete().eq("id", d.id); refresh(); }}>Release</Button>
         </div>
       ))}
+    </div>
+  );
+}
+
+function FeaturePicker({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
+  return (
+    <div className="mt-2 flex flex-wrap gap-1">
+      {FEATURES.map((ft) => {
+        const on = value.includes(ft);
+        return (
+          <button key={ft} type="button" onClick={() => onChange(on ? value.filter((x) => x !== ft) : [...value, ft])}
+            className={`rounded-full border px-2 py-0.5 text-xs transition ${on ? "border-primary bg-primary text-primary-foreground" : "bg-background text-muted-foreground"}`}>
+            {ft}
+          </button>
+        );
+      })}
     </div>
   );
 }
