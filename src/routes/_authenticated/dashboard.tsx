@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BusSide } from "@/components/BusSide";
+import { operatorPhoto } from "@/lib/bus-photos";
 import { HERTS_TOWNS, PRESETS, type Preset } from "@/lib/herts";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -42,7 +43,7 @@ function Dashboard() {
     await supabase.from("buses").insert(p.fleet.map((b, i) => ({
       company_id: c.id, ...b, livery: p.livery, depot: p.depots[i % p.depots.length] ?? "", route_id: routes?.[i % (routes?.length || 1)]?.id ?? null,
     })));
-    await supabase.from("drivers").insert(p.fleet.map((_, i) => ({ company_id: c.id, name: `Driver ${i + 1}`, depot: p.depots[i % p.depots.length] ?? "", staff_no: String(1000 + i) })));
+    await supabase.from("drivers").insert(p.fleet.map((_, i) => ({ company_id: c.id, name: `Driver ${i + 1}`, depot: p.depots[i % p.depots.length] ?? "", staff_no: String(1000 + i), role: "Driver" })));
     qc.invalidateQueries({ queryKey: ["companies"] });
     navigate({ to: "/company/$id", params: { id: c.id } });
   }
@@ -80,7 +81,7 @@ function Dashboard() {
         <div className="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {PRESETS.map((p) => (
             <div key={p.key} className="rounded-lg border bg-card p-3">
-              <BusSide primary={p.primary} secondary={p.secondary} label={p.short} className="w-full" />
+              <img src={operatorPhoto(p.key)} alt={`${p.name} bus`} width={1024} height={640} loading="lazy" className="aspect-[16/10] w-full rounded-md object-cover" />
               <p className="font-display text-2xl">{p.name}</p>
               <p className="text-xs text-muted-foreground">{p.livery} · {p.routes.length} routes · {p.fleet.length} buses</p>
               <Button size="sm" className="mt-2 w-full" onClick={() => startPreset(p)}>Take control</Button>
