@@ -212,33 +212,45 @@ export type Database = {
       }
       drivers: {
         Row: {
+          applicant_id: string | null
           company_id: string
           created_at: string
           depot: string
+          experience_years: number
           id: string
           name: string
+          portrait_index: number | null
+          qualifications: string[]
           role: string
           staff_no: string
           user_id: string
           wage: number
         }
         Insert: {
+          applicant_id?: string | null
           company_id: string
           created_at?: string
           depot?: string
+          experience_years?: number
           id?: string
           name: string
+          portrait_index?: number | null
+          qualifications?: string[]
           role?: string
           staff_no?: string
           user_id?: string
           wage?: number
         }
         Update: {
+          applicant_id?: string | null
           company_id?: string
           created_at?: string
           depot?: string
+          experience_years?: number
           id?: string
           name?: string
+          portrait_index?: number | null
+          qualifications?: string[]
           role?: string
           staff_no?: string
           user_id?: string
@@ -247,6 +259,125 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "drivers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_adverts: {
+        Row: {
+          company_id: string
+          depot: string
+          description: string
+          id: string
+          positions: number
+          posted_day: number
+          role: string
+          status: string
+          user_id: string
+          wage: number
+        }
+        Insert: {
+          company_id: string
+          depot: string
+          description?: string
+          id?: string
+          positions?: number
+          posted_day: number
+          role: string
+          status?: string
+          user_id?: string
+          wage: number
+        }
+        Update: {
+          company_id?: string
+          depot?: string
+          description?: string
+          id?: string
+          positions?: number
+          posted_day?: number
+          role?: string
+          status?: string
+          user_id?: string
+          wage?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_adverts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_applicants: {
+        Row: {
+          advert_id: string
+          applied_day: number
+          availability: string
+          company_id: string
+          expected_wage: number
+          experience_years: number
+          id: string
+          name: string
+          portrait_index: number
+          previous_employer: string
+          qualifications: string[]
+          reference_note: string
+          skills: string[]
+          statement: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          advert_id: string
+          applied_day: number
+          availability: string
+          company_id: string
+          expected_wage: number
+          experience_years: number
+          id?: string
+          name: string
+          portrait_index: number
+          previous_employer: string
+          qualifications?: string[]
+          reference_note: string
+          skills?: string[]
+          statement: string
+          status?: string
+          user_id?: string
+        }
+        Update: {
+          advert_id?: string
+          applied_day?: number
+          availability?: string
+          company_id?: string
+          expected_wage?: number
+          experience_years?: number
+          id?: string
+          name?: string
+          portrait_index?: number
+          previous_employer?: string
+          qualifications?: string[]
+          reference_note?: string
+          skills?: string[]
+          statement?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applicants_advert_id_fkey"
+            columns: ["advert_id"]
+            isOneToOne: false
+            referencedRelation: "job_adverts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_applicants_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
@@ -406,6 +537,18 @@ export type Database = {
         }
         Returns: undefined
       }
+      publish_job_advert: {
+        Args: {
+          p_candidates: Json
+          p_company: string
+          p_depot: string
+          p_description: string
+          p_positions: number
+          p_role: string
+          p_wage: number
+        }
+        Returns: string
+      }
       resolve_game_bid: {
         Args: {
           p_company: string
@@ -414,6 +557,10 @@ export type Database = {
           p_won: boolean
         }
         Returns: undefined
+      }
+      review_job_applicant: {
+        Args: { p_action: string; p_applicant: string }
+        Returns: string
       }
       submit_game_bid: {
         Args: { p_bid: number; p_company: string; p_day: number; p_key: string }
