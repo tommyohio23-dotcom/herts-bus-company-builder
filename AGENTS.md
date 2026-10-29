@@ -17,3 +17,5 @@
 - Rail mode uses separate revisioned owner-scoped saved state and pure rail rules; authenticated actions commit through a service-only compare-and-save RPC so train finances cannot mix with bus games.
 - Upgrade installation and upkeep use shared pure price helpers; purchases and retrofits commit spending and specifications together through a service-only authenticated action.
 - London stop datasets filter ONS borough polygons for Barnet, Enfield and Haringey, with Borehamwood/Elstree NaPTAN localities added; London presets attribute TfL routes to actual operating companies.
+- Passenger review analysis reads owner-scoped route evidence on the server and uses streamed structured Lovable AI output; both modes share review selection, and denied AI access is persisted to prevent automatic replays.
+- Bus frequency uses a shared 60-minute game-cycle rule; undersupplied allocated routes block operating-day settlement in pure rules and the report validation trigger, while zero-bus routes remain planned.
