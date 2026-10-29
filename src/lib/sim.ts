@@ -56,4 +56,4 @@ export function simulateDay(
   );
   const wages = drivers.reduce((sum, d) => sum + d.wage, 0);
 
-  return { revenue, costs: busCost + wages, profit: revenue - busCost - wages, activeBuses, busCost };
+  return { revenue, costs: busCost + wages, profit: revenue - busCost - wages, activeBuses, busCost };}
