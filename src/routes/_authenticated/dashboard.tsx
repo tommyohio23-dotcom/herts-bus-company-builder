@@ -133,7 +133,7 @@ function CustomCompany({ onDone, area }: { onDone: (id: string) => void; area: A
   const [short, setShort] = useState("");
   const [primary, setPrimary] = useState("#0b6b3a");
   const [secondary, setSecondary] = useState("#f2e6b8");
-  const [hq, setHq] = useState(AREA_TOWNS[area][0]);
+  const [hq, setHq] = useState<string>(AREA_TOWNS[area][0] ?? "");
   async function create() {
     if (!name.trim()) { toast.error("Give your company a name"); return; }
     const { data, error } = await supabase.from("companies").insert({

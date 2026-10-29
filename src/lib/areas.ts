@@ -12,7 +12,7 @@ export const AREAS = [
 export type AreaKey = (typeof AREAS)[number]['key'];
 
 type Raw = Omit<Preset, 'photoKind' | 'fleet'>;
-const build = (area: AreaKey, list: Raw[]): Preset[] => list.map(p => ({
+const build = (_area: AreaKey, list: Raw[]): Preset[] => list.map(p => ({
   ...p, photoKind: 'single',
   fleet: p.routes.slice(0, 4).map((_, i) => ({ fleet_no: `${p.short}-${i + 1} (game)`, registration: '', model: i % 2 ? 'ADL Enviro400' : 'ADL Enviro200', year: 2015 + i })),
 }));
