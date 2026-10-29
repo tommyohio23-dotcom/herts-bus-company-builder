@@ -1,4 +1,9 @@
 # Game expansion
+- [ ] Add a post-login bus/train choice and Great Northern management with timetables and equivalent current game features; clarify timetable scope.
+- [ ] Charge in-game money for additional vehicle features; clarify pricing.
+- [ ] Expand used stock with repeated models/photos and varied years, specifications and prices.
+- [ ] Add a grouped north London/Borehamwood operating area and separate map menus; clarify area coverage.
+- [ ] Verify New Barnet Station Road services and assign them to actual operators rather than TfL branding; clarify current versus historical operators.
 - [x] Add London active bus-stop map data (25,049 verified active records in the map window).
 - [x] Replace direct hiring with job adverts, varied applicants, review/shortlist/reject and offer acceptance.
 - [x] Add 24 fictional applicant portraits and detailed saved employee profiles.
