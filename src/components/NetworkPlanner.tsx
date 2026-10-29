@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { MAP_AREAS, stopLabel, type RealStop } from '@/lib/management';
+import { Tabs,TabsList,TabsTrigger } from './ui/tabs';
 
 let mapPromise: Promise<void> | undefined;
 function loadMaps() {
@@ -45,7 +46,7 @@ export function NetworkPlanner({companyId,refresh}: {companyId:string;refresh:()
   function move(i:number,d:number){setSelected(old=>{const next=[...old],a=next[i],b=next[i+d];if(!a||!b)return old;next[i]=b;next[i+d]=a;return next;});}
   async function save(){if(saving)return;if(!number.trim()||selected.length<2){toast.error('Enter a route number and choose at least two stops');return;}setSaving(true);try{const first=selected[0],last=selected.at(-1);if(!first||!last)return;const r=await supabase.from('routes').insert({company_id:companyId,number:number.trim(),origin:stopLabel(first),destination:stopLabel(last),via:selected.slice(1,-1).map(stopLabel).join(' → '),stop_ids:selected.map(s=>s.id),service_type:serviceType,fare,frequency_mins:frequency});if(r.error)throw r.error;toast.success('Route registered');setNumber('');setSelected([]);refresh();}catch(e){toast.error(e instanceof Error?e.message:'Route could not save');}finally{setSaving(false);}}
   return <section className="mt-4 space-y-4">
-    <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-3xl">Network map</h2><Select value={areaKey} onValueChange={setAreaKey}><SelectTrigger className="w-full sm:w-64"><SelectValue/></SelectTrigger><SelectContent>{MAP_AREAS.map(a=><SelectItem value={a.key} key={a.key}>{a.name}</SelectItem>)}</SelectContent></Select></div>
+    <h2 className="text-3xl">Network maps</h2><Tabs value={areaKey} onValueChange={setAreaKey}><TabsList className="h-auto w-full flex-wrap justify-start">{MAP_AREAS.map(a=><TabsTrigger className="whitespace-normal text-left" value={a.key} key={a.key}>{a.name}</TabsTrigger>)}</TabsList></Tabs>
     <Input aria-label="Find a real bus stop" placeholder="Search town, street or bus stop" value={search} onChange={e=>setSearch(e.target.value)}/>
     <div ref={container} className="h-[420px] w-full overflow-hidden rounded-md border bg-muted" aria-label="Bus stop map"/>
     {error&&<p className="text-destructive">{error}</p>}

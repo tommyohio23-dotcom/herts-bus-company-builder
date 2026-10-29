@@ -1,0 +1,3 @@
+import {createFileRoute} from '@tanstack/react-router';
+import {RailManager} from '@/components/RailManager';
+export const Route=createFileRoute('/_authenticated/rail/$id')({head:()=>({meta:[{title:'Great Northern operations — Herts Transport Manager'},{name:'description',content:'Manage your separate Great Northern railway, timetables, platforms, rolling stock and recruitment.'},{property:'og:title',content:'Great Northern operations — Herts Transport Manager'},{property:'og:description',content:'Saved railway management with full station timetables and staff assignments.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'}]}),component:()=>{const {id}=Route.useParams();return <RailManager companyId={id}/>;}});
