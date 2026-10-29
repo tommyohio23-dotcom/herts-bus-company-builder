@@ -306,6 +306,7 @@ export type Database = {
           origin: string
           service_type: string
           stop_ids: string[]
+          tender_key: string | null
           user_id: string
           via: string
         }
@@ -322,6 +323,7 @@ export type Database = {
           origin: string
           service_type?: string
           stop_ids?: string[]
+          tender_key?: string | null
           user_id?: string
           via?: string
         }
@@ -338,6 +340,7 @@ export type Database = {
           origin?: string
           service_type?: string
           stop_ids?: string[]
+          tender_key?: string | null
           user_id?: string
           via?: string
         }
@@ -401,6 +404,19 @@ export type Database = {
           p_day: number
           p_payload: Json
         }
+        Returns: undefined
+      }
+      resolve_game_bid: {
+        Args: {
+          p_company: string
+          p_key: string
+          p_route: Json
+          p_won: boolean
+        }
+        Returns: undefined
+      }
+      submit_game_bid: {
+        Args: { p_bid: number; p_company: string; p_day: number; p_key: string }
         Returns: undefined
       }
     }
