@@ -46,3 +46,11 @@ describe('management rules', () => {
     expect(new Set(reviews.map(r => r.rating))).toEqual(new Set([3]));
   });
 });
+import { REVIEW_BANK } from './review-bank';
+describe('uploaded review bank', () => {
+  it('contains all 300 uploaded reviews', () => expect(REVIEW_BANK.length).toBe(300));
+  it('uses uploaded reviews for served routes on most days', () => {
+    const texts = [1,2,3,4,5,6,7,8].map(d => passengerReview({number:'1',fare:2,frequency_mins:60},[{condition:85,features:[]}],d).comment);
+    expect(texts.filter(t => REVIEW_BANK.some(r => t.startsWith(r.text))).length).toBeGreaterThan(4);
+  });
+});

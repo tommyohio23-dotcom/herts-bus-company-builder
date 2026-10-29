@@ -1,0 +1,575 @@
+{
+ "beds": [
+  {
+   "key": "arriva-beds",
+   "name": "Arriva Beds and Bucks",
+   "short": "Arriva",
+   "primary": "#00A6A6",
+   "secondary": "#FFFFFF",
+   "livery": "Turquoise and white livery",
+   "hq": "Luton",
+   "depots": [
+    "Luton"
+   ],
+   "routes": [
+    {
+     "number": "1",
+     "origin": "Farley Hill",
+     "destination": "Dunstable",
+     "via": "Luton, Luton and Dunstable Hospital",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "5",
+     "origin": "Luton",
+     "destination": "Marsh Farm",
+     "via": "Bury Park, Leagrave",
+     "frequency": 15,
+     "fare": 3
+    },
+    {
+     "number": "12",
+     "origin": "Luton",
+     "destination": "Stopsley",
+     "via": "Round Green, Vauxhall Way",
+     "frequency": 12,
+     "fare": 3
+    },
+    {
+     "number": "13",
+     "origin": "Luton",
+     "destination": "St Annes",
+     "via": "Hart Hill, Crawley Green",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "32",
+     "origin": "Luton",
+     "destination": "Hockwell Ring",
+     "via": "Bury Park, Leagrave",
+     "frequency": 30,
+     "fare": 3
+    },
+    {
+     "number": "A",
+     "origin": "Luton Airport",
+     "destination": "Houghton Regis",
+     "via": "Luton, Dunstable",
+     "frequency": 60,
+     "fare": 3
+    }
+   ]
+  },
+  {
+   "key": "stagecoach-beds",
+   "name": "Stagecoach East",
+   "short": "Stagecoach",
+   "primary": "#005DAA",
+   "secondary": "#FFFFFF",
+   "livery": "Blue and white with orange accents livery",
+   "hq": "Cambridge",
+   "depots": [
+    "Bedford"
+   ],
+   "routes": [
+    {
+     "number": "1",
+     "origin": "Bedford",
+     "destination": "Kempston",
+     "via": "Bedford Hospital, Saxon Centre",
+     "frequency": 15,
+     "fare": 3
+    },
+    {
+     "number": "2W",
+     "origin": "Bedford",
+     "destination": "Wootton",
+     "via": "Interchange Retail Park, Wixams",
+     "frequency": 30,
+     "fare": 3
+    },
+    {
+     "number": "4",
+     "origin": "Bedford",
+     "destination": "Goldington / Norse Road",
+     "via": "Goldington Road, Elms Farm",
+     "frequency": 30,
+     "fare": 3
+    },
+    {
+     "number": "X5",
+     "origin": "Bedford",
+     "destination": "Oxford",
+     "via": "Milton Keynes, Buckingham, Bicester",
+     "frequency": 30,
+     "fare": 3
+    },
+    {
+     "number": "905",
+     "origin": "Bedford",
+     "destination": "Cambridge",
+     "via": "St Neots, Cambourne",
+     "frequency": 30,
+     "fare": 3
+    },
+    {
+     "number": "MK1",
+     "origin": "Bedford",
+     "destination": "Milton Keynes",
+     "via": "Luton, Luton Airport",
+     "frequency": 30,
+     "fare": 3
+    }
+   ]
+  },
+  {
+   "key": "grant-palmer-beds",
+   "name": "Grant Palmer",
+   "short": "Grant Palmer",
+   "primary": "#F58220",
+   "secondary": "#FFF4D2",
+   "livery": "Orange and cream livery",
+   "hq": "Flitwick",
+   "depots": [
+    "Flitwick",
+    "Biggleswade"
+   ],
+   "routes": [
+    {
+     "number": "25",
+     "origin": "Bedford",
+     "destination": "Harrold",
+     "via": "Clapham, Oakley, Carlton",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "34",
+     "origin": "Milton Keynes",
+     "destination": "Ampthill Heights",
+     "via": "Ridgmont, Ampthill, Flitwick",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "42",
+     "origin": "Bedford",
+     "destination": "Dunstable",
+     "via": "Ampthill, Flitwick, Toddington",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "44",
+     "origin": "Bedford",
+     "destination": "Flitwick",
+     "via": "Wixams, Clophill, Maulden",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "73",
+     "origin": "Bedford",
+     "destination": "Biggleswade",
+     "via": "Willington, Sandy, Kings Reach",
+     "frequency": 120,
+     "fare": 3
+    },
+    {
+     "number": "200",
+     "origin": "Flitwick",
+     "destination": "Biggleswade",
+     "via": "Clophill, Shefford, Broom",
+     "frequency": 120,
+     "fare": 3
+    }
+   ]
+  }
+ ],
+ "bucks": [
+  {
+   "key": "arriva-bucks",
+   "name": "Arriva Beds and Bucks",
+   "short": "Arriva",
+   "primary": "#00A6A6",
+   "secondary": "#FFFFFF",
+   "livery": "Turquoise and white livery",
+   "hq": "Luton",
+   "depots": [
+    "Milton Keynes"
+   ],
+   "routes": [
+    {
+     "number": "2",
+     "origin": "Newport Pagnell",
+     "destination": "Grange Farm",
+     "via": "Willen, Central Milton Keynes, Crownhill",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "4",
+     "origin": "Wolverton",
+     "destination": "Bletchley",
+     "via": "Shenley Church End, Central Milton Keynes",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "5",
+     "origin": "Wolverton",
+     "destination": "Lakes Estate",
+     "via": "Stony Stratford, Central Milton Keynes, Bletchley",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "6",
+     "origin": "Wolverton",
+     "destination": "Lakes Estate",
+     "via": "Stony Stratford, Central Milton Keynes, Bletchley",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "7",
+     "origin": "Wolverton",
+     "destination": "Milton Keynes",
+     "via": "Great Linford, Neath Hill",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "8",
+     "origin": "Oxley Park",
+     "destination": "Walnut Tree",
+     "via": "Westcroft, Central Milton Keynes, Kingston",
+     "frequency": 60,
+     "fare": 3
+    }
+   ]
+  },
+  {
+   "key": "carousel-bucks",
+   "name": "Carousel Buses (Go-Ahead)",
+   "short": "Carousel",
+   "primary": "#D71920",
+   "secondary": "#FFFFFF",
+   "livery": "Red and white livery",
+   "hq": "High Wycombe",
+   "depots": [
+    "High Wycombe"
+   ],
+   "routes": [
+    {
+     "number": "36",
+     "origin": "High Wycombe",
+     "destination": "Bourne End",
+     "via": "Daws Hill, Flackwell Heath",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "37",
+     "origin": "High Wycombe",
+     "destination": "Windsor",
+     "via": "Wooburn Green, Bourne End, Maidenhead",
+     "frequency": 30,
+     "fare": 3
+    },
+    {
+     "number": "41",
+     "origin": "High Wycombe",
+     "destination": "Amersham",
+     "via": "Great Kingshill, Prestwood, Great Missenden",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "101",
+     "origin": "Amersham",
+     "destination": "Uxbridge",
+     "via": "Beaconsfield, Gerrards Cross, Denham",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "102",
+     "origin": "High Wycombe",
+     "destination": "Heathrow Airport",
+     "via": "Beaconsfield, Gerrards Cross, Uxbridge",
+     "frequency": 30,
+     "fare": 3
+    },
+    {
+     "number": "104",
+     "origin": "High Wycombe",
+     "destination": "Uxbridge",
+     "via": "Beaconsfield, Gerrards Cross, Denham",
+     "frequency": 60,
+     "fare": 3
+    }
+   ]
+  },
+  {
+   "key": "redline-bucks",
+   "name": "Redline Buses",
+   "short": "Redline",
+   "primary": "#D71920",
+   "secondary": "#FFFFFF",
+   "livery": "Red and white livery",
+   "hq": "Aylesbury",
+   "depots": [
+    "Aylesbury"
+   ],
+   "routes": [
+    {
+     "number": "2",
+     "origin": "Aylesbury",
+     "destination": "Aylesbury",
+     "via": "Dunsham Lane, Meadowcroft, Haydon Hill",
+     "frequency": 30,
+     "fare": 3
+    },
+    {
+     "number": "4",
+     "origin": "Aylesbury",
+     "destination": "Aylesbury",
+     "via": "Bicester Road, Meadowcroft, Berryfields",
+     "frequency": 30,
+     "fare": 3
+    },
+    {
+     "number": "6",
+     "origin": "Aylesbury",
+     "destination": "Watermead",
+     "via": "Dunsham Lane, Buckingham Park",
+     "frequency": 40,
+     "fare": 3
+    },
+    {
+     "number": "110",
+     "origin": "Aylesbury",
+     "destination": "Worminghall",
+     "via": "Cuddington, Long Crendon, Thame",
+     "frequency": 120,
+     "fare": 3
+    },
+    {
+     "number": "130",
+     "origin": "Aylesbury",
+     "destination": "High Wycombe",
+     "via": "Stoke Mandeville, Princes Risborough, Saunderton",
+     "frequency": 30,
+     "fare": 3
+    },
+    {
+     "number": "300",
+     "origin": "Aylesbury",
+     "destination": "High Wycombe",
+     "via": "Stoke Mandeville, Princes Risborough, Naphill",
+     "frequency": 30,
+     "fare": 3
+    }
+   ]
+  }
+ ],
+ "essex": [
+  {
+   "key": "first-essex",
+   "name": "First Essex",
+   "short": "First",
+   "primary": "#69428E",
+   "secondary": "#EC008C",
+   "livery": "Legacy purple and magenta livery",
+   "hq": "Chelmsford",
+   "depots": [
+    "Chelmsford",
+    "Colchester",
+    "Basildon",
+    "Hadleigh"
+   ],
+   "routes": [
+    {
+     "number": "3",
+     "origin": "Chelmsford",
+     "destination": "Southend",
+     "via": "East Hanningfield, Rayleigh, Hadleigh",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "13",
+     "origin": "Chelmsford",
+     "destination": "Wickford",
+     "via": "Rettendon, Runwell",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "22",
+     "origin": "Canvey Island (Leigh Beck)",
+     "destination": "Basildon",
+     "via": "Benfleet, Pitsea",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "28",
+     "origin": "Southend",
+     "destination": "Basildon",
+     "via": "Hadleigh, Benfleet, Pitsea",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "31",
+     "origin": "Chelmsford",
+     "destination": "Burnham-on-Crouch",
+     "via": "Danbury, Maldon, Southminster",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "50",
+     "origin": "Colchester",
+     "destination": "Tollesbury",
+     "via": "Layer-de-la-Haye, Tiptree, Tolleshunt D\u2019Arcy",
+     "frequency": 60,
+     "fare": 3
+    }
+   ]
+  },
+  {
+   "key": "arriva-essex",
+   "name": "Arriva Herts and Essex",
+   "short": "Arriva",
+   "primary": "#00A6A6",
+   "secondary": "#FFFFFF",
+   "livery": "Turquoise and white livery",
+   "hq": "Harlow",
+   "depots": [
+    "Harlow",
+    "Colchester",
+    "Southend-on-Sea"
+   ],
+   "routes": [
+    {
+     "number": "1",
+     "origin": "Southend",
+     "destination": "Rayleigh",
+     "via": "Westcliff, Leigh-on-Sea, Hadleigh",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "2",
+     "origin": "Shoeburyness",
+     "destination": "Southend",
+     "via": "Thorpe Bay, Southchurch",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "7",
+     "origin": "Great Wakering",
+     "destination": "Rayleigh",
+     "via": "Southend, Southend Airport, Rochford",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "8",
+     "origin": "Great Wakering",
+     "destination": "Rayleigh",
+     "via": "Southend, Southend Airport, Rochford",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "9",
+     "origin": "Shoeburyness",
+     "destination": "Rayleigh",
+     "via": "Southend, Southend Airport, Eastwood",
+     "frequency": 30,
+     "fare": 3
+    },
+    {
+     "number": "59",
+     "origin": "Chelmsford",
+     "destination": "Harlow",
+     "via": "Roxwell, Leaden Roding, Hatfield Heath",
+     "frequency": 60,
+     "fare": 3
+    }
+   ]
+  },
+  {
+   "key": "stephensons-essex",
+   "name": "Stephensons of Essex",
+   "short": "Stephensons",
+   "primary": "#164194",
+   "secondary": "#FFD500",
+   "livery": "Blue and yellow livery",
+   "hq": "Rochford",
+   "depots": [
+    "Rochford",
+    "Braintree",
+    "Boreham",
+    "Haverhill"
+   ],
+   "routes": [
+    {
+     "number": "21",
+     "origin": "Black Notley",
+     "destination": "Bocking",
+     "via": "Braintree, Braintree College",
+     "frequency": 30,
+     "fare": 3
+    },
+    {
+     "number": "38",
+     "origin": "Cressing",
+     "destination": "Witham",
+     "via": "Tye Green, Silver End, Rivenhall",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "38A",
+     "origin": "Halstead",
+     "destination": "Witham",
+     "via": "Gosfield, Braintree, Silver End",
+     "frequency": 60,
+     "fare": 3
+    },
+    {
+     "number": "39",
+     "origin": "Witham",
+     "destination": "Witham",
+     "via": "Spinks Lane, Yare Avenue, Chipping Hill",
+     "frequency": 30,
+     "fare": 3
+    },
+    {
+     "number": "60",
+     "origin": "Southend",
+     "destination": "Paglesham (Plough and Sail)",
+     "via": "Rochford, Stambridge, Canewdon",
+     "frequency": 120,
+     "fare": 3
+    },
+    {
+     "number": "301",
+     "origin": "Saffron Walden",
+     "destination": "Bishop\u2019s Stortford",
+     "via": "Audley End, Newport, Stansted Mountfitchet",
+     "frequency": 60,
+     "fare": 3
+    }
+   ]
+  }
+ ]
+}

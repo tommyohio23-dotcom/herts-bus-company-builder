@@ -9,10 +9,17 @@ export const NEW_BARNET_ROUTES = [
  {number:'626',operator:'metroline',origin:'Finchley Central',destination:"Dame Alice Owen's School",via:'New Barnet Station Road (school journeys only)'},
 ];
 // Endpoints checked against TfL Line/Route; operating-company attribution corroborated by stop listings.
+import NL from './north-london-routes.json';
+const OP_KEY:Record<string,string>={'Metroline':'metroline','Arriva London':'arriva-london','Go-Ahead London':'go-ahead-london','First Bus London':'first-london','Stagecoach London':'stagecoach-london','Uno':'uno'};
+/** Every current TfL route with 3+ stops inside Barnet, Enfield, Haringey or Borehamwood, operator from current allocation lists. */
+export const NORTH_LONDON_ROUTES=[...(NL as {number:string;operator:string;origin:string;destination:string;via:string;school:boolean}[]).map(r=>({...r,operator:OP_KEY[r.operator]??r.operator})),...NEW_BARNET_ROUTES.filter(b=>!(NL as {number:string}[]).some(r=>r.number===b.number)).map(r=>({...r,school:r.number==='626'}))];
+const routesFor=(key:string)=>NORTH_LONDON_ROUTES.filter(r=>r.operator===key).map(r=>({number:r.number,origin:r.origin,destination:r.destination,via:r.via,frequency:r.school?720:r.number.startsWith('N')?30:12,fare:1.75}));
 export const LONDON_PRESETS:Preset[] = [
- {key:'arriva-london',name:'Arriva London',short:'Arriva',hq:'Enfield',depots:['Enfield']},
- {key:'metroline',name:'Metroline',short:'Metroline',hq:'Potters Bar',depots:['Potters Bar','Edgware']},
- {key:'go-ahead-london',name:'Go-Ahead London',short:'Go-Ahead',hq:'Wood Green',depots:['Wood Green']},
+ {key:'arriva-london',name:'Arriva London',short:'Arriva',hq:'Enfield',depots:['Enfield','Edmonton']},
+ {key:'metroline',name:'Metroline',short:'Metroline',hq:'Potters Bar',depots:['Potters Bar','Edgware','Holloway']},
+ {key:'go-ahead-london',name:'Go-Ahead London',short:'Go-Ahead',hq:'Northumberland Park',depots:['Northumberland Park']},
+ {key:'first-london',name:'First Bus London',short:'First',hq:'Edgware',depots:['Edgware']},
+ {key:'stagecoach-london',name:'Stagecoach London',short:'Stagecoach',hq:'Tottenham',depots:['Tottenham']},
  {key:'london-sovereign',name:'London Sovereign',short:'Sovereign',hq:'Edgware',depots:['Edgware']},
-].map(p=>({...p,photoKind:'double',primary:'#ce192d',secondary:'#24272b',livery:'London red (game fleet)',routes:NEW_BARNET_ROUTES.filter(r=>r.operator===p.key).map(r=>({...r,frequency:r.number==='626'?720:30,fare:2})),fleet:[{fleet_no:`${p.short}-1 (game)`,registration:'',model:'ADL Enviro400',year:2016}]}));
-export const BUS_OPERATOR_PRESETS = [...PRESETS.map(p=>p.key==='uno'?{...p,routes:[...p.routes,...NEW_BARNET_ROUTES.filter(r=>r.operator==='uno').map(r=>({...r,frequency:30,fare:2}))]}:p),...LONDON_PRESETS];
+].map(p=>({...p,photoKind:'double' as const,primary:'#ce192d',secondary:'#24272b',livery:'London red (game fleet)',routes:routesFor(p.key),fleet:[0,1,2].map(i=>({fleet_no:`${p.short}-${i+1} (game)`,registration:'',model:i===1?'ADL Enviro200':'ADL Enviro400',year:2016+i}))})).filter(p=>p.routes.length>0);
+export const BUS_OPERATOR_PRESETS = [...PRESETS.map(p=>p.key==='uno'?{...p,routes:[...p.routes,...routesFor('uno').filter(r=>!p.routes.some(x=>x.number===r.number))]}:p),...LONDON_PRESETS];
