@@ -36,6 +36,13 @@
       "when": 1793264154966,
       "tag": "0004_recruitment_applications",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793265265882,
+      "tag": "0005_rail_management_and_paid_features",
+      "breakpoints": true
     }
   ]
 }
