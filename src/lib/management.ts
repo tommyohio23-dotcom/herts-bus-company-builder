@@ -45,8 +45,8 @@ const REVIEW_TEXT = {
   missing: ['No bus arrived for this service.', 'I waited at the stop but the bus never came.', 'The timetable showed a bus, but nothing turned up.', 'Missed an appointment because this service did not run.'],
   worn: ['The bus felt worn and could do with attention.', 'Rattly seats and a tired interior spoiled the trip.', 'It got me there, but the vehicle needs some care.', 'The bus looked scruffy and the ride was rough.'],
   fare: ['The journey was useful, but the fare felt expensive.', 'Good route, though the ticket price is steep.', 'I would travel more often if the fare were lower.', 'Reliable enough, but poor value for a short trip.'],
-  comfort: ['A comfortable journey; the onboard extras were welcome.', 'Clean bus, comfy seats and handy charging points.', 'Pleasant ride — the extras made a real difference.', 'One of the nicer buses I have used in the area.'],
-  frequent: ['A regular service and a straightforward journey.', 'Turned up on time and there was another one soon after.', 'Frequent buses make this route easy to rely on.', 'Friendly driver and a smooth, regular service.'],
+  comfort: ['A comfortable journey; the onboard extras were welcome.', 'The onboard extras made the journey more comfortable.', 'Pleasant ride — the extras made a real difference.', 'One of the nicer buses I have used in the area.'],
+  frequent: ['A regular service and a straightforward journey.', 'Having another bus soon after makes this route convenient.', 'Frequent buses make this route easy to rely on.', 'The regular service makes everyday journeys easier.'],
   sparse: ['A useful service, though I would like more frequent buses.', 'Handy route, but the gaps between buses are long.', 'If I miss one, the wait for the next is frustrating.', 'Decent journey; an extra bus each hour would help.'],
 };
 export function passengerReview(route: { number: string; fare: number; frequency_mins: number }, buses: { features: string[]; condition: number }[], day = 1) {
