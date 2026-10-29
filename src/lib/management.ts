@@ -1,3 +1,4 @@
+import { bankReview } from './review-bank';
 import { simulateDay, type SimBus, type SimRoute } from './sim';
 import { upgradeUpkeep } from './upgrades';
 import { operatingConditions } from './operating-conditions';
@@ -57,7 +58,7 @@ export function passengerReview(route: { number: string; fare: number; frequency
   const comfortable = buses.some(b => b.features.includes('Leather seats') || b.features.includes('USB charging ports') || b.features.includes('Air conditioning'));
   const rating = Math.max(1, Math.min(5, 3 + (route.frequency_mins <= 30 ? 1 : 0) + (comfortable ? 1 : 0) - (route.fare > 3 ? 1 : 0) - (avgCondition < 65 ? 1 : 0)));
   const comment = pick(avgCondition < 65 ? REVIEW_TEXT.worn : route.fare > 3 ? REVIEW_TEXT.fare : comfortable ? REVIEW_TEXT.comfort : route.frequency_mins <= 30 ? REVIEW_TEXT.frequent : REVIEW_TEXT.sparse, seed);
-  return { route_number: route.number, rating, comment };
+  return { route_number: route.number, rating, comment: seed % 4 === 0 ? comment : bankReview('bus', rating, seed * 13 + day) ?? comment };
 }
 export function managementDay(routes: (SimRoute & { number: string; contract_payment: number; contract_end_day: number | null })[], buses: (SimBus & { features: string[]; condition: number })[], wages: number[], rents: number[], day: number) {
   const activeRoutes = routes.filter(r => r.contract_end_day == null || r.contract_end_day >= day);
