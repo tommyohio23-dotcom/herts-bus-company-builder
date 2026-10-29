@@ -1,5 +1,6 @@
 import { simulateDay, type SimBus, type SimRoute } from './sim';
 import { upgradeUpkeep } from './upgrades';
+import { operatingConditions } from './operating-conditions';
 
 export const MAP_AREAS = [
   { key: 'herts', name: 'Hertfordshire & borders', lat: 51.85, lng: -0.28 },
@@ -49,9 +50,9 @@ export function passengerReview(route: { number: string; fare: number; frequency
 }
 export function managementDay(routes: (SimRoute & { number: string; contract_payment: number; contract_end_day: number | null })[], buses: (SimBus & { features: string[]; condition: number })[], wages: number[], rents: number[], day: number) {
   const activeRoutes = routes.filter(r => r.contract_end_day == null || r.contract_end_day >= day);
-  const result = simulateDay(activeRoutes, buses, wages);
+  const result = simulateDay(activeRoutes, buses, wages, day);
   const contractRevenue = activeRoutes.reduce((sum, r) => sum + (buses.some(b => b.route_id === r.id && b.status === 'In service') ? r.contract_payment : 0), 0);
   const depotCosts = rents.reduce((sum, rent) => sum + rent, 0);
   const upgradeCosts = buses.filter(b => b.status !== 'Withdrawn').reduce((n,b) => n + upgradeUpkeep(b.features), 0);
-  return { revenue: result.revenue + contractRevenue, costs: result.costs + depotCosts + upgradeCosts, profit: result.profit + contractRevenue - depotCosts - upgradeCosts, details: { fares: result.revenue, contractRevenue, depotCosts, upgradeCosts, wages: wages.reduce((a,b) => a+b,0), busCosts: result.activeBuses * 90, activeBuses: result.activeBuses }, reviews: activeRoutes.map(r => passengerReview(r, buses.filter(b => b.route_id === r.id && b.status === 'In service'))) };
+  return { revenue: result.revenue + contractRevenue, costs: result.costs + depotCosts + upgradeCosts, profit: result.profit + contractRevenue - depotCosts - upgradeCosts, details: { conditions: operatingConditions(day).label, fares: result.revenue, contractRevenue, depotCosts, upgradeCosts, wages: wages.reduce((a,b) => a+b,0), busCosts: result.busCost, activeBuses: result.activeBuses }, reviews: activeRoutes.map(r => passengerReview(r, buses.filter(b => b.route_id === r.id && b.status === 'In service'))) };
 }
