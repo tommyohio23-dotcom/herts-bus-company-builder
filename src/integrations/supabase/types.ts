@@ -92,6 +92,7 @@ export type Database = {
       companies: {
         Row: {
           balance: number
+          capital_boost_applied: boolean
           created_at: string
           day: number
           hq_town: string
@@ -106,6 +107,7 @@ export type Database = {
         }
         Insert: {
           balance?: number
+          capital_boost_applied?: boolean
           created_at?: string
           day?: number
           hq_town?: string
@@ -120,6 +122,7 @@ export type Database = {
         }
         Update: {
           balance?: number
+          capital_boost_applied?: boolean
           created_at?: string
           day?: number
           hq_town?: string
@@ -590,6 +593,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      boost_existing_network_capital: { Args: never; Returns: number }
       publish_job_advert: {
         Args: {
           p_candidates: Json

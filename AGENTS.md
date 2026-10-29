@@ -21,3 +21,4 @@
 - Bus frequency uses a shared 60-minute game-cycle rule; undersupplied allocated routes block operating-day settlement in pure rules and the report validation trigger, while zero-bus routes remain planned.
 - Daily demand and running-cost variation uses shared pure, day-keyed operating conditions saved with reports; retries reproduce results while wages, rents, contracts and feature upkeep remain fixed.
 - Bus companies are grouped into area menus (Herts, North London, Beds, Bucks, Essex) derived from preset key or HQ town in `src/lib/areas.ts`, avoiding a schema change; north London routes come from a generated TfL stop-match snapshot, and uploaded passenger reviews live in `src/lib/review-bank.json`.
+- Starting-capital suggestions use shared pure rules; saved-network funding is an owner-scoped atomic RPC with a per-company one-time marker, so reopening the company list cannot duplicate grants.

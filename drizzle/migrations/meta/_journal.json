@@ -64,6 +64,13 @@
       "when": 1793266469057,
       "tag": "0008_enforce_operating_fleet_frequency",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793273657218,
+      "tag": "0009_network_starting_capital",
+      "breakpoints": true
     }
   ]
 }
