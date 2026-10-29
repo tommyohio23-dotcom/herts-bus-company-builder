@@ -19,6 +19,8 @@ import { NetworkPlanner } from "@/components/NetworkPlanner";
 import { Recruitment } from "@/components/Recruitment";
 import { UPGRADE_PRICES, upgradeCost, upgradeUpkeep } from '@/lib/upgrades';
 import { purchaseBusOrFeatures } from '@/lib/upgrades.functions';
+import {ServiceFrequency} from '@/components/ServiceFrequency';
+import {requiredBuses} from '@/lib/service-frequency';
 
 export const Route = createFileRoute("/_authenticated/company/$id")({
   head: () => ({
@@ -101,6 +103,7 @@ function CompanyPage() {
           <TabsContent value="drivers"><Recruitment companyId={id} drivers={drivers} refresh={refresh} /></TabsContent>
           <TabsContent value="ops">
             <Button size="lg" className="mt-3" disabled={running} onClick={runDay}>{running ? 'Running…' : `Run day ${company.day}`}</Button>
+            {routes.filter(r=>{const n=buses.filter(b=>b.route_id===r.id&&b.status==='In service').length;return n>0&&n<requiredBuses(r.frequency_mins)&&(r.contract_end_day==null||r.contract_end_day>=company.day);}).map(r=><p key={r.id} className="mt-2 text-sm text-destructive">Route {r.number}: {requiredBuses(r.frequency_mins)} in-service buses needed. Allocate more buses or change its frequency in Routes.</p>)}
             <ManagementExpansion view="reports" company={company} buses={buses} drivers={drivers} refresh={refresh}/>
           </TabsContent>
           {(['market','depots','tenders','reviews'] as const).map(view=><TabsContent key={view} value={view}><ManagementExpansion view={view} company={company} buses={buses} drivers={drivers} refresh={refresh}/></TabsContent>)}
@@ -232,7 +235,7 @@ function Routes({ companyId, routes, buses, refresh }: { companyId: string; rout
   return (
     <div className="mt-2 space-y-3">
       {routes.map((r) => {
-        const n = buses.filter((b) => b.route_id === r.id).length;
+        const n = buses.filter((b) => b.route_id === r.id && b.status==='In service').length;
         return (
           <div key={r.id} className="flex flex-wrap items-center gap-3 rounded-lg border bg-card p-3">
             <span className="blind min-w-16 px-2 py-1 text-center text-3xl">{r.number}</span>
@@ -241,6 +244,7 @@ function Routes({ companyId, routes, buses, refresh }: { companyId: string; rout
               <p className="break-words text-xs text-muted-foreground">{r.service_type} · {r.via && `via ${r.via} · `}every {r.frequency_mins} min · £{Number(r.fare).toFixed(2)} · {n} bus{n === 1 ? "" : "es"}{r.contract_end_day != null && ` · Contract ends day ${r.contract_end_day}`}</p>
             </div>
             {r.stop_ids.length === 0 && <EditStops route={r} refresh={refresh} />}
+            <RouteFrequency route={r} count={n} refresh={refresh}/>
             <Button size="sm" variant="ghost" onClick={async () => { await supabase.from("routes").delete().eq("id", r.id); refresh(); }}>Withdraw</Button>
           </div>
         );
@@ -254,7 +258,7 @@ function Routes({ companyId, routes, buses, refresh }: { companyId: string; rout
           <div className="sm:col-span-3"><Label>Stops in between (in order)</Label>
             <StopPicker value={f.via ? f.via.split(", ") : []} onChange={(v) => setF({ ...f, via: v.join(", ") })} />
           </div>
-          <div><Label>Every (min)</Label><Input type="number" min={5} value={f.frequency_mins} onChange={(e) => setF({ ...f, frequency_mins: Number(e.target.value) })} /></div>
+          <ServiceFrequency value={f.frequency_mins} onChange={n=>setF({...f,frequency_mins:n})} label="New route frequency"/>
           <div><Label>Fare £</Label><Input type="number" step="0.1" min={0} value={f.fare} onChange={(e) => setF({ ...f, fare: Number(e.target.value) })} /></div>
         </div>
         <Button className="mt-3" onClick={add}>Register route</Button>
@@ -276,6 +280,11 @@ function FeaturePicker({ value, onChange, disabled=false }: { value: string[]; o
       })}
     </div>
   );
+}
+
+function RouteFrequency({route,count,refresh}:{route:Rt;count:number;refresh:()=>void}) {
+ const [value,setValue]=useState(route.frequency_mins),[busy,setBusy]=useState(false);
+ return <div className="w-full border-t pt-2"><ServiceFrequency value={value} onChange={setValue} label={`Route ${route.number} frequency`} disabled={busy}/><div className="flex flex-wrap items-center justify-between gap-2"><p className={`text-xs ${count<requiredBuses(value)?'text-destructive':'text-muted-foreground'}`}>{count} in-service buses allocated · {count===0?'Planned / unserved':count<requiredBuses(value)?'Not enough buses to operate':'Ready to operate'}</p><Button size="sm" variant="outline" disabled={busy||value===route.frequency_mins} onClick={async()=>{setBusy(true);try{const r=await supabase.from('routes').update({frequency_mins:value}).eq('id',route.id);if(r.error)throw r.error;toast.success('Service frequency saved');refresh();}catch(e){toast.error(e instanceof Error?e.message:'Frequency could not save');}finally{setBusy(false);}}}>Save frequency</Button></div></div>;
 }
 
 function StopPicker({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
