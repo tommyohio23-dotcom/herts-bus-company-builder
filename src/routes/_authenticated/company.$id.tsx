@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BusSide } from "@/components/BusSide";
 import { BUS_MODELS, FEATURES, HERTS_TOWNS, STAFF_ROLES, STATUSES } from "@/lib/herts";
 import { BusPhoto } from "@/components/BusPhoto";
-import { simulateDay } from "@/lib/sim";
+import { managementAction } from "@/lib/management.functions";
+import { ManagementExpansion } from "@/components/ManagementExpansion";
+import { NetworkPlanner } from "@/components/NetworkPlanner";
 
 export const Route = createFileRoute("/_authenticated/company/$id")({
   head: () => ({
@@ -21,6 +24,8 @@ export const Route = createFileRoute("/_authenticated/company/$id")({
       { name: "description", content: "Fleet list, routes and driver roster for your Herts bus company." },
       { property: "og:title", content: "Company depot — Herts Bus Manager" },
       { property: "og:description", content: "Manage fleet, routes and drivers." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: CompanyPage,
@@ -40,19 +45,18 @@ function CompanyPage() {
   const { id } = Route.useParams();
   const qc = useQueryClient();
   const { company, buses, routes, drivers } = useCompanyData(id);
-  const refresh = () => ["company", "buses", "routes", "drivers"].forEach((k) => qc.invalidateQueries({ queryKey: [k, id] }));
-  const [log, setLog] = useState<string[]>([]);
+  const refresh = () => ["company", "buses", "routes", "drivers", "depots", "tender_bids", "passenger_reviews", "day_reports"].forEach((k) => qc.invalidateQueries({ queryKey: [k, id] }));
+  const action = useServerFn(managementAction);
+  const [running, setRunning] = useState(false);
 
   if (!company) return <div className="p-8 text-muted-foreground">Loading depot…</div>;
 
   async function runDay() {
-    if (!company) return;
-    const r = simulateDay(routes.map((x) => ({ id: x.id, frequency_mins: x.frequency_mins, fare: Number(x.fare) })), buses, drivers.map((d) => Number(d.wage)));
-    await supabase.from("companies").update({ balance: Number(company.balance) + r.profit, day: company.day + 1 }).eq("id", id);
-    await Promise.all(buses.filter((b) => b.status === "In service" && b.route_id).map((b) =>
-      supabase.from("buses").update({ mileage: b.mileage + 180 + Math.floor(Math.random() * 60) }).eq("id", b.id)));
-    setLog((l) => [`Day ${company.day}: £${r.revenue.toLocaleString()} fares, £${r.costs.toLocaleString()} costs → ${r.profit >= 0 ? "+" : ""}£${r.profit.toLocaleString()} (${r.activeBuses} buses out)`, ...l].slice(0, 20));
-    refresh();
+    if (!company || running) return;
+    setRunning(true);
+    try { const r = await action({data:{companyId:id,day:company.day,action:'day'}}); toast.success(`${r.message} · Profit £${r.profit?.toLocaleString() ?? 0}`); refresh(); }
+    catch(e) { toast.error(e instanceof Error ? e.message : 'Day could not save'); }
+    finally { setRunning(false); }
   }
 
   async function spend(amount: number) {
@@ -84,20 +88,20 @@ function CompanyPage() {
       </header>
       <main className="mx-auto max-w-6xl px-4 pb-16">
         <Tabs defaultValue="fleet">
-          <TabsList className="w-full justify-start overflow-x-auto">
+          <TabsList className="h-auto w-full flex-wrap justify-start gap-1">
             <TabsTrigger value="fleet">Fleet</TabsTrigger><TabsTrigger value="routes">Routes</TabsTrigger>
             <TabsTrigger value="drivers">Employees</TabsTrigger><TabsTrigger value="ops">Operations</TabsTrigger>
+            <TabsTrigger value="market">Used market</TabsTrigger><TabsTrigger value="depots">Depots</TabsTrigger><TabsTrigger value="tenders">Tenders</TabsTrigger><TabsTrigger value="network">Map</TabsTrigger><TabsTrigger value="reviews">Reviews</TabsTrigger>
           </TabsList>
           <TabsContent value="fleet"><Fleet companyId={id} company={company} buses={buses} routes={routes} refresh={refresh} spend={spend} /></TabsContent>
           <TabsContent value="routes"><Routes companyId={id} routes={routes} buses={buses} refresh={refresh} /></TabsContent>
           <TabsContent value="drivers"><Drivers companyId={id} drivers={drivers} refresh={refresh} /></TabsContent>
           <TabsContent value="ops">
-            <div className="rounded-lg border bg-card p-4">
-              <p className="text-sm text-muted-foreground">Only buses marked “In service” and allocated to a route earn fares. Each bus costs £90/day to run; drivers are paid daily.</p>
-              <Button size="lg" className="mt-3" onClick={runDay}>Run day {company.day}</Button>
-              <ul className="mt-4 space-y-1 text-sm">{log.map((l, i) => <li key={i} className="border-b py-1">{l}</li>)}</ul>
-            </div>
+            <Button size="lg" className="mt-3" disabled={running} onClick={runDay}>{running ? 'Running…' : `Run day ${company.day}`}</Button>
+            <ManagementExpansion view="reports" company={company} buses={buses} drivers={drivers} refresh={refresh}/>
           </TabsContent>
+          {(['market','depots','tenders','reviews'] as const).map(view=><TabsContent key={view} value={view}><ManagementExpansion view={view} company={company} buses={buses} drivers={drivers} refresh={refresh}/></TabsContent>)}
+          <TabsContent value="network"><NetworkPlanner companyId={id} refresh={refresh}/></TabsContent>
         </Tabs>
       </main>
     </div>
@@ -222,13 +226,13 @@ function Routes({ companyId, routes, buses, refresh }: { companyId: string; rout
       {routes.map((r) => {
         const n = buses.filter((b) => b.route_id === r.id).length;
         return (
-          <div key={r.id} className="flex items-center gap-3 rounded-lg border bg-card p-3">
+          <div key={r.id} className="flex flex-wrap items-center gap-3 rounded-lg border bg-card p-3">
             <span className="blind min-w-16 px-2 py-1 text-center text-3xl">{r.number}</span>
-            <div className="flex-1">
+            <div className="min-w-0 flex-1 basis-40">
               <p className="font-semibold">{r.origin} → {r.destination}</p>
-              <p className="text-xs text-muted-foreground">{r.via && `via ${r.via} · `}every {r.frequency_mins} min · £{Number(r.fare).toFixed(2)} · {n} bus{n === 1 ? "" : "es"}</p>
+              <p className="break-words text-xs text-muted-foreground">{r.service_type} · {r.via && `via ${r.via} · `}every {r.frequency_mins} min · £{Number(r.fare).toFixed(2)} · {n} bus{n === 1 ? "" : "es"}{r.contract_end_day != null && ` · Contract ends day ${r.contract_end_day}`}</p>
             </div>
-            <EditStops route={r} refresh={refresh} />
+            {r.stop_ids.length === 0 && <EditStops route={r} refresh={refresh} />}
             <Button size="sm" variant="ghost" onClick={async () => { await supabase.from("routes").delete().eq("id", r.id); refresh(); }}>Withdraw</Button>
           </div>
         );

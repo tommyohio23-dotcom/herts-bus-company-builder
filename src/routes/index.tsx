@@ -11,6 +11,8 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Take charge of Arriva the Shires, Uno, Centrebus, Sullivan and more, or start your own Herts bus company." },
       { property: "og:title", content: "Herts Bus Manager" },
       { property: "og:description", content: "Fleet, roster and route management for classic Hertfordshire bus operators." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Index,

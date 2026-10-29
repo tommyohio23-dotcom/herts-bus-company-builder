@@ -20,6 +20,8 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       { name: "description", content: "Choose or create a Hertfordshire bus company." },
       { property: "og:title", content: "Your companies — Herts Bus Manager" },
       { property: "og:description", content: "Your saved Herts bus companies." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Dashboard,
