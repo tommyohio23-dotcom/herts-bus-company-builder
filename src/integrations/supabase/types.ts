@@ -17,12 +17,14 @@ export type Database = {
       buses: {
         Row: {
           company_id: string
+          condition: number
           created_at: string
           depot: string
           features: string[]
           fleet_no: string
           id: string
           livery: string
+          market_key: string | null
           mileage: number
           model: string
           notes: string
@@ -34,12 +36,14 @@ export type Database = {
         }
         Insert: {
           company_id: string
+          condition?: number
           created_at?: string
           depot?: string
           features?: string[]
           fleet_no: string
           id?: string
           livery?: string
+          market_key?: string | null
           mileage?: number
           model: string
           notes?: string
@@ -51,12 +55,14 @@ export type Database = {
         }
         Update: {
           company_id?: string
+          condition?: number
           created_at?: string
           depot?: string
           features?: string[]
           fleet_no?: string
           id?: string
           livery?: string
+          market_key?: string | null
           mileage?: number
           model?: string
           notes?: string
@@ -125,6 +131,85 @@ export type Database = {
         }
         Relationships: []
       }
+      day_reports: {
+        Row: {
+          company_id: string
+          costs: number
+          day: number
+          details: Json
+          id: string
+          profit: number
+          revenue: number
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          costs: number
+          day: number
+          details?: Json
+          id?: string
+          profit: number
+          revenue: number
+          user_id?: string
+        }
+        Update: {
+          company_id?: string
+          costs?: number
+          day?: number
+          details?: Json
+          id?: string
+          profit?: number
+          revenue?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "day_reports_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      depots: {
+        Row: {
+          capacity: number
+          company_id: string
+          daily_rent: number
+          id: string
+          name: string
+          town: string
+          user_id: string
+        }
+        Insert: {
+          capacity?: number
+          company_id: string
+          daily_rent?: number
+          id?: string
+          name: string
+          town: string
+          user_id?: string
+        }
+        Update: {
+          capacity?: number
+          company_id?: string
+          daily_rent?: number
+          id?: string
+          name?: string
+          town?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "depots_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       drivers: {
         Row: {
           company_id: string
@@ -169,9 +254,49 @@ export type Database = {
           },
         ]
       }
+      passenger_reviews: {
+        Row: {
+          comment: string
+          company_id: string
+          day: number
+          id: string
+          rating: number
+          route_number: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          company_id: string
+          day: number
+          id?: string
+          rating: number
+          route_number: string
+          user_id?: string
+        }
+        Update: {
+          comment?: string
+          company_id?: string
+          day?: number
+          id?: string
+          rating?: number
+          route_number?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "passenger_reviews_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       routes: {
         Row: {
           company_id: string
+          contract_end_day: number | null
+          contract_payment: number
           created_at: string
           destination: string
           fare: number
@@ -179,11 +304,16 @@ export type Database = {
           id: string
           number: string
           origin: string
+          service_type: string
+          stop_ids: string[]
+          tender_key: string | null
           user_id: string
           via: string
         }
         Insert: {
           company_id: string
+          contract_end_day?: number | null
+          contract_payment?: number
           created_at?: string
           destination: string
           fare?: number
@@ -191,11 +321,16 @@ export type Database = {
           id?: string
           number: string
           origin: string
+          service_type?: string
+          stop_ids?: string[]
+          tender_key?: string | null
           user_id?: string
           via?: string
         }
         Update: {
           company_id?: string
+          contract_end_day?: number | null
+          contract_payment?: number
           created_at?: string
           destination?: string
           fare?: number
@@ -203,6 +338,9 @@ export type Database = {
           id?: string
           number?: string
           origin?: string
+          service_type?: string
+          stop_ids?: string[]
+          tender_key?: string | null
           user_id?: string
           via?: string
         }
@@ -216,12 +354,71 @@ export type Database = {
           },
         ]
       }
+      tender_bids: {
+        Row: {
+          bid: number
+          company_id: string
+          id: string
+          status: string
+          submitted_day: number
+          tender_key: string
+          user_id: string
+        }
+        Insert: {
+          bid: number
+          company_id: string
+          id?: string
+          status?: string
+          submitted_day: number
+          tender_key: string
+          user_id?: string
+        }
+        Update: {
+          bid?: number
+          company_id?: string
+          id?: string
+          status?: string
+          submitted_day?: number
+          tender_key?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tender_bids_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      apply_management_action: {
+        Args: {
+          p_action: string
+          p_company: string
+          p_day: number
+          p_payload: Json
+        }
+        Returns: undefined
+      }
+      resolve_game_bid: {
+        Args: {
+          p_company: string
+          p_key: string
+          p_route: Json
+          p_won: boolean
+        }
+        Returns: undefined
+      }
+      submit_game_bid: {
+        Args: { p_bid: number; p_company: string; p_day: number; p_key: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

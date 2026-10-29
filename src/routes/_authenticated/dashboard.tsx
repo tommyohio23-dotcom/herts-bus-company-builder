@@ -20,6 +20,8 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       { name: "description", content: "Choose or create a Hertfordshire bus company." },
       { property: "og:title", content: "Your companies — Herts Bus Manager" },
       { property: "og:description", content: "Your saved Herts bus companies." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Dashboard,
@@ -50,6 +52,8 @@ function Dashboard() {
       name: p.name, short_name: p.short, primary_color: p.primary, secondary_color: p.secondary, preset_key: p.key, hq_town: p.hq,
     }).select().single();
     if (error || !c) { toast.error(error?.message ?? "Failed"); return; }
+    const depotResult = await supabase.from('depots').insert(p.depots.map(town => ({company_id:c.id,name:`${town} depot`,town,capacity:15,daily_rent:0})));
+    if (depotResult.error) { toast.error('Starter depots could not be created'); return; }
     const { data: routes } = await supabase.from("routes").insert(
       p.routes.map((r) => ({ company_id: c.id, number: r.number, origin: r.origin, destination: r.destination, via: r.via, frequency_mins: r.frequency, fare: r.fare })),
     ).select();
@@ -121,6 +125,8 @@ function CustomCompany({ onDone }: { onDone: (id: string) => void }) {
       name, short_name: short || name.slice(0, 8), primary_color: primary, secondary_color: secondary, hq_town: hq, balance: 150000,
     }).select().single();
     if (error || !data) { toast.error(error?.message ?? "Failed"); return; }
+    const depot = await supabase.from('depots').insert({company_id:data.id,name:`${hq} depot`,town:hq,capacity:5,daily_rent:0});
+    if (depot.error) { toast.error('Starter depot could not be created'); return; }
     onDone(data.id);
   }
   return (
