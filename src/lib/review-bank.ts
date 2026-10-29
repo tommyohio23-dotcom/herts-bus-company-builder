@@ -5,6 +5,6 @@ export const REVIEW_BANK=bank as BankReview[];
 export function bankReview(mode:'bus'|'train',rating:number,seed:number):string|null{
   const list=REVIEW_BANK.filter(r=>r.mode===mode&&r.rating===rating);
   if(!list.length)return null;
-  const r=list[Math.abs(seed)%list.length];
+  const r=list[Math.abs(seed)%list.length]!;
   return `${r.text} — ${r.passenger}`;
 }
