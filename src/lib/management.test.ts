@@ -1,10 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { DEPOT_PACKAGES, managementDay, marketListings, passengerReview, tenderDecision } from './management';
 describe('management rules', () => {
-  it('offers six distinct used listings and renews after seven days', () => {
-    expect(new Set(marketListings(1).map(b => b.key)).size).toBe(6);
+  it('offers eighteen distinct used listings and renews after seven days', () => {
+    expect(new Set(marketListings(1).map(b => b.key)).size).toBe(18);
     expect(marketListings(7)[0]?.key).toBe(marketListings(1)[0]?.key);
     expect(marketListings(8)[0]?.key).not.toBe(marketListings(1)[0]?.key);
+  });
+  it('offers the same model with different years and specifications', () => {
+    const stock = marketListings(1).filter(b => b.model === 'Optare Solo');
+    expect(stock.map(b => b.year)).toEqual([2009, 2011, 2013]);
+    expect(stock[0]?.features).not.toEqual(stock[2]?.features);
   });
   it('has five spaces in the smallest depot', () => expect(DEPOT_PACKAGES[0]?.capacity).toBe(5));
   it('rejects bids without the required eligible fleet', () => expect(tenderDecision(300,360,0,1)).toBe(false));

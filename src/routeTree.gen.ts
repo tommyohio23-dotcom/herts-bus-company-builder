@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCompanyIdRouteImport } from './routes/_authenticated/company.$id'
+import { Route as AuthenticatedRailIdRouteImport } from './routes/_authenticated/rail.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -39,18 +40,25 @@ const AuthenticatedCompanyIdRoute = AuthenticatedCompanyIdRouteImport.update({
   path: '/company/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRailIdRoute = AuthenticatedRailIdRouteImport.update({
+  id: '/rail/$id',
+  path: '/rail/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/company/$id': typeof AuthenticatedCompanyIdRoute
+  '/rail/$id': typeof AuthenticatedRailIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/company/$id': typeof AuthenticatedCompanyIdRoute
+  '/rail/$id': typeof AuthenticatedRailIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -59,12 +67,13 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/company/$id': typeof AuthenticatedCompanyIdRoute
+  '/_authenticated/rail/$id': typeof AuthenticatedRailIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/dashboard' | '/company/$id'
+  fullPaths: '/' | '/auth' | '/dashboard' | '/company/$id' | '/rail/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/dashboard' | '/company/$id'
+  to: '/' | '/auth' | '/dashboard' | '/company/$id' | '/rail/$id'
   id:
     | '__root__'
     | '/'
@@ -72,6 +81,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/dashboard'
     | '/_authenticated/company/$id'
+    | '/_authenticated/rail/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -117,17 +127,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCompanyIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/rail/$id': {
+      id: '/_authenticated/rail/$id'
+      path: '/rail/$id'
+      fullPath: '/rail/$id'
+      preLoaderRoute: typeof AuthenticatedRailIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedCompanyIdRoute: typeof AuthenticatedCompanyIdRoute
+  AuthenticatedRailIdRoute: typeof AuthenticatedRailIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedCompanyIdRoute: AuthenticatedCompanyIdRoute,
+  AuthenticatedRailIdRoute: AuthenticatedRailIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

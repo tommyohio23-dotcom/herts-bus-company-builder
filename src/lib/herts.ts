@@ -12,6 +12,7 @@ export const HERTS_TOWNS = [
   "Weston", "Wormley", "Hemel Maylands", "Hatfield Business Park", "Lister Hospital",
   "Watford General Hospital", "University of Hertfordshire", "Luton Airport", "Harlow", "Luton",
   "Enfield", "Barnet", "Aylesbury", "Heathrow Airport", "Stansted Airport", "Cambridge",
+  "Wood Green", "Finchley", "New Barnet", "New Barnet Station Road", "Cockfosters", "Oakwood", "Edgware", "Brimsdown", "Turnpike Lane", "Palmers Green", "Winchmore Hill", "Gordon Hill", "Totteridge", "Whetstone", "Brent Cross",
 ].sort();
 
 export const FEATURES = [

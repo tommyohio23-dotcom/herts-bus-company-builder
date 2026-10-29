@@ -11,15 +11,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BusSide } from "@/components/BusSide";
 import { realOperatorPhoto } from "@/lib/bus-photos";
 import { BusPhoto } from "@/components/BusPhoto";
-import { HERTS_TOWNS, PRESETS, type Preset } from "@/lib/herts";
+import { HERTS_TOWNS, type Preset } from "@/lib/herts";
+import { useServerFn } from '@tanstack/react-start';
+import { createRailCompany } from '@/lib/rail.functions';
+import { Bus,TrainFront } from 'lucide-react';
+import { Tabs,TabsList,TabsTrigger } from '@/components/ui/tabs';
+import { BUS_OPERATOR_PRESETS } from '@/lib/london';
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Your companies — Herts Bus Manager" },
-      { name: "description", content: "Choose or create a Hertfordshire bus company." },
-      { property: "og:title", content: "Your companies — Herts Bus Manager" },
-      { property: "og:description", content: "Your saved Herts bus companies." },
+      { title: "Bus & train companies — Herts Transport Manager" },
+      { name: "description", content: "Choose bus operations in Herts and London or your separate Great Northern train company." },
+      { property: "og:title", content: "Bus & train companies — Herts Transport Manager" },
+      { property: "og:description", content: "Your saved bus and Great Northern railway companies." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -28,6 +33,8 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 function Dashboard() {
+  const [mode,setMode]=useState('bus');
+  const createRail=useServerFn(createRailCompany);
   const qc = useQueryClient();
   const navigate = useNavigate();
   const { data: companies = [] } = useQuery({
@@ -79,13 +86,14 @@ function Dashboard() {
         <Button variant="ghost" onClick={signOut}>Sign out</Button>
       </header>
       <main className="mx-auto max-w-6xl px-4 pb-16">
-        <h1 className="text-5xl">Your companies</h1>
+        <h1 className="text-5xl">Your transport companies</h1>
+        <Tabs value={mode} onValueChange={setMode} className="mt-4"><TabsList className="h-12 w-full sm:w-auto"><TabsTrigger className="flex-1 gap-2" value="bus"><Bus className="size-5"/>Bus companies</TabsTrigger><TabsTrigger className="flex-1 gap-2" value="train"><TrainFront className="size-5"/>Train companies</TabsTrigger></TabsList></Tabs>
         {companies.length === 0 && <p className="text-muted-foreground">None yet — pick a classic operator or found your own below.</p>}
         <div className="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {companies.map((c) => (
+          {companies.filter(c=>c.transport_mode===mode).map((c) => (
             <div key={c.id} className="card-raised rounded-lg bg-card p-3">
-            <Link to="/company/$id" params={{ id: c.id }} className="block">
-              <BusSide primary={c.primary_color} secondary={c.secondary_color} label={c.short_name} className="w-full" />
+            <Link to={c.transport_mode==='train'?'/rail/$id':'/company/$id'} params={{ id: c.id }} className="block">
+              {c.transport_mode==='train'?<TrainFront className="my-4 size-12 text-primary"/>:<BusSide primary={c.primary_color} secondary={c.secondary_color} label={c.short_name} className="w-full" />}
               <p className="font-display text-2xl">{c.name}</p>
               <p className="text-sm text-muted-foreground">Day {c.day} · £{Number(c.balance).toLocaleString()}</p>
             </Link>
@@ -94,12 +102,13 @@ function Dashboard() {
           ))}
         </div>
 
+        {mode==='train'?<section className="mt-10"><h2 className="text-4xl">Great Northern</h2><div className="mt-4 flex items-center gap-4 border-y py-6"><TrainFront className="size-16 text-primary"/><div><p className="text-lg">Hornsey · Class 717 · £3,000,000 game balance</p><Button className="mt-3" disabled={!!busy} onClick={async()=>{if(busy)return;setBusy('rail');try{const r=await createRail();qc.invalidateQueries({queryKey:['companies']});navigate({to:'/rail/$id',params:{id:r.id}});}catch(e){toast.error(e instanceof Error?e.message:'Could not create railway');}finally{setBusy(null);}}}>{busy==='rail'?'Setting up…':'Take control of Great Northern'}</Button></div></div></section>:<>
         <div className="mt-12 flex flex-wrap items-end justify-between gap-2">
-          <h2 className="text-4xl">Classic Herts operators</h2>
+          <h2 className="text-4xl">Herts & London operators</h2>
           <CustomCompany onDone={(id) => navigate({ to: "/company/$id", params: { id } })} />
         </div>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {PRESETS.map((p) => (
+          {BUS_OPERATOR_PRESETS.map((p) => (
             <div key={p.key} className="rounded-lg border bg-card p-3">
               <BusPhoto model={p.name} presetKey={p.key} credit={realOperatorPhoto(p.key)} className="overflow-hidden rounded-md" />
               <p className="font-display text-2xl">{p.name}</p>
@@ -108,6 +117,7 @@ function Dashboard() {
             </div>
           ))}
         </div>
+        </>}
       </main>
     </div>
   );

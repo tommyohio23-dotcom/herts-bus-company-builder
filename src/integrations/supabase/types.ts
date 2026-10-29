@@ -101,6 +101,7 @@ export type Database = {
           primary_color: string
           secondary_color: string
           short_name: string
+          transport_mode: string
           user_id: string
         }
         Insert: {
@@ -114,6 +115,7 @@ export type Database = {
           primary_color?: string
           secondary_color?: string
           short_name?: string
+          transport_mode?: string
           user_id?: string
         }
         Update: {
@@ -127,6 +129,7 @@ export type Database = {
           primary_color?: string
           secondary_color?: string
           short_name?: string
+          transport_mode?: string
           user_id?: string
         }
         Relationships: []
@@ -423,6 +426,35 @@ export type Database = {
           },
         ]
       }
+      rail_games: {
+        Row: {
+          company_id: string
+          revision: number
+          state: Json
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          revision?: number
+          state: Json
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          revision?: number
+          state?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rail_games_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       routes: {
         Row: {
           company_id: string
@@ -549,6 +581,17 @@ export type Database = {
         }
         Returns: string
       }
+      purchase_bus_or_features: {
+        Args: {
+          p_bus: string
+          p_company: string
+          p_cost: number
+          p_day: number
+          p_payload: Json
+          p_user: string
+        }
+        Returns: undefined
+      }
       resolve_game_bid: {
         Args: {
           p_company: string
@@ -561,6 +604,15 @@ export type Database = {
       review_job_applicant: {
         Args: { p_action: string; p_applicant: string }
         Returns: string
+      }
+      save_rail_game: {
+        Args: {
+          p_company: string
+          p_revision: number
+          p_state: Json
+          p_user: string
+        }
+        Returns: undefined
       }
       submit_game_bid: {
         Args: { p_bid: number; p_company: string; p_day: number; p_key: string }
