@@ -17,6 +17,8 @@ import { managementAction } from "@/lib/management.functions";
 import { ManagementExpansion } from "@/components/ManagementExpansion";
 import { NetworkPlanner } from "@/components/NetworkPlanner";
 import { Recruitment } from "@/components/Recruitment";
+import { UPGRADE_PRICES, upgradeCost, upgradeUpkeep } from '@/lib/upgrades';
+import { purchaseBusOrFeatures } from '@/lib/upgrades.functions';
 
 export const Route = createFileRoute("/_authenticated/company/$id")({
   head: () => ({
@@ -119,6 +121,9 @@ type Drv = ReturnType<typeof useCompanyData>["drivers"][number];
 type Co = NonNullable<ReturnType<typeof useCompanyData>["company"]>;
 
 function Fleet({ companyId, company, buses, routes, refresh, spend }: { companyId: string; company: Co; buses: Bus[]; routes: Rt[]; refresh: () => void; spend: (n: number) => Promise<boolean> }) {
+  const purchase = useServerFn(purchaseBusOrFeatures);
+  const [upgrading,setUpgrading]=useState(false);
+  async function upgrade(b:Bus, features:string[]){if(upgrading)return;setUpgrading(true);try{const r=await purchase({data:{companyId,day:company.day,busId:b.id,features}});toast.success(`Specification saved · £${r.cost.toLocaleString()}`);refresh();}catch(e){toast.error(e instanceof Error?e.message:'Could not save');}finally{setUpgrading(false);}}
   const update = async (id: string, patch: Partial<Bus>) => { await supabase.from("buses").update(patch).eq("id", id); refresh(); };
   const remove = async (b: Bus) => {
     if (!confirm(`Sell ${b.fleet_no} for £${Math.round(busPrice(b.year) * 0.3).toLocaleString()}?`)) return;
@@ -155,7 +160,8 @@ function Fleet({ companyId, company, buses, routes, refresh, spend }: { companyI
                 </SelectContent>
               </Select>
             </div>
-            <FeaturePicker value={b.features} onChange={(v) => update(b.id, { features: v })} />
+            <FeaturePicker value={b.features} disabled={upgrading} onChange={(v) => upgrade(b, v)} />
+            <p className="mt-2 text-xs text-muted-foreground">Extras upkeep · £{upgradeUpkeep(b.features)}/day</p>
             </div>
           </div>
         ))}
@@ -165,15 +171,15 @@ function Fleet({ companyId, company, buses, routes, refresh, spend }: { companyI
 }
 
 function AddBus({ companyId, company, routes, refresh, spend }: { companyId: string; company: Co; routes: Rt[]; refresh: () => void; spend: (n: number) => Promise<boolean> }) {
+  const purchase=useServerFn(purchaseBusOrFeatures);
+  const [saving,setSaving]=useState(false);
   const [open, setOpen] = useState(false);
   const [f, setF] = useState({ fleet_no: "", registration: "", model: BUS_MODELS[0] ?? "", year: 2012, depot: company.hq_town, livery: "", route_id: "none", features: [] as string[] });
-  const price = busPrice(f.year);
+  const price = busPrice(f.year) + upgradeCost(f.features);
   async function save() {
     if (!f.fleet_no) { toast.error("Fleet number needed"); return; }
-    if (!(await spend(price))) return;
-    const { error } = await supabase.from("buses").insert({ ...f, company_id: companyId, route_id: f.route_id === "none" ? null : f.route_id });
-    if (error) { toast.error(error.message); return; }
-    toast.success(`${f.fleet_no} joins the fleet`); setOpen(false); refresh();
+    if(saving)return;setSaving(true);
+    try{await purchase({data:{...f,companyId,day:company.day,route_id:f.route_id==='none'?null:f.route_id}});toast.success(`${f.fleet_no} joins the fleet`);setOpen(false);refresh();}catch(e){toast.error(e instanceof Error?e.message:'Purchase failed');}finally{setSaving(false);}
   }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -203,7 +209,8 @@ function AddBus({ companyId, company, routes, refresh, spend }: { companyId: str
           </div>
           <div><Label>Spec & extras</Label><FeaturePicker value={f.features} onChange={(v) => setF({ ...f, features: v })} /></div>
           <BusPhoto model={f.model} presetKey={company.preset_key} className="overflow-hidden rounded-md" />
-          <Button onClick={save}>Buy for £{price.toLocaleString()}</Button>
+          <p className="text-sm text-muted-foreground">Extras £{upgradeCost(f.features).toLocaleString()} · Upkeep £{upgradeUpkeep(f.features)}/day</p>
+          <Button disabled={saving} onClick={save}>Buy for £{price.toLocaleString()}</Button>
         </div>
       </DialogContent>
     </Dialog>
@@ -256,16 +263,15 @@ function Routes({ companyId, routes, buses, refresh }: { companyId: string; rout
   );
 }
 
-function FeaturePicker({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
+function FeaturePicker({ value, onChange, disabled=false }: { value: string[]; onChange: (v: string[]) => void; disabled?:boolean }) {
   return (
     <div className="mt-2 flex flex-wrap gap-1">
       {FEATURES.map((ft) => {
         const on = value.includes(ft);
         return (
-          <button key={ft} type="button" onClick={() => onChange(on ? value.filter((x) => x !== ft) : [...value, ft])}
-            className={`rounded-full border px-2 py-0.5 text-xs transition ${on ? "border-primary bg-primary text-primary-foreground" : "bg-background text-muted-foreground"}`}>
-            {ft}
-          </button>
+          <Button key={ft} type="button" size="sm" variant={on?'default':'outline'} disabled={disabled} onClick={() => onChange(on ? value.filter((x) => x !== ft) : [...value, ft])} className="h-auto whitespace-normal text-xs">
+            {ft}{!on && ` · £${UPGRADE_PRICES[ft]?.install.toLocaleString()}`}
+          </Button>
         );
       })}
     </div>
@@ -274,7 +280,7 @@ function FeaturePicker({ value, onChange }: { value: string[]; onChange: (v: str
 
 function StopPicker({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
   const [pick, setPick] = useState("");
-  const move = (i: number, d: number) => { const v = [...value]; const j = i + d; if (j < 0 || j >= v.length) return; [v[i], v[j]] = [v[j]!, v[i]!]; onChange(v); };
+  const move = (i: number, d: number) => { const v = [...value]; const j = i + d; const a=v[i],b=v[j]; if(a===undefined||b===undefined)return;v[i]=b;v[j]=a;onChange(v); };
   return (
     <div className="space-y-2">
       <ol className="space-y-1">
