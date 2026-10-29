@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -284,6 +284,7 @@ function FeaturePicker({ value, onChange, disabled=false }: { value: string[]; o
 
 function RouteFrequency({route,count,refresh}:{route:Rt;count:number;refresh:()=>void}) {
  const [value,setValue]=useState(route.frequency_mins),[busy,setBusy]=useState(false);
+ useEffect(()=>setValue(route.frequency_mins),[route.frequency_mins]);
  return <div className="w-full border-t pt-2"><ServiceFrequency value={value} onChange={setValue} label={`Route ${route.number} frequency`} disabled={busy}/><div className="flex flex-wrap items-center justify-between gap-2"><p className={`text-xs ${count<requiredBuses(value)?'text-destructive':'text-muted-foreground'}`}>{count} in-service buses allocated · {count===0?'Planned / unserved':count<requiredBuses(value)?'Not enough buses to operate':'Ready to operate'}</p><Button size="sm" variant="outline" disabled={busy||value===route.frequency_mins} onClick={async()=>{setBusy(true);try{const r=await supabase.from('routes').update({frequency_mins:value}).eq('id',route.id);if(r.error)throw r.error;toast.success('Service frequency saved');refresh();}catch(e){toast.error(e instanceof Error?e.message:'Frequency could not save');}finally{setBusy(false);}}}>Save frequency</Button></div></div>;
 }
 
