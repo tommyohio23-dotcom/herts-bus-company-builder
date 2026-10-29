@@ -1,0 +1,16 @@
+import { STAFF_ROLES } from './herts';
+
+const NAMES = ['Martin Hughes','Priya Shah','Oliver Reed','Grace Okafor','Peter Collins','Amy Chen','Daniel Mensah','Claire Bennett','Imran Hussain','Sophie Miller','James Walker','Rachel Lewis','David Morgan','Anika Patel','Ben Carter','Helen Clarke','Ravi Singh','Lucy Evans','Tom Wilson','Kenji Tanaka','Emma Brooks','Michael Brown','Alice Foster','Paul Turner'];
+const EMPLOYERS = ['Local bus operator','Airport shuttle company','Community transport charity','Coach tour operator','Vehicle maintenance centre','Retail distribution fleet','Rail replacement contractor','University transport team'];
+const SKILLS = ['Calm under pressure','Customer care','Local route knowledge','Safety-first approach','Team coordination','Vehicle fault reporting','Accessible transport','Timekeeping','Shift flexibility','Conflict resolution','Digital ticketing','Mentoring colleagues'];
+const STATEMENTS = ['I enjoy helping passengers feel confident on unfamiliar journeys.','I want to bring my practical experience to a growing local team.','I take pride in keeping services reliable and colleagues informed.','I am looking for a stable role with opportunities to develop.','I have worked across busy shifts and quieter rural services.','I enjoy solving problems calmly and supporting new colleagues.','I am keen to return to public transport after a change of sector.','I value clear communication and a well-organised working day.'];
+export function generateApplicants(role: string, wage: number, seed: number) {
+  if (!(role in STAFF_ROLES)) throw new Error('Unknown job role');
+  const offset=((seed%24)+24)%24;
+  return Array.from({length:12},(_,i)=>{
+    const index=(offset+i*5)%24,experience=(seed+i*3)%21;
+    const qualifications = /Driver/.test(role) ? ['Category D licence','Driver CPC',...(experience>8?['Defensive driving course']:[])] : role==='Engineer' ? ['Vehicle maintenance Level 3',...(experience>6?['Diagnostic systems training']:[])] : role==='Cleaner' ? ['COSHH awareness','Workplace safety'] : ['Workplace safety','Customer service training',...(experience>10?['Team leadership certificate']:[])];
+    return { name:NAMES[index] ?? 'Applicant',portrait_index:index,experience_years:experience,qualifications,skills:[SKILLS[(i+seed)%SKILLS.length] ?? 'Customer care',SKILLS[(i+seed+4)%SKILLS.length] ?? 'Timekeeping',SKILLS[(i+seed+7)%SKILLS.length] ?? 'Team coordination'],previous_employer:EMPLOYERS[(i+seed)%EMPLOYERS.length] ?? 'Local transport team',statement:STATEMENTS[(i+seed)%STATEMENTS.length] ?? '',availability:['Immediate start','One week notice','Two weeks notice','Four weeks notice'][i%4] ?? 'Immediate start',expected_wage:Math.round(wage*(0.85+(i%5)*.05)),reference_note:['Strong attendance and positive passenger feedback.','Reliable team member; references available on request.','Good technical judgement and clear communication.','Consistent safety record and dependable shift handovers.'][i%4] ?? '' };
+  });
+}
+export function offerAccepted(offered: number, expected: number) { return offered>=expected; }

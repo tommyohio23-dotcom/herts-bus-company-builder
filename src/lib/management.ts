@@ -5,6 +5,7 @@ export const MAP_AREAS = [
   { key: 'beds', name: 'Bedfordshire & Luton', lat: 52.075, lng: -0.475 },
   { key: 'bucks', name: 'Buckinghamshire & borders', lat: 51.70, lng: -0.75 },
   { key: 'essex', name: 'West Essex', lat: 51.825, lng: 0.30 },
+  { key: 'london', name: 'London & borders', lat: 51.5074, lng: -0.1278 },
 ];
 export type RealStop = { id: string; name: string; locality: string; indicator: string; lat: number; lng: number };
 export const stopLabel = (s: RealStop) => `${s.locality} · ${s.name}${s.indicator ? ` (${s.indicator})` : ''}`;
