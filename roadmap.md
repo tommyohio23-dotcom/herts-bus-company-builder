@@ -1,4 +1,5 @@
 # Game expansion
+- [ ] Add generous network-based starting capital and editable amounts for preset, custom and rail companies; boost existing large bus companies once and verify saved balances.
 - [x] Vary bus and rail daily passenger demand and operating costs, explain conditions in saved reports, and verify settlement and reload persistence in both modes.
 - [x] Vary bus and rail passenger review wording across days while keeping ratings and complaints grounded in the actual service; verify saved feedback in both modes.
 - [x] Add bus/rail route and review selection with authenticated AI complaint analysis and specific improvement recommendations.
