@@ -11,12 +11,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BusSide } from "@/components/BusSide";
 import { realOperatorPhoto } from "@/lib/bus-photos";
 import { BusPhoto } from "@/components/BusPhoto";
-import { HERTS_TOWNS, type Preset } from "@/lib/herts";
+import { type Preset } from "@/lib/herts";
 import { useServerFn } from '@tanstack/react-start';
 import { createRailCompany } from '@/lib/rail.functions';
 import { Bus,TrainFront } from 'lucide-react';
 import { Tabs,TabsList,TabsTrigger } from '@/components/ui/tabs';
-import { BUS_OPERATOR_PRESETS } from '@/lib/london';
+import { BUS_OPERATOR_PRESETS, LONDON_PRESETS } from '@/lib/london';
+import { AREAS, AREA_PRESETS, AREA_TOWNS, companyArea, type AreaKey } from '@/lib/areas';
+const LONDON_KEYS = LONDON_PRESETS.map(p => p.key);
+function areaPresets(a: AreaKey): Preset[] { return a === 'herts' ? BUS_OPERATOR_PRESETS.filter(p => !LONDON_KEYS.includes(p.key)) : a === 'london' ? LONDON_PRESETS : AREA_PRESETS[a]; }
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -34,6 +37,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 
 function Dashboard() {
   const [mode,setMode]=useState('bus');
+  const [area,setArea]=useState<AreaKey>('herts');
   const createRail=useServerFn(createRailCompany);
   const qc = useQueryClient();
   const navigate = useNavigate();
@@ -88,9 +92,10 @@ function Dashboard() {
       <main className="mx-auto max-w-6xl px-4 pb-16">
         <h1 className="text-5xl">Your transport companies</h1>
         <Tabs value={mode} onValueChange={setMode} className="mt-4"><TabsList className="h-12 w-full sm:w-auto"><TabsTrigger className="flex-1 gap-2" value="bus"><Bus className="size-5"/>Bus companies</TabsTrigger><TabsTrigger className="flex-1 gap-2" value="train"><TrainFront className="size-5"/>Train companies</TabsTrigger></TabsList></Tabs>
+        {mode==='bus'&&<Tabs value={area} onValueChange={v=>setArea(v as AreaKey)} className="mt-3"><TabsList className="h-auto flex-wrap">{AREAS.map(a=><TabsTrigger key={a.key} value={a.key}>{a.label}</TabsTrigger>)}</TabsList></Tabs>}
         {companies.length === 0 && <p className="text-muted-foreground">None yet — pick a classic operator or found your own below.</p>}
         <div className="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {companies.filter(c=>c.transport_mode===mode).map((c) => (
+          {companies.filter(c=>c.transport_mode===mode&&(mode!=='bus'||companyArea(c,LONDON_KEYS)===area)).map((c) => (
             <div key={c.id} className="card-raised rounded-lg bg-card p-3">
             <Link to={c.transport_mode==='train'?'/rail/$id':'/company/$id'} params={{ id: c.id }} className="block">
               {c.transport_mode==='train'?<TrainFront className="my-4 size-12 text-primary"/>:<BusSide primary={c.primary_color} secondary={c.secondary_color} label={c.short_name} className="w-full" />}
@@ -104,11 +109,11 @@ function Dashboard() {
 
         {mode==='train'?<section className="mt-10"><h2 className="text-4xl">Great Northern</h2><div className="mt-4 flex items-center gap-4 border-y py-6"><TrainFront className="size-16 text-primary"/><div><p className="text-lg">Hornsey · Class 717 · £3,000,000 game balance</p><Button className="mt-3" disabled={!!busy} onClick={async()=>{if(busy)return;setBusy('rail');try{const r=await createRail();qc.invalidateQueries({queryKey:['companies']});navigate({to:'/rail/$id',params:{id:r.id}});}catch(e){toast.error(e instanceof Error?e.message:'Could not create railway');}finally{setBusy(null);}}}>{busy==='rail'?'Setting up…':'Take control of Great Northern'}</Button></div></div></section>:<>
         <div className="mt-12 flex flex-wrap items-end justify-between gap-2">
-          <h2 className="text-4xl">Herts & London operators</h2>
-          <CustomCompany onDone={(id) => navigate({ to: "/company/$id", params: { id } })} />
+          <h2 className="text-4xl">{AREAS.find(a=>a.key===area)?.label} operators</h2>
+          <CustomCompany key={area} area={area} onDone={(id) => navigate({ to: "/company/$id", params: { id } })} />
         </div>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {BUS_OPERATOR_PRESETS.map((p) => (
+          {areaPresets(area).map((p) => (
             <div key={p.key} className="rounded-lg border bg-card p-3">
               <BusPhoto model={p.name} presetKey={p.key} credit={realOperatorPhoto(p.key)} className="overflow-hidden rounded-md" />
               <p className="font-display text-2xl">{p.name}</p>
@@ -123,12 +128,12 @@ function Dashboard() {
   );
 }
 
-function CustomCompany({ onDone }: { onDone: (id: string) => void }) {
+function CustomCompany({ onDone, area }: { onDone: (id: string) => void; area: AreaKey }) {
   const [name, setName] = useState("");
   const [short, setShort] = useState("");
   const [primary, setPrimary] = useState("#0b6b3a");
   const [secondary, setSecondary] = useState("#f2e6b8");
-  const [hq, setHq] = useState("Hertford");
+  const [hq, setHq] = useState(AREA_TOWNS[area][0]);
   async function create() {
     if (!name.trim()) { toast.error("Give your company a name"); return; }
     const { data, error } = await supabase.from("companies").insert({
@@ -155,7 +160,7 @@ function CustomCompany({ onDone }: { onDone: (id: string) => void }) {
           <div><Label>Head office town</Label>
             <Select value={hq} onValueChange={setHq}>
               <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{HERTS_TOWNS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+              <SelectContent>{AREA_TOWNS[area].map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <Button onClick={create}>Create company (£150,000 start)</Button>
