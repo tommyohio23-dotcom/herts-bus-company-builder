@@ -1,0 +1,10 @@
+import { useState } from 'react';
+import { Expand } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { marketPhoto } from '@/lib/market-photos';
+
+export function MarketPhoto({model}:{model:string}) {
+  const [open,setOpen]=useState(false),[failed,setFailed]=useState(false),photo=marketPhoto(model);
+  return <figure><div className="relative flex aspect-[4/3] items-center justify-center bg-muted">{photo&&!failed?<img src={photo.url} alt={`${model} — actual model reference photograph`} loading="lazy" width={1600} height={1200} className="h-full w-full object-contain" onError={()=>setFailed(true)}/>:<span className="text-sm text-muted-foreground">Photo unavailable</span>}{photo&&!failed&&<Button title="Enlarge bus photo" aria-label={`Enlarge ${model} photo`} size="icon" variant="secondary" className="absolute bottom-2 right-2" onClick={()=>setOpen(true)}><Expand className="size-4"/></Button>}</div>{photo&&<figcaption className="min-h-10 bg-muted px-2 py-1 text-[10px] text-muted-foreground"><a href={photo.page} target="_blank" rel="noreferrer" className="underline">{photo.author} · {photo.license}</a> · Wikimedia Commons · Resized</figcaption>}<Dialog open={open} onOpenChange={setOpen}><DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-4xl"><DialogHeader><DialogTitle>{model}</DialogTitle></DialogHeader>{photo&&<><img src={photo.url} alt={`${model} full photograph`} width={1600} height={1200} className="max-h-[68vh] w-full object-contain"/><p className="text-xs text-muted-foreground">Actual model reference, not the simulated sale vehicle. <a href={photo.page} className="underline" target="_blank" rel="noreferrer">Photo credit and licence</a></p></>}</DialogContent></Dialog></figure>;
+}
