@@ -1,5 +1,6 @@
 import { simulateDay, type SimBus, type SimRoute } from './sim';
 import { upgradeUpkeep } from './upgrades';
+import { operatingConditions } from './operating-conditions';
 
 export const MAP_AREAS = [
   { key: 'herts', name: 'Hertfordshire & borders', lat: 51.85, lng: -0.28 },
@@ -39,19 +40,30 @@ export function tenderOffers(day: number) {
 export function tenderDecision(bid: number, budget: number, eligibleBuses: number, required: number) {
   return Number.isFinite(bid) && bid > 0 && bid <= budget * 0.95 && eligibleBuses >= required;
 }
-export function passengerReview(route: { number: string; fare: number; frequency_mins: number }, buses: { features: string[]; condition: number }[]) {
-  if (!buses.length) return { route_number: route.number, rating: 1, comment: 'No bus arrived for this service.' };
+const pick = (items: string[], seed: number) => items[Math.abs(seed) % items.length] ?? items[0] ?? '';
+const REVIEW_TEXT = {
+  missing: ['No bus arrived for this service.', 'I waited at the stop but the bus never came.', 'The timetable showed a bus, but nothing turned up.', 'Missed an appointment because this service did not run.'],
+  worn: ['The bus felt worn and could do with attention.', 'Rattly seats and a tired interior spoiled the trip.', 'It got me there, but the vehicle needs some care.', 'The bus looked scruffy and the ride was rough.'],
+  fare: ['The journey was useful, but the fare felt expensive.', 'Good route, though the ticket price is steep.', 'I would travel more often if the fare were lower.', 'Reliable enough, but poor value for a short trip.'],
+  comfort: ['A comfortable journey; the onboard extras were welcome.', 'The onboard extras made the journey more comfortable.', 'Pleasant ride — the extras made a real difference.', 'One of the nicer buses I have used in the area.'],
+  frequent: ['A regular service and a straightforward journey.', 'Having another bus soon after makes this route convenient.', 'Frequent buses make this route easy to rely on.', 'The regular service makes everyday journeys easier.'],
+  sparse: ['A useful service, though I would like more frequent buses.', 'Handy route, but the gaps between buses are long.', 'If I miss one, the wait for the next is frustrating.', 'Decent journey; an extra bus each hour would help.'],
+};
+export function passengerReview(route: { number: string; fare: number; frequency_mins: number }, buses: { features: string[]; condition: number }[], day = 1) {
+  const routeSeed = Number.parseInt(route.number.replace(/\D/g, ''), 10);
+  const seed = day * 7 + (Number.isFinite(routeSeed) ? routeSeed : [...route.number].reduce((n, c, i) => n + c.charCodeAt(0) * (i + 1), 0));
+  if (!buses.length) return { route_number: route.number, rating: 1, comment: pick(REVIEW_TEXT.missing, seed) };
   const avgCondition = buses.reduce((n, b) => n + b.condition, 0) / buses.length;
   const comfortable = buses.some(b => b.features.includes('Leather seats') || b.features.includes('USB charging ports') || b.features.includes('Air conditioning'));
   const rating = Math.max(1, Math.min(5, 3 + (route.frequency_mins <= 30 ? 1 : 0) + (comfortable ? 1 : 0) - (route.fare > 3 ? 1 : 0) - (avgCondition < 65 ? 1 : 0)));
-  const comment = avgCondition < 65 ? 'The bus felt worn and could do with attention.' : route.fare > 3 ? 'The journey was useful, but the fare felt expensive.' : comfortable ? 'A comfortable journey; the onboard extras were welcome.' : route.frequency_mins <= 30 ? 'A regular service and a straightforward journey.' : 'A useful service, though I would like more frequent buses.';
+  const comment = pick(avgCondition < 65 ? REVIEW_TEXT.worn : route.fare > 3 ? REVIEW_TEXT.fare : comfortable ? REVIEW_TEXT.comfort : route.frequency_mins <= 30 ? REVIEW_TEXT.frequent : REVIEW_TEXT.sparse, seed);
   return { route_number: route.number, rating, comment };
 }
 export function managementDay(routes: (SimRoute & { number: string; contract_payment: number; contract_end_day: number | null })[], buses: (SimBus & { features: string[]; condition: number })[], wages: number[], rents: number[], day: number) {
   const activeRoutes = routes.filter(r => r.contract_end_day == null || r.contract_end_day >= day);
-  const result = simulateDay(activeRoutes, buses, wages);
+  const result = simulateDay(activeRoutes, buses, wages, day);
   const contractRevenue = activeRoutes.reduce((sum, r) => sum + (buses.some(b => b.route_id === r.id && b.status === 'In service') ? r.contract_payment : 0), 0);
   const depotCosts = rents.reduce((sum, rent) => sum + rent, 0);
   const upgradeCosts = buses.filter(b => b.status !== 'Withdrawn').reduce((n,b) => n + upgradeUpkeep(b.features), 0);
-  return { revenue: result.revenue + contractRevenue, costs: result.costs + depotCosts + upgradeCosts, profit: result.profit + contractRevenue - depotCosts - upgradeCosts, details: { fares: result.revenue, contractRevenue, depotCosts, upgradeCosts, wages: wages.reduce((a,b) => a+b,0), busCosts: result.activeBuses * 90, activeBuses: result.activeBuses }, reviews: activeRoutes.map(r => passengerReview(r, buses.filter(b => b.route_id === r.id && b.status === 'In service'))) };
+  return { revenue: result.revenue + contractRevenue, costs: result.costs + depotCosts + upgradeCosts, profit: result.profit + contractRevenue - depotCosts - upgradeCosts, details: { conditions: operatingConditions(day).label, fares: result.revenue, contractRevenue, depotCosts, upgradeCosts, wages: wages.reduce((a,b) => a+b,0), busCosts: result.busCost, activeBuses: result.activeBuses }, reviews: activeRoutes.map(r => passengerReview(r, buses.filter(b => b.route_id === r.id && b.status === 'In service'), day)) };
 }

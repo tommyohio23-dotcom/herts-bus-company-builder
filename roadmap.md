@@ -1,4 +1,6 @@
 # Game expansion
+- [x] Vary bus and rail daily passenger demand and operating costs, explain conditions in saved reports, and verify settlement and reload persistence in both modes.
+- [x] Vary bus and rail passenger review wording across days while keeping ratings and complaints grounded in the actual service; verify saved feedback in both modes.
 - [x] Add bus/rail route and review selection with authenticated AI complaint analysis and specific improvement recommendations.
 - [x] Enforce enough buses for the selected service frequency using a 60-minute game cycle, with saved sliders and operating-day validation.
 - [x] Verify real AI success in both modes, recurring complaints supported by two selected reviews, saved 60-minute frequency, one-bus half-hourly rejection, and narrow-screen layout.

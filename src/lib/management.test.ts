@@ -1,6 +1,21 @@
 import { describe, expect, it } from 'vitest';
 import { DEPOT_PACKAGES, managementDay, marketListings, passengerReview, tenderDecision } from './management';
 describe('management rules', () => {
+  it('varies daily income and running costs without changing wages, rent or contract payments', () => {
+    const routes = [{id:'a',number:'1',fare:2,frequency_mins:60,contract_payment:360,contract_end_day:35}];
+    const buses = [{route_id:'a',status:'In service',features:[],condition:85}];
+    const days = [1,2,3].map(day => managementDay(routes,buses,[140],[35],day));
+    expect(new Set(days.map(d => d.revenue)).size).toBe(3);
+    expect(new Set(days.map(d => d.costs)).size).toBe(3);
+    for (const d of days) {
+      expect(d.details.wages).toBe(140);
+      expect(d.details.depotCosts).toBe(35);
+      expect(d.details.contractRevenue).toBe(360);
+      expect(d.profit).toBe(d.revenue - d.costs);
+      expect(d.costs).toBe(d.details.busCosts + 140 + 35);
+    }
+    expect(managementDay(routes,buses,[140],[35],2)).toEqual(days[1]);
+  });
   it('offers eighteen distinct used listings and renews after seven days', () => {
     expect(new Set(marketListings(1).map(b => b.key)).size).toBe(18);
     expect(marketListings(7)[0]?.key).toBe(marketListings(1)[0]?.key);
@@ -23,5 +38,11 @@ describe('management rules', () => {
   it('does not pay an expired contract', () => {
     const r = managementDay([{id:'a',number:'T1',fare:0,frequency_mins:60,contract_payment:360,contract_end_day:7}],[{route_id:'a',status:'In service',features:[],condition:85}],[],[],8);
     expect(r.revenue).toBe(0);
+  });
+});describe('passenger review variety', () => {
+  it('changes wording across days without changing the rating', () => {
+    const reviews = [1,2,3,4].map(day => passengerReview({number:'1',fare:2,frequency_mins:60},[{condition:85,features:[]}],day));
+    expect(new Set(reviews.map(r => r.comment)).size).toBe(4);
+    expect(new Set(reviews.map(r => r.rating))).toEqual(new Set([3]));
   });
 });
