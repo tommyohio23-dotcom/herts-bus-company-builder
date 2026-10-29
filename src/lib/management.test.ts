@@ -39,4 +39,10 @@ describe('management rules', () => {
     const r = managementDay([{id:'a',number:'T1',fare:0,frequency_mins:60,contract_payment:360,contract_end_day:7}],[{route_id:'a',status:'In service',features:[],condition:85}],[],[],8);
     expect(r.revenue).toBe(0);
   });
+});describe('passenger review variety', () => {
+  it('changes wording across days without changing the rating', () => {
+    const reviews = [1,2,3,4].map(day => passengerReview({number:'1',fare:2,frequency_mins:60},[{condition:85,features:[]}],day));
+    expect(new Set(reviews.map(r => r.comment)).size).toBe(4);
+    expect(new Set(reviews.map(r => r.rating))).toEqual(new Set([3]));
+  });
 });
