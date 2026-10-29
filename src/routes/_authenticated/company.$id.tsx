@@ -1,327 +1,413 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BusSide } from "@/components/BusSide";
-import { BUS_MODELS, FEATURES, HERTS_TOWNS, STATUSES } from "@/lib/herts";
-import { BusPhoto } from "@/components/BusPhoto";
-import { managementAction } from "@/lib/management.functions";
-import { ManagementExpansion } from "@/components/ManagementExpansion";
-import { NetworkPlanner } from "@/components/NetworkPlanner";
-import { Recruitment } from "@/components/Recruitment";
-import { UPGRADE_PRICES, upgradeCost, upgradeUpkeep } from '@/lib/upgrades';
-import { purchaseBusOrFeatures } from '@/lib/upgrades.functions';
-import {ServiceFrequency} from '@/components/ServiceFrequency';
-import {requiredBuses} from '@/lib/service-frequency';
+import { useParams } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { routeCycleFromNames, requiredBuses } from '@/lib/service-frequency';
 
-export const Route = createFileRoute("/_authenticated/company/$id")({
-  head: () => ({
-    meta: [
-      { title: "Company depot — Herts Bus Manager" },
-      { name: "description", content: "Fleet list, routes and driver roster for your Herts bus company." },
-      { property: "og:title", content: "Company depot — Herts Bus Manager" },
-      { property: "og:description", content: "Manage fleet, routes and drivers." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: CompanyPage,
-});
+type Company = { id: string; name: string; budget: number; day: number };
+type Rt = { id: string; number: string; origin: string | null; destination: string | null; via: string | null; frequency_mins: number };
+type Bus = { id: string; plate: string; route_id: string | null; status: string };
+type Driver = { id: string; name: string; route_id: string | null };
+type GameEvent = { id: number; type: 'breakdown' | 'rail'; msg: string; payload?: number; busId?: string };
 
-const busPrice = (year: number) => Math.max(8000, 20000 + (year - 1995) * 6000);
+let eventId = 0;
 
-function useCompanyData(id: string) {
-  const company = useQuery({ queryKey: ["company", id], queryFn: async () => (await supabase.from("companies").select("*").eq("id", id).single()).data });
-  const buses = useQuery({ queryKey: ["buses", id], queryFn: async () => (await supabase.from("buses").select("*").eq("company_id", id).order("fleet_no")).data ?? [] });
-  const routes = useQuery({ queryKey: ["routes", id], queryFn: async () => (await supabase.from("routes").select("*").eq("company_id", id).order("number")).data ?? [] });
-  const drivers = useQuery({ queryKey: ["drivers", id], queryFn: async () => (await supabase.from("drivers").select("*").eq("company_id", id).order("name")).data ?? [] });
-  return { company: company.data, buses: buses.data ?? [], routes: routes.data ?? [], drivers: drivers.data ?? [] };
-}
+export default function CompanyPage() {
+  const { id: companyId } = useParams({ from: '/_authenticated/company/$id' });
+  const [company, setCompany] = useState<Company | null>(null);
+  const [routes, setRoutes] = useState<Rt[]>([]);
+  const [buses, setBuses] = useState<Bus[]>([]);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [events, setEvents] = useState<GameEvent[]>([]);
 
-function CompanyPage() {
-  const { id } = Route.useParams();
-  const qc = useQueryClient();
-  const { company, buses, routes, drivers } = useCompanyData(id);
-  const refresh = () => ["company", "buses", "routes", "drivers", "depots", "tender_bids", "passenger_reviews", "day_reports", "job_adverts", "job_applicants"].forEach((k) => qc.invalidateQueries({ queryKey: [k, id] }));
-  const action = useServerFn(managementAction);
-  const [running, setRunning] = useState(false);
-
-  if (!company) return <div className="p-8 text-muted-foreground">Loading depot…</div>;
-
-  async function runDay() {
-    if (!company || running) return;
-    setRunning(true);
-    try { const r = await action({data:{companyId:id,day:company.day,action:'day'}}); toast.success(`${r.message} · Profit £${r.profit?.toLocaleString() ?? 0}`); refresh(); }
-    catch(e) { toast.error(e instanceof Error ? e.message : 'Day could not save'); }
-    finally { setRunning(false); }
+  async function refresh() {
+    const [{ data: co }, { data: rt }, { data: bu }, { data: dr }] = await Promise.all([
+      supabase.from('companies').select('*').eq('id', companyId).single(),
+      supabase.from('routes').select('*').eq('company_id', companyId),
+      supabase.from('buses').select('*').eq('company_id', companyId),
+      supabase.from('drivers').select('*').eq('company_id', companyId),
+    ]);
+    if (co) setCompany(co as Company);
+    setRoutes((rt ?? []) as Rt[]);
+    setBuses((bu ?? []) as Bus[]);
+    setDrivers((dr ?? []) as Driver[]);
   }
 
-  async function spend(amount: number) {
-    if (!company) return false;
-    if (Number(company.balance) < amount) { toast.error("Not enough money"); return false; }
-    await supabase.from("companies").update({ balance: Number(company.balance) - amount }).eq("id", id);
-    return true;
+  useEffect(() => { refresh(); }, [companyId]);
+
+  function dismiss(id: number) {
+    setEvents(ev => ev.filter(e => e.id !== id));
   }
 
+  async function advanceDay() {
+    if (!company) return;
+    const newEvents: GameEvent[] = [];
+
+    // Breakdowns — 20% chance per active bus
+    const activeBuses = buses.filter(b => b.status === 'In service');
+    for (const bus of activeBuses) {
+      if (Math.random() < 0.2) {
+        await supabase.from('buses').update({ status: 'Broken down' }).eq('id', bus.id);
+        newEvents.push({ id: ++eventId, type: 'breakdown', busId: bus.id, msg: `🔧 ${bus.plate} broke down — repair for £2,000` });
+      }
+    }
+
+    // Rail replacement offer — 30% chance
+    if (Math.random() < 0.3) {
+      const lines = ['Thameslink', 'Great Northern', 'West Midlands Trains', 'East Midlands Railway'];
+      const line = lines[Math.floor(Math.random() * lines.length)];
+      const pay = Math.floor(Math.random() * 3000 + 2000);
+      newEvents.push({ id: ++eventId, type: 'rail', payload: pay, msg: `🚆 ${line} needs rail replacement — accept for £${pay}` });
+    }
+
+    // Revenue from routes
+    const revenue = routes.reduce((sum, r) => {
+      const cycle = routeCycleFromNames(r.origin ?? '', r.via ?? '', r.destination ?? '');
+      const needed = requiredBuses(r.frequency_mins, cycle);
+      const active = buses.filter(b => b.route_id === r.id && b.status === 'In service').length;
+      return sum + Math.min(active, needed) * 400;
+    }, 0);
+
+    const busCost = buses.filter(b => b.status === 'In service').length * 150;
+    const wages = drivers.length * 120;
+    const profit = revenue - busCost - wages;
+
+    await supabase.from('companies').update({ budget: company.budget + profit, day: company.day + 1 }).eq('id', companyId);
+    setEvents(prev => [...prev, ...newEvents]);
+    await refresh();
+
+    if (newEvents.length === 0) {
+      alert(`Day ${company.day} done\nRevenue £${revenue} · Costs £${busCost + wages} · Net £${profit}`);
+    }
+  }
+
+  if (!company) return <p className="p-8 text-center text-muted-foreground">Loading…</p>;
+
+  const activeBuses = buses.filter(b => b.status === 'In service').length;
+  const brokenBuses = buses.filter(b => b.status === 'Broken down').length;
+
   return (
-    <div className="min-h-screen">
-      <div className="h-2" style={{ background: `linear-gradient(90deg, ${company.primary_color} 70%, ${company.secondary_color} 70%)` }} />
-      <header className="mx-auto max-w-6xl px-4 py-4">
-        <Link to="/dashboard" className="text-sm text-muted-foreground underline">← All companies</Link>
-        <div className="mt-2 flex flex-wrap items-center gap-4">
-          <BusSide primary={company.primary_color} secondary={company.secondary_color} label={company.short_name} double className="w-36" />
-          <div className="flex-1">
-            <h1 className="text-5xl leading-none">{company.name}</h1>
-            <p className="text-muted-foreground">HQ {company.hq_town} · Day {company.day}</p>
+    <main className="min-h-screen bg-background">
+
+      {/* Header */}
+      <div className="border-b bg-card px-4 py-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h1 className="text-4xl font-bold">{company.name}</h1>
+              <p className="text-muted-foreground mt-1">Day {company.day} · £{company.budget.toLocaleString()}</p>
+            </div>
+            <Button onClick={advanceDay}>Advance day ▶</Button>
           </div>
-          <div className="text-right">
-            <p className="text-xs uppercase text-muted-foreground">Balance</p>
-            <p className={`font-display text-4xl ${Number(company.balance) < 0 ? "text-destructive" : "text-primary"}`}>£{Number(company.balance).toLocaleString()}</p>
-          </div>
-        </div>
-        <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-          <Stat label="Buses" value={buses.length} /><Stat label="Routes" value={routes.length} /><Stat label="Staff" value={drivers.length} />
-        </div>
-      </header>
-      <main className="mx-auto max-w-6xl px-4 pb-16">
-        <Tabs defaultValue="fleet">
-          <TabsList className="h-auto w-full flex-wrap justify-start gap-1">
-            <TabsTrigger value="fleet">Fleet</TabsTrigger><TabsTrigger value="routes">Routes</TabsTrigger>
-            <TabsTrigger value="drivers">Employees</TabsTrigger><TabsTrigger value="ops">Operations</TabsTrigger>
-            <TabsTrigger value="market">Used market</TabsTrigger><TabsTrigger value="depots">Depots</TabsTrigger><TabsTrigger value="tenders">Tenders</TabsTrigger><TabsTrigger value="network">Map</TabsTrigger><TabsTrigger value="reviews">Reviews</TabsTrigger>
-          </TabsList>
-          <TabsContent value="fleet"><Fleet companyId={id} company={company} buses={buses} routes={routes} refresh={refresh} spend={spend} /></TabsContent>
-          <TabsContent value="routes"><Routes companyId={id} routes={routes} buses={buses} refresh={refresh} /></TabsContent>
-          <TabsContent value="drivers"><Recruitment companyId={id} drivers={drivers} refresh={refresh} /></TabsContent>
-          <TabsContent value="ops">
-            <Button size="lg" className="mt-3" disabled={running} onClick={runDay}>{running ? 'Running…' : `Run day ${company.day}`}</Button>
-            {routes.filter(r=>{const n=buses.filter(b=>b.route_id===r.id&&b.status==='In service').length;return n>0&&n<requiredBuses(r.frequency_mins)&&(r.contract_end_day==null||r.contract_end_day>=company.day);}).map(r=><p key={r.id} className="mt-2 text-sm text-destructive">Route {r.number}: {requiredBuses(r.frequency_mins)} in-service buses needed. Allocate more buses or change its frequency in Routes.</p>)}
-            <ManagementExpansion view="reports" company={company} buses={buses} drivers={drivers} refresh={refresh}/>
-          </TabsContent>
-          {(['market','depots','tenders','reviews'] as const).map(view=><TabsContent key={view} value={view}><ManagementExpansion view={view} company={company} buses={buses} drivers={drivers} refresh={refresh}/></TabsContent>)}
-          <TabsContent value="network"><NetworkPlanner companyId={id} refresh={refresh}/></TabsContent>
-        </Tabs>
-      </main>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return <div className="rounded-md bg-secondary p-2"><p className="font-display text-3xl">{value}</p><p className="text-xs uppercase text-muted-foreground">{label}</p></div>;
-}
-
-type Bus = ReturnType<typeof useCompanyData>["buses"][number];
-type Rt = ReturnType<typeof useCompanyData>["routes"][number];
-type Drv = ReturnType<typeof useCompanyData>["drivers"][number];
-type Co = NonNullable<ReturnType<typeof useCompanyData>["company"]>;
-
-function Fleet({ companyId, company, buses, routes, refresh, spend }: { companyId: string; company: Co; buses: Bus[]; routes: Rt[]; refresh: () => void; spend: (n: number) => Promise<boolean> }) {
-  const purchase = useServerFn(purchaseBusOrFeatures);
-  const [upgrading,setUpgrading]=useState(false);
-  async function upgrade(b:Bus, features:string[]){if(upgrading)return;setUpgrading(true);try{const r=await purchase({data:{companyId,day:company.day,busId:b.id,features}});toast.success(`Specification saved · £${r.cost.toLocaleString()}`);refresh();}catch(e){toast.error(e instanceof Error?e.message:'Could not save');}finally{setUpgrading(false);}}
-  const update = async (id: string, patch: Partial<Bus>) => { await supabase.from("buses").update(patch).eq("id", id); refresh(); };
-  const remove = async (b: Bus) => {
-    if (!confirm(`Sell ${b.fleet_no} for £${Math.round(busPrice(b.year) * 0.3).toLocaleString()}?`)) return;
-    await supabase.from("buses").delete().eq("id", b.id);
-    await supabase.from("companies").update({ balance: Number(company.balance) + Math.round(busPrice(b.year) * 0.3) }).eq("id", companyId);
-    refresh();
-  };
-  return (
-    <div className="mt-2">
-      <AddBus companyId={companyId} company={company} routes={routes} refresh={refresh} spend={spend} />
-      <div className="mt-3 grid gap-3 md:grid-cols-2">
-        {buses.map((b) => (
-          <div key={b.id} className="overflow-hidden rounded-lg border bg-card">
-            <BusPhoto model={b.model} presetKey={company.preset_key} />
-            <div className="p-3">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <p className="font-display text-2xl leading-none">{b.fleet_no} <span className="rounded bg-accent px-1.5 text-base text-accent-foreground">{b.registration}</span></p>
-                <p className="text-sm">{b.model} · {b.year}</p>
-                <p className="text-xs text-muted-foreground">{b.livery || "Fleet livery"} · {b.depot || "No depot"} · {b.mileage.toLocaleString()} mi · {b.condition}% condition</p>
+          <div className="grid grid-cols-4 gap-3 text-center">
+            <div className="rounded-lg border bg-muted/40 p-3">
+              <p className="text-2xl font-bold">{activeBuses}</p>
+              <p className="text-xs text-muted-foreground uppercase">Active buses</p>
+            </div>
+            {brokenBuses > 0 && (
+              <div className="rounded-lg border border-red-300 bg-red-50 p-3">
+                <p className="text-2xl font-bold text-red-600">{brokenBuses}</p>
+                <p className="text-xs text-red-500 uppercase">Broken</p>
               </div>
-              <Button size="sm" variant="ghost" onClick={() => remove(b)}>Sell</Button>
+            )}
+            <div className="rounded-lg border bg-muted/40 p-3">
+              <p className="text-2xl font-bold">{routes.length}</p>
+              <p className="text-xs text-muted-foreground uppercase">Routes</p>
             </div>
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              <Select value={b.status} onValueChange={(v) => update(b.id, { status: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-              </Select>
-              <Select value={b.route_id ?? "none"} onValueChange={(v) => update(b.id, { route_id: v === "none" ? null : v })}>
-                <SelectTrigger><SelectValue placeholder="Route" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Unallocated</SelectItem>
-                  {routes.map((r) => <SelectItem key={r.id} value={r.id}>{r.number} {r.destination}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <FeaturePicker value={b.features} disabled={upgrading} onChange={(v) => upgrade(b, v)} />
-            <p className="mt-2 text-xs text-muted-foreground">Extras upkeep · £{upgradeUpkeep(b.features)}/day</p>
+            <div className="rounded-lg border bg-muted/40 p-3">
+              <p className="text-2xl font-bold">{drivers.length}</p>
+              <p className="text-xs text-muted-foreground uppercase">Staff</p>
             </div>
           </div>
-        ))}
+        </div>
       </div>
-    </div>
+
+      {/* Tabs */}
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        <Tabs defaultValue="routes">
+          <TabsList className="w-full mb-6">
+            <TabsTrigger value="routes">Routes</TabsTrigger>
+            <TabsTrigger value="fleet">Fleet</TabsTrigger>
+            <TabsTrigger value="employees">Employees</TabsTrigger>
+            <TabsTrigger value="operations">Operations</TabsTrigger>
+          </TabsList>
+
+          {/* ROUTES */}
+          <TabsContent value="routes" className="space-y-4">
+            <AddRoute companyId={companyId} refresh={refresh} />
+            {routes.length === 0 && <p className="text-center text-muted-foreground py-12">No routes yet.</p>}
+            {routes.map(r => {
+              const cycle = routeCycleFromNames(r.origin ?? '', r.via ?? '', r.destination ?? '');
+              const needed = requiredBuses(r.frequency_mins, cycle);
+              const active = buses.filter(b => b.route_id === r.id && b.status === 'In service').length;
+              const ok = active >= needed;
+              return (
+                <Card key={r.id}>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Route {r.number} · {r.origin} → {r.destination}</CardTitle>
+                    {r.via && <p className="text-sm text-muted-foreground">Via {r.via}</p>}
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="outline">Every {r.frequency_mins} min</Badge>
+                      <Badge variant="outline">{cycle / 2} min journey</Badge>
+                      <Badge variant="outline">{cycle} min round trip</Badge>
+                    </div>
+                    <p className={`text-sm font-medium ${ok ? 'text-green-600' : 'text-red-500'}`}>
+                      {needed} buses needed for this {cycle}-min loop · {active} assigned
+                      {!ok && ` ⚠ need ${needed - active} more`}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </TabsContent>
+
+          {/* FLEET */}
+          <TabsContent value="fleet" className="space-y-4">
+            <AddBus companyId={companyId} routes={routes} day={company.day} refresh={refresh} />
+            {buses.length === 0 && <p className="text-center text-muted-foreground py-12">No buses yet.</p>}
+            {buses.map(b => {
+              const rt = routes.find(r => r.id === b.route_id);
+              const broken = b.status === 'Broken down';
+              return (
+                <Card key={b.id} className={broken ? 'border-red-300' : ''}>
+                  <CardContent className="pt-4 flex items-center justify-between gap-4 flex-wrap">
+                    <div>
+                      <p className="font-bold text-lg">{b.plate}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {rt ? `Route ${rt.number}: ${rt.origin} → ${rt.destination}` : 'Unassigned'}
+                      </p>
+                      <Badge variant={broken ? 'destructive' : 'outline'} className="mt-1">{b.status}</Badge>
+                    </div>
+                    <div className="flex flex-col gap-2 items-end">
+                      {broken ? (
+                        <Button size="sm" variant="destructive" onClick={async () => {
+                          if (!company || company.budget < 2000) return alert('Not enough money!');
+                          await supabase.from('buses').update({ status: 'In service' }).eq('id', b.id);
+                          await supabase.from('companies').update({ budget: company.budget - 2000 }).eq('id', companyId);
+                          refresh();
+                        }}>Repair £2,000</Button>
+                      ) : (
+                        <RouteSelect value={b.route_id} table="buses" rowId={b.id} routes={routes} refresh={refresh} />
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </TabsContent>
+
+          {/* EMPLOYEES */}
+          <TabsContent value="employees" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold">Employees</h2>
+              <HireDriver companyId={companyId} refresh={refresh} />
+            </div>
+            {drivers.length === 0 && <p className="text-center text-muted-foreground py-12">No drivers yet.</p>}
+            {drivers.map(d => {
+              const rt = routes.find(r => r.id === d.route_id);
+              return (
+                <Card key={d.id}>
+                  <CardContent className="pt-4 flex items-center justify-between gap-4 flex-wrap">
+                    <div>
+                      <p className="font-bold text-lg">{d.name}</p>
+                      <p className="text-sm text-muted-foreground">Driver · £120/day</p>
+                      {rt && <p className="text-sm mt-1">Route {rt.number}: {rt.origin} → {rt.destination}</p>}
+                    </div>
+                    <div className="flex flex-col gap-2 items-end">
+                      <RouteSelect value={d.route_id} table="drivers" rowId={d.id} routes={routes} refresh={refresh} />
+                      <Button size="sm" variant="outline" onClick={async () => {
+                        await supabase.from('drivers').delete().eq('id', d.id);
+                        refresh();
+                      }}>Release employee</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </TabsContent>
+
+          {/* OPERATIONS */}
+          <TabsContent value="operations" className="space-y-4">
+            <h2 className="text-2xl font-bold">Operations</h2>
+            {routes.length === 0 && <p className="text-center text-muted-foreground py-12">No routes yet.</p>}
+            {routes.map(r => {
+              const cycle = routeCycleFromNames(r.origin ?? '', r.via ?? '', r.destination ?? '');
+              const needed = requiredBuses(r.frequency_mins, cycle);
+              const active = buses.filter(b => b.route_id === r.id && b.status === 'In service').length;
+              const assigned = drivers.filter(d => d.route_id === r.id).length;
+              const ok = active >= needed;
+              return (
+                <Card key={r.id} className={ok ? '' : 'border-red-300'}>
+                  <CardContent className="pt-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="font-bold">Route {r.number}: {r.origin} → {r.destination}</p>
+                      <Badge variant={ok ? 'default' : 'destructive'}>{ok ? 'Running' : 'Under-served'}</Badge>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1 text-sm">
+                      <p>Buses: {active} / {needed} needed</p>
+                      <p>Drivers: {assigned}</p>
+                      <p>Every {r.frequency_mins} min</p>
+                      <p>{cycle}-min round trip</p>
+                    </div>
+                    {!ok && (
+                      <p className="text-xs text-red-500">
+                        ⚠ Need {needed - active} more bus{needed - active !== 1 ? 'es' : ''} to run full service
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Event popups */}
+      {events.length > 0 && (
+        <div className="fixed bottom-4 right-4 left-4 max-w-md mx-auto space-y-2 z-50">
+          {events.map(e => (
+            <div key={e.id} className="bg-card border rounded-lg p-4 shadow-xl">
+              <p className="text-sm font-medium mb-3">{e.msg}</p>
+              <div className="flex gap-2">
+                {e.type === 'breakdown' && e.busId && (
+                  <>
+                    <Button size="sm" onClick={async () => {
+                      if (!company || company.budget < 2000) return alert('Not enough money!');
+                      await supabase.from('buses').update({ status: 'In service' }).eq('id', e.busId);
+                      await supabase.from('companies').update({ budget: company.budget - 2000 }).eq('id', companyId);
+                      dismiss(e.id);
+                      refresh();
+                    }}>Repair £2,000</Button>
+                    <Button size="sm" variant="outline" onClick={() => dismiss(e.id)}>Leave broken</Button>
+                  </>
+                )}
+                {e.type === 'rail' && (
+                  <>
+                    <Button size="sm" onClick={async () => {
+                      if (!company) return;
+                      await supabase.from('companies').update({ budget: company.budget + (e.payload ?? 0) }).eq('id', companyId);
+                      dismiss(e.id);
+                      refresh();
+                    }}>Accept £{e.payload}</Button>
+                    <Button size="sm" variant="outline" onClick={() => dismiss(e.id)}>Decline</Button>
+                  </>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </main>
   );
 }
 
-function AddBus({ companyId, company, routes, refresh, spend }: { companyId: string; company: Co; routes: Rt[]; refresh: () => void; spend: (n: number) => Promise<boolean> }) {
-  const purchase=useServerFn(purchaseBusOrFeatures);
-  const [saving,setSaving]=useState(false);
+function RouteSelect({ value, table, rowId, routes, refresh }: {
+  value: string | null; table: 'buses' | 'drivers'; rowId: string; routes: Rt[]; refresh: () => void;
+}) {
+  return (
+    <Select value={value ?? 'none'} onValueChange={async v => {
+      await supabase.from(table).update({ route_id: v === 'none' ? null : v }).eq('id', rowId);
+      refresh();
+    }}>
+      <SelectTrigger className="w-48"><SelectValue placeholder="No route" /></SelectTrigger>
+      <SelectContent>
+        <SelectItem value="none">No route</SelectItem>
+        {routes.map(r => (
+          <SelectItem key={r.id} value={r.id}>{r.number}: {r.origin} → {r.destination}</SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function AddRoute({ companyId, refresh }: { companyId: string; refresh: () => void }) {
   const [open, setOpen] = useState(false);
-  const [f, setF] = useState({ fleet_no: "", registration: "", model: BUS_MODELS[0] ?? "", year: 2012, depot: company.hq_town, livery: "", route_id: "none", features: [] as string[] });
-  const price = busPrice(f.year) + upgradeCost(f.features);
-  async function save() {
-    if (!f.fleet_no) { toast.error("Fleet number needed"); return; }
-    if(saving)return;setSaving(true);
-    try{await purchase({data:{...f,companyId,day:company.day,route_id:f.route_id==='none'?null:f.route_id}});toast.success(`${f.fleet_no} joins the fleet`);setOpen(false);refresh();}catch(e){toast.error(e instanceof Error?e.message:'Purchase failed');}finally{setSaving(false);}
-  }
+  const [f, setF] = useState({ number: '', origin: '', destination: '', via: '', frequency_mins: 30 });
+  const cycle = routeCycleFromNames(f.origin, f.via, f.destination);
+  const needed = requiredBuses(f.frequency_mins, cycle);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button>+ Buy a bus</Button></DialogTrigger>
-      <DialogContent className="max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle className="font-display text-3xl">Add to fleet</DialogTitle></DialogHeader>
-        <div className="grid gap-3">
-          <div className="grid grid-cols-2 gap-2">
-            <div><Label>Fleet no.</Label><Input value={f.fleet_no} onChange={(e) => setF({ ...f, fleet_no: e.target.value })} /></div>
-            <div><Label>Registration</Label><Input value={f.registration} onChange={(e) => setF({ ...f, registration: e.target.value.toUpperCase() })} /></div>
-          </div>
-          <div><Label>Model</Label>
-            <Select value={f.model} onValueChange={(v) => setF({ ...f, model: v })}><SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{BUS_MODELS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent></Select>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div><Label>Year</Label><Input type="number" min={1970} max={2026} value={f.year} onChange={(e) => setF({ ...f, year: Number(e.target.value) })} /></div>
-            <div><Label>Depot</Label>
-              <Select value={f.depot} onValueChange={(v) => setF({ ...f, depot: v })}><SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{HERTS_TOWNS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select>
-            </div>
-          </div>
-          <div><Label>Livery</Label><Input value={f.livery} onChange={(e) => setF({ ...f, livery: e.target.value })} placeholder="e.g. Green Line, Sapphire, heritage NBC" /></div>
-          <div><Label>Allocate to route</Label>
-            <Select value={f.route_id} onValueChange={(v) => setF({ ...f, route_id: v })}><SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent><SelectItem value="none">Unallocated</SelectItem>{routes.map((r) => <SelectItem key={r.id} value={r.id}>{r.number}</SelectItem>)}</SelectContent></Select>
-          </div>
-          <div><Label>Spec & extras</Label><FeaturePicker value={f.features} onChange={(v) => setF({ ...f, features: v })} /></div>
-          <BusPhoto model={f.model} presetKey={company.preset_key} className="overflow-hidden rounded-md" />
-          <p className="text-sm text-muted-foreground">Extras £{upgradeCost(f.features).toLocaleString()} · Upkeep £{upgradeUpkeep(f.features)}/day</p>
-          <Button disabled={saving} onClick={save}>Buy for £{price.toLocaleString()}</Button>
+      <DialogTrigger asChild><Button size="sm">+ Add route</Button></DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>New route</DialogTitle></DialogHeader>
+        <div className="space-y-3">
+          <div><Label>Route number</Label><Input value={f.number} onChange={e => setF(p => ({ ...p, number: e.target.value }))} placeholder="84" /></div>
+          <div><Label>Origin</Label><Input value={f.origin} onChange={e => setF(p => ({ ...p, origin: e.target.value }))} placeholder="Hertford" /></div>
+          <div><Label>Destination</Label><Input value={f.destination} onChange={e => setF(p => ({ ...p, destination: e.target.value }))} placeholder="Watford" /></div>
+          <div><Label>Via (comma-separated)</Label><Input value={f.via} onChange={e => setF(p => ({ ...p, via: e.target.value }))} placeholder="Welwyn Garden City, Hatfield" /></div>
+          <div><Label>Frequency (mins)</Label><Input type="number" value={f.frequency_mins} onChange={e => setF(p => ({ ...p, frequency_mins: Number(e.target.value) }))} /></div>
+          {f.origin && f.destination && (
+            <p className="text-sm bg-muted rounded p-2">{cycle}-min round trip → <strong>{needed} buses needed</strong></p>
+          )}
+          <Button className="w-full" onClick={async () => {
+            if (!f.number || !f.origin || !f.destination) return;
+            await supabase.from('routes').insert({ ...f, company_id: companyId });
+            setOpen(false);
+            setF({ number: '', origin: '', destination: '', via: '', frequency_mins: 30 });
+            refresh();
+          }}>Save route</Button>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
 
-function Routes({ companyId, routes, buses, refresh }: { companyId: string; routes: Rt[]; buses: Bus[]; refresh: () => void }) {
-  const [f, setF] = useState({ number: "", origin: "Hertford", destination: "Stevenage", via: "", frequency_mins: 30, fare: 2 });
-  async function add() {
-    if (!f.number) { toast.error("Route number needed"); return; }
-    const { error } = await supabase.from("routes").insert({ ...f, company_id: companyId });
-    if (error) { toast.error(error.message); return; }
-    setF({ ...f, number: "", via: "" }); refresh();
-  }
-  const townSelect = (k: "origin" | "destination") => (
-    <Select value={f[k]} onValueChange={(v) => setF({ ...f, [k]: v })}><SelectTrigger><SelectValue /></SelectTrigger>
-      <SelectContent>{HERTS_TOWNS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select>
-  );
-  return (
-    <div className="mt-2 space-y-3">
-      {routes.map((r) => {
-        const n = buses.filter((b) => b.route_id === r.id && b.status==='In service').length;
-        return (
-          <div key={r.id} className="flex flex-wrap items-center gap-3 rounded-lg border bg-card p-3">
-            <span className="blind min-w-16 px-2 py-1 text-center text-3xl">{r.number}</span>
-            <div className="min-w-0 flex-1 basis-40">
-              <p className="font-semibold">{r.origin} → {r.destination}</p>
-              <p className="break-words text-xs text-muted-foreground">{r.service_type} · {r.via && `via ${r.via} · `}every {r.frequency_mins} min · £{Number(r.fare).toFixed(2)} · {n} bus{n === 1 ? "" : "es"}{r.contract_end_day != null && ` · Contract ends day ${r.contract_end_day}`}</p>
-            </div>
-            {r.stop_ids.length === 0 && <EditStops route={r} refresh={refresh} />}
-            <RouteFrequency route={r} count={n} refresh={refresh}/>
-            <Button size="sm" variant="ghost" onClick={async () => { await supabase.from("routes").delete().eq("id", r.id); refresh(); }}>Withdraw</Button>
-          </div>
-        );
-      })}
-      <div className="rounded-lg border border-dashed bg-card p-3">
-        <p className="font-display text-2xl">Register a new route</p>
-        <div className="mt-2 grid gap-2 sm:grid-cols-3">
-          <div><Label>Number</Label><Input value={f.number} onChange={(e) => setF({ ...f, number: e.target.value })} /></div>
-          <div><Label>From</Label>{townSelect("origin")}</div>
-          <div><Label>To</Label>{townSelect("destination")}</div>
-          <div className="sm:col-span-3"><Label>Stops in between (in order)</Label>
-            <StopPicker value={f.via ? f.via.split(", ") : []} onChange={(v) => setF({ ...f, via: v.join(", ") })} />
-          </div>
-          <ServiceFrequency value={f.frequency_mins} onChange={n=>setF({...f,frequency_mins:n})} label="New route frequency"/>
-          <div><Label>Fare £</Label><Input type="number" step="0.1" min={0} value={f.fare} onChange={(e) => setF({ ...f, fare: Number(e.target.value) })} /></div>
-        </div>
-        <Button className="mt-3" onClick={add}>Register route</Button>
-      </div>
-    </div>
-  );
-}
-
-function FeaturePicker({ value, onChange, disabled=false }: { value: string[]; onChange: (v: string[]) => void; disabled?:boolean }) {
-  return (
-    <div className="mt-2 flex flex-wrap gap-1">
-      {FEATURES.map((ft) => {
-        const on = value.includes(ft);
-        return (
-          <Button key={ft} type="button" size="sm" variant={on?'default':'outline'} disabled={disabled} onClick={() => onChange(on ? value.filter((x) => x !== ft) : [...value, ft])} className="h-auto whitespace-normal text-xs">
-            {ft}{!on && ` · £${UPGRADE_PRICES[ft]?.install.toLocaleString()}`}
-          </Button>
-        );
-      })}
-    </div>
-  );
-}
-
-function RouteFrequency({route,count,refresh}:{route:Rt;count:number;refresh:()=>void}) {
- const [value,setValue]=useState(route.frequency_mins),[busy,setBusy]=useState(false);
- useEffect(()=>setValue(route.frequency_mins),[route.frequency_mins]);
- return <div className="w-full border-t pt-2"><ServiceFrequency value={value} onChange={setValue} label={`Route ${route.number} frequency`} disabled={busy}/><div className="flex flex-wrap items-center justify-between gap-2"><p className={`text-xs ${count<requiredBuses(value)?'text-destructive':'text-muted-foreground'}`}>{count} in-service buses allocated · {count===0?'Planned / unserved':count<requiredBuses(value)?'Not enough buses to operate':'Ready to operate'}</p><Button size="sm" variant="outline" disabled={busy||value===route.frequency_mins} onClick={async()=>{setBusy(true);try{const r=await supabase.from('routes').update({frequency_mins:value}).eq('id',route.id);if(r.error)throw r.error;toast.success('Service frequency saved');refresh();}catch(e){toast.error(e instanceof Error?e.message:'Frequency could not save');}finally{setBusy(false);}}}>Save frequency</Button></div></div>;
-}
-
-function StopPicker({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
-  const [pick, setPick] = useState("");
-  const move = (i: number, d: number) => { const v = [...value]; const j = i + d; const a=v[i],b=v[j]; if(a===undefined||b===undefined)return;v[i]=b;v[j]=a;onChange(v); };
-  return (
-    <div className="space-y-2">
-      <ol className="space-y-1">
-        {value.map((s, i) => (
-          <li key={`${s}-${i}`} className="flex items-center gap-1 rounded-md border bg-background px-2 py-1 text-sm">
-            <span className="w-5 text-muted-foreground">{i + 1}.</span><span className="flex-1">{s}</span>
-            <button type="button" aria-label="Move up" className="px-1" onClick={() => move(i, -1)}>↑</button>
-            <button type="button" aria-label="Move down" className="px-1" onClick={() => move(i, 1)}>↓</button>
-            <button type="button" aria-label="Remove stop" className="px-1 text-destructive" onClick={() => onChange(value.filter((_, k) => k !== i))}>✕</button>
-          </li>
-        ))}
-      </ol>
-      <div className="flex gap-2">
-        <div className="flex-1"><Select value={pick} onValueChange={setPick}><SelectTrigger><SelectValue placeholder="Choose a stop" /></SelectTrigger>
-          <SelectContent>{HERTS_TOWNS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
-        <Button type="button" variant="secondary" disabled={!pick} onClick={() => { onChange([...value, pick]); setPick(""); }}>Add stop</Button>
-      </div>
-    </div>
-  );
-}
-
-function EditStops({ route, refresh }: { route: Rt; refresh: () => void }) {
+function AddBus({ companyId, routes, day, refresh }: { companyId: string; routes: Rt[]; day: number; refresh: () => void }) {
   const [open, setOpen] = useState(false);
-  const [stops, setStops] = useState<string[]>(route.via ? route.via.split(", ") : []);
+  const [plate, setPlate] = useState('');
+  const [routeId, setRouteId] = useState('none');
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button size="sm" variant="outline">Stops</Button></DialogTrigger>
-      <DialogContent className="max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle className="font-display text-3xl">{route.number}: {route.origin} → {route.destination}</DialogTitle></DialogHeader>
-        <StopPicker value={stops} onChange={setStops} />
-        <Button onClick={async () => { await supabase.from("routes").update({ via: stops.join(", ") }).eq("id", route.id); setOpen(false); refresh(); }}>Save stops</Button>
+      <DialogTrigger asChild><Button size="sm">+ Purchase bus</Button></DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Purchase bus · £50,000</DialogTitle></DialogHeader>
+        <div className="space-y-3">
+          <div><Label>Plate</Label><Input value={plate} onChange={e => setPlate(e.target.value)} placeholder="HX74 BUS" /></div>
+          <div><Label>Route</Label>
+            <Select value={routeId} onValueChange={setRouteId}>
+              <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                {routes.map(r => <SelectItem key={r.id} value={r.id}>{r.number}: {r.origin} → {r.destination}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button className="w-full" onClick={async () => {
+            if (!plate) return;
+            await supabase.from('buses').insert({ plate, company_id: companyId, day, status: 'In service', route_id: routeId === 'none' ? null : routeId });
+            setOpen(false); setPlate(''); setRouteId('none'); refresh();
+          }}>Buy</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function HireDriver({ companyId, refresh }: { companyId: string; refresh: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState('');
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild><Button size="sm">+ Hire driver</Button></DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Hire driver · £120/day</DialogTitle></DialogHeader>
+        <div className="space-y-3">
+          <div><Label>Name</Label><Input value={name} onChange={e => setName(e.target.value)} placeholder="John Smith" /></div>
+          <Button className="w-full" onClick={async () => {
+            if (!name) return;
+            await supabase.from('drivers').insert({ name, company_id: companyId, route_id: null });
+            setOpen(false); setName(''); refresh();
+          }}>Hire</Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
