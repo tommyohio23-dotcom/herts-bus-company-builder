@@ -15,7 +15,7 @@ export const purchaseBusOrFeatures = createServerFn({method:'POST'}).middleware(
     if(data.busId){const b=await db.from('buses').select('*').eq('id',data.busId).eq('company_id',data.companyId).single();if(b.error||!b.data)throw new Error('Bus not found');cost=upgradeCost(data.features,b.data.features);}
     else {if(!data.fleet_no?.trim()||!data.model||!BUS_MODELS.includes(data.model)||!data.year||!data.depot||!HERTS_TOWNS.includes(data.depot))throw new Error('Choose bus details');if(data.route_id){const r=await db.from('routes').select('id').eq('id',data.route_id).eq('company_id',data.companyId).single();if(!r.data)throw new Error('Route not found');}cost=newBusPrice(data.year)+upgradeCost(data.features);}
     const {supabaseAdmin}=await import('@/integrations/supabase/client.server');
-    const r=await supabaseAdmin.rpc('purchase_bus_or_features',{p_company:data.companyId,p_user:context.userId,p_day:data.day,p_cost:cost,p_bus:data.busId??null,p_payload:{...data,features:[...new Set(data.features)]}});
+    const r=await supabaseAdmin.rpc('purchase_bus_or_features',{p_company:data.companyId,p_user:context.userId,p_day:data.day,p_cost:cost,p_bus:data.busId??'00000000-0000-0000-0000-000000000000',p_payload:{...data,features:[...new Set(data.features)]}});
     if(r.error)throw new Error(r.error.message);
     return {cost};
   });
