@@ -17,9 +17,9 @@ const build = (_area: AreaKey, list: Raw[]): Preset[] => list.map(p => ({
   fleet: p.routes.slice(0, 4).map((_, i) => ({ fleet_no: `${p.short}-${i + 1} (game)`, registration: '', model: i % 2 ? 'ADL Enviro400' : 'ADL Enviro200', year: 2015 + i })),
 }));
 export const AREA_PRESETS: Record<'beds' | 'bucks' | 'essex', Preset[]> = {
-  beds: build('beds', (data as Record<string, Raw[]>).beds),
-  bucks: build('bucks', (data as Record<string, Raw[]>).bucks),
-  essex: build('essex', (data as Record<string, Raw[]>).essex),
+  beds: build('beds', (data as unknown as Record<"beds"|"bucks"|"essex", Raw[]>).beds),
+  bucks: build('bucks', (data as unknown as Record<"beds"|"bucks"|"essex", Raw[]>).bucks),
+  essex: build('essex', (data as unknown as Record<"beds"|"bucks"|"essex", Raw[]>).essex),
 };
 export const AREA_TOWNS: Record<AreaKey, string[]> = {
   herts: HERTS_TOWNS,
