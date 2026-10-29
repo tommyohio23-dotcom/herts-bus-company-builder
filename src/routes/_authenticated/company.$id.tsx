@@ -411,4 +411,4 @@ function HireDriver({ companyId, refresh }: { companyId: string; refresh: () => 
       </DialogContent>
     </Dialog>
   );
-} 
+}
