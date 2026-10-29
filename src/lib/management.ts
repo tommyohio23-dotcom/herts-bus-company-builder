@@ -50,7 +50,8 @@ const REVIEW_TEXT = {
   sparse: ['A useful service, though I would like more frequent buses.', 'Handy route, but the gaps between buses are long.', 'If I miss one, the wait for the next is frustrating.', 'Decent journey; an extra bus each hour would help.'],
 };
 export function passengerReview(route: { number: string; fare: number; frequency_mins: number }, buses: { features: string[]; condition: number }[], day = 1) {
-  const seed = day * 7 + [...route.number].reduce((n, c) => n + c.charCodeAt(0), 0);
+  const routeSeed = Number.parseInt(route.number.replace(/\D/g, ''), 10);
+  const seed = day * 7 + (Number.isFinite(routeSeed) ? routeSeed : [...route.number].reduce((n, c, i) => n + c.charCodeAt(0) * (i + 1), 0));
   if (!buses.length) return { route_number: route.number, rating: 1, comment: pick(REVIEW_TEXT.missing, seed) };
   const avgCondition = buses.reduce((n, b) => n + b.condition, 0) / buses.length;
   const comfortable = buses.some(b => b.features.includes('Leather seats') || b.features.includes('USB charging ports') || b.features.includes('Air conditioning'));
