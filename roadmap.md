@@ -1,9 +1,9 @@
 # Game expansion
-- [ ] Add London active bus-stop map data.
-- [ ] Replace direct hiring with job adverts, varied applicants, review/shortlist/reject and offer acceptance.
-- [ ] Add applicant and employee portraits and more detailed profiles.
-- [ ] Improve real used-market photos with uncropped images and enlarged viewing.
-- [ ] Verify recruitment saving and market images on desktop and phone.
+- [x] Add London active bus-stop map data (25,049 verified active records in the map window).
+- [x] Replace direct hiring with job adverts, varied applicants, review/shortlist/reject and offer acceptance.
+- [x] Add 24 fictional applicant portraits and detailed saved employee profiles.
+- [x] Improve real used-market photos with exact-model replacements, uncropped images and enlarged viewing.
+- [x] Verify recruitment saving, offer acceptance/decline, rejection and market images on desktop and phone; 18 tests passed.
 - [x] Add used-bus market with saved purchases and real model photos.
 - [x] Add depot opening, capacity and bus/staff allocation.
 - [x] Add simulated route tender bids and commercial/tourism services.
