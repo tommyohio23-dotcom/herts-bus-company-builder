@@ -100,4 +100,4 @@ export function routeCycleFromNames(origin: string, via: string, destination: st
   const allTowns = [origin, ...viaStops, destination];
   const coords   = allTowns.map(t => HERTS_TOWN_COORDS[t]).filter((c): c is LatLng => !!c);
   return routeCycleMinutes(coords.length >= 2 ? coords : undefined);
-}
+} 
