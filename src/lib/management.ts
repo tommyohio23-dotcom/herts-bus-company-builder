@@ -1,4 +1,5 @@
 import { simulateDay, type SimBus, type SimRoute } from './sim';
+import { upgradeUpkeep } from './upgrades';
 
 export const MAP_AREAS = [
   { key: 'herts', name: 'Hertfordshire & borders', lat: 51.85, lng: -0.28 },
@@ -6,6 +7,7 @@ export const MAP_AREAS = [
   { key: 'bucks', name: 'Buckinghamshire & borders', lat: 51.70, lng: -0.75 },
   { key: 'essex', name: 'West Essex', lat: 51.825, lng: 0.30 },
   { key: 'london', name: 'London & borders', lat: 51.5074, lng: -0.1278 },
+  { key: 'north-london', name: 'Barnet · Enfield · Haringey · Borehamwood', lat: 51.637, lng: -0.12 },
 ];
 export type RealStop = { id: string; name: string; locality: string; indicator: string; lat: number; lng: number };
 export const stopLabel = (s: RealStop) => `${s.locality} · ${s.name}${s.indicator ? ` (${s.indicator})` : ''}`;
@@ -17,11 +19,13 @@ export const DEPOT_PACKAGES = [
 const marketModels = ['Optare Solo', 'ADL Enviro200', 'Dennis Dart SLF / Plaxton Pointer', 'ADL Enviro400', 'Wright StreetLite', 'Volvo B9TL / Wright Gemini 2'];
 export function marketListings(day: number) {
   const week = Math.floor((day - 1) / 7);
-  return marketModels.map((model, i) => {
-    const year = [2009, 2013, 2004, 2011, 2017, 2010][i] ?? 2010;
-    const mileage = 80000 + i * 42000 + (week % 5) * 12000;
+  return Array.from({length: 18}, (_, i) => {
+    const model = marketModels[i % marketModels.length] ?? 'Optare Solo';
+    const variant = Math.floor(i / marketModels.length);
+    const year = ([2009, 2013, 2004, 2011, 2017, 2010][i % marketModels.length] ?? 2010) + variant * 2;
+    const mileage = 80000 + (i % 6) * 42000 + (week % 5) * 12000 - variant * 18000;
     const condition = 62 + ((i * 7 + week * 3) % 33);
-    return { key: `used-${week}-${i}`, model, year, mileage, condition, price: Math.round((18000 + (year - 2000) * 3000) * (condition / 100)), features: i % 2 ? ['CCTV', 'Wheelchair space', 'Contactless ticket machine'] : ['CCTV', 'Wheelchair space'] };
+    return { key: `used-${week}-${i}`, model, year, mileage, condition, price: Math.round((18000 + (year - 2000) * 3000) * (condition / 100)), features: ['CCTV', 'Wheelchair space', ...(variant >= 1 ? ['Contactless ticket machine'] : []), ...(variant === 2 ? ['USB charging ports', 'Free Wi-Fi'] : [])] };
   });
 }
 export function tenderOffers(day: number) {
@@ -48,5 +52,6 @@ export function managementDay(routes: (SimRoute & { number: string; contract_pay
   const result = simulateDay(activeRoutes, buses, wages);
   const contractRevenue = activeRoutes.reduce((sum, r) => sum + (buses.some(b => b.route_id === r.id && b.status === 'In service') ? r.contract_payment : 0), 0);
   const depotCosts = rents.reduce((sum, rent) => sum + rent, 0);
-  return { revenue: result.revenue + contractRevenue, costs: result.costs + depotCosts, profit: result.profit + contractRevenue - depotCosts, details: { fares: result.revenue, contractRevenue, depotCosts, wages: wages.reduce((a,b) => a+b,0), busCosts: result.activeBuses * 90, activeBuses: result.activeBuses }, reviews: activeRoutes.map(r => passengerReview(r, buses.filter(b => b.route_id === r.id && b.status === 'In service'))) };
+  const upgradeCosts = buses.filter(b => b.status !== 'Withdrawn').reduce((n,b) => n + upgradeUpkeep(b.features), 0);
+  return { revenue: result.revenue + contractRevenue, costs: result.costs + depotCosts + upgradeCosts, profit: result.profit + contractRevenue - depotCosts - upgradeCosts, details: { fares: result.revenue, contractRevenue, depotCosts, upgradeCosts, wages: wages.reduce((a,b) => a+b,0), busCosts: result.activeBuses * 90, activeBuses: result.activeBuses }, reviews: activeRoutes.map(r => passengerReview(r, buses.filter(b => b.route_id === r.id && b.status === 'In service'))) };
 }
