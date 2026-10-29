@@ -16,6 +16,8 @@ import { useServerFn } from '@tanstack/react-start';
 import { createRailCompany } from '@/lib/rail.functions';
 import { Bus,TrainFront } from 'lucide-react';
 import { Tabs,TabsList,TabsTrigger } from '@/components/ui/tabs';
+import { BUS_OPERATOR_PRESETS } from '@/lib/london';
+import { TrainPhoto } from '@/components/TrainPhoto';
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -103,11 +105,11 @@ function Dashboard() {
 
         {mode==='train'?<section className="mt-10"><h2 className="text-4xl">Great Northern</h2><div className="mt-4 flex items-center gap-4 border-y py-6"><TrainFront className="size-16 text-primary"/><div><p className="text-lg">Hornsey · Class 717 · £3,000,000 game balance</p><Button className="mt-3" disabled={!!busy} onClick={async()=>{if(busy)return;setBusy('rail');try{const r=await createRail();qc.invalidateQueries({queryKey:['companies']});navigate({to:'/rail/$id',params:{id:r.id}});}catch(e){toast.error(e instanceof Error?e.message:'Could not create railway');}finally{setBusy(null);}}}>{busy==='rail'?'Setting up…':'Take control of Great Northern'}</Button></div></div></section>:<>
         <div className="mt-12 flex flex-wrap items-end justify-between gap-2">
-          <h2 className="text-4xl">Classic Herts operators</h2>
+          <h2 className="text-4xl">Herts & London operators</h2>
           <CustomCompany onDone={(id) => navigate({ to: "/company/$id", params: { id } })} />
         </div>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {PRESETS.map((p) => (
+          {BUS_OPERATOR_PRESETS.map((p) => (
             <div key={p.key} className="rounded-lg border bg-card p-3">
               <BusPhoto model={p.name} presetKey={p.key} credit={realOperatorPhoto(p.key)} className="overflow-hidden rounded-md" />
               <p className="font-display text-2xl">{p.name}</p>
