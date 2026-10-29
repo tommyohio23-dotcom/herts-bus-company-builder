@@ -455,6 +455,27 @@ export type Database = {
           },
         ]
       }
+      review_ai_access: {
+        Row: {
+          blocked_status: number
+          message: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          blocked_status: number
+          message: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          blocked_status?: number
+          message?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       routes: {
         Row: {
           company_id: string
