@@ -11,21 +11,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BusSide } from "@/components/BusSide";
 import { realOperatorPhoto } from "@/lib/bus-photos";
 import { BusPhoto } from "@/components/BusPhoto";
-import { HERTS_TOWNS, PRESETS, type Preset } from "@/lib/herts";
+import { HERTS_TOWNS, type Preset } from "@/lib/herts";
 import { useServerFn } from '@tanstack/react-start';
 import { createRailCompany } from '@/lib/rail.functions';
 import { Bus,TrainFront } from 'lucide-react';
 import { Tabs,TabsList,TabsTrigger } from '@/components/ui/tabs';
 import { BUS_OPERATOR_PRESETS } from '@/lib/london';
-import { TrainPhoto } from '@/components/TrainPhoto';
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
       { title: "Bus & train companies — Herts Transport Manager" },
-      { name: "description", content: "Choose or create a Hertfordshire bus company." },
-      { property: "og:title", content: "Your companies — Herts Bus Manager" },
-      { property: "og:description", content: "Your saved Herts bus companies." },
+      { name: "description", content: "Choose bus operations in Herts and London or your separate Great Northern train company." },
+      { property: "og:title", content: "Bus & train companies — Herts Transport Manager" },
+      { property: "og:description", content: "Your saved bus and Great Northern railway companies." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
