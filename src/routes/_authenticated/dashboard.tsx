@@ -18,6 +18,8 @@ import { Bus,TrainFront } from 'lucide-react';
 import { Tabs,TabsList,TabsTrigger } from '@/components/ui/tabs';
 import { BUS_OPERATOR_PRESETS, LONDON_PRESETS } from '@/lib/london';
 import { AREAS, AREA_PRESETS, AREA_TOWNS, companyArea, type AreaKey } from '@/lib/areas';
+import { StartingMoney } from '@/components/StartingMoney';
+import { suggestedBusCapital, validStartingCapital, RAIL_STARTING_CAPITAL } from '@/lib/starting-capital';
 const LONDON_KEYS = LONDON_PRESETS.map(p => p.key);
 function areaPresets(a: AreaKey): Preset[] { return a === 'herts' ? BUS_OPERATOR_PRESETS.filter(p => !LONDON_KEYS.includes(p.key)) : a === 'london' ? LONDON_PRESETS : AREA_PRESETS[a]; }
 
@@ -43,24 +45,50 @@ function Dashboard() {
   const navigate = useNavigate();
   const { data: companies = [] } = useQuery({
     queryKey: ["companies"],
-    queryFn: async () => (await supabase.from("companies").select("*").order("created_at")).data ?? [],
+    queryFn: async () => {
+      const boost = await supabase.rpc('boost_existing_network_capital');
+      if (boost.error) throw new Error(boost.error.message);
+      const result = await supabase.from("companies").select("*").order("created_at");
+      if (result.error) throw new Error(result.error.message);
+      return result.data ?? [];
+    },
   });
 
   const [busy, setBusy] = useState<string | null>(null);
-  async function startPreset(p: Preset) {
+  const [pending, setPending] = useState<Preset | 'rail' | null>(null);
+  const [startingMoney, setStartingMoney] = useState('');
+  function chooseStartingMoney(p: Preset | 'rail') {
+    setStartingMoney(String(p === 'rail' ? RAIL_STARTING_CAPITAL : suggestedBusCapital(p.routes)));
+    setPending(p);
+  }
+  async function confirmStart() {
+    if (!pending || busy) return;
+    const amount = Number(startingMoney);
+    if (!startingMoney.trim() || !validStartingCapital(amount)) { toast.error('Enter a non-negative whole-pound amount'); return; }
+    if (pending !== 'rail') { await startPreset(pending, amount); return; }
+    setBusy('rail');
+    try {
+      const r = await createRail({ data: { startingMoney: amount } });
+      qc.invalidateQueries({ queryKey: ['companies'] });
+      navigate({ to: '/rail/$id', params: { id: r.id } });
+    } catch (e) { toast.error(e instanceof Error ? e.message : 'Could not create railway'); }
+    finally { setBusy(null); }
+  }
+  async function startPreset(p: Preset, amount: number) {
     if (busy) return;
     setBusy(p.key);
     const t = toast.loading(`Setting up ${p.name}…`);
-    try { await setupPreset(p); } finally { toast.dismiss(t); setBusy(null); }
+    try { await setupPreset(p, amount); } finally { toast.dismiss(t); setBusy(null); }
   }
   async function removeCompany(id: string, name: string) {
     if (!confirm(`Delete ${name}? This removes its fleet, routes and staff.`)) return;
     await supabase.from("companies").delete().eq("id", id);
     qc.invalidateQueries({ queryKey: ["companies"] });
   }
-  async function setupPreset(p: Preset) {
+  async function setupPreset(p: Preset, amount: number) {
     const { data: c, error } = await supabase.from("companies").insert({
       name: p.name, short_name: p.short, primary_color: p.primary, secondary_color: p.secondary, preset_key: p.key, hq_town: p.hq,
+      balance: amount, capital_boost_applied: true,
     }).select().single();
     if (error || !c) { toast.error(error?.message ?? "Failed"); return; }
     const depotResult = await supabase.from('depots').insert(p.depots.map(town => ({company_id:c.id,name:`${town} depot`,town,capacity:15,daily_rent:0})));
@@ -107,7 +135,7 @@ function Dashboard() {
           ))}
         </div>
 
-        {mode==='train'?<section className="mt-10"><h2 className="text-4xl">Great Northern</h2><div className="mt-4 flex items-center gap-4 border-y py-6"><TrainFront className="size-16 text-primary"/><div><p className="text-lg">Hornsey · Class 717 · £3,000,000 game balance</p><Button className="mt-3" disabled={!!busy} onClick={async()=>{if(busy)return;setBusy('rail');try{const r=await createRail();qc.invalidateQueries({queryKey:['companies']});navigate({to:'/rail/$id',params:{id:r.id}});}catch(e){toast.error(e instanceof Error?e.message:'Could not create railway');}finally{setBusy(null);}}}>{busy==='rail'?'Setting up…':'Take control of Great Northern'}</Button></div></div></section>:<>
+        {mode==='train'?<section className="mt-10"><h2 className="text-4xl">Great Northern</h2><div className="mt-4 flex items-center gap-4 border-y py-6"><TrainFront className="size-16 text-primary"/><div><p className="text-lg">Hornsey · Class 717</p><Button className="mt-3" disabled={!!busy} onClick={()=>chooseStartingMoney('rail')}>{busy==='rail'?'Setting up…':'Take control of Great Northern'}</Button></div></div></section>:<>
         <div className="mt-12 flex flex-wrap items-end justify-between gap-2">
           <h2 className="text-4xl">{AREAS.find(a=>a.key===area)?.label} operators</h2>
           <CustomCompany key={area} area={area} onDone={(id) => navigate({ to: "/company/$id", params: { id } })} />
@@ -118,11 +146,19 @@ function Dashboard() {
               <BusPhoto model={p.name} presetKey={p.key} credit={realOperatorPhoto(p.key)} className="overflow-hidden rounded-md" />
               <p className="font-display text-2xl">{p.name}</p>
               <p className="text-xs text-muted-foreground">{p.livery} · {p.routes.length} routes · {p.fleet.length} buses</p>
-              <Button size="sm" className="mt-2 w-full" disabled={!!busy} onClick={() => startPreset(p)}>{busy === p.key ? "Setting up…" : "Take control"}</Button>
+              <p className="mt-2 text-sm text-muted-foreground">Suggested start: £{suggestedBusCapital(p.routes).toLocaleString('en-GB')}</p>
+              <Button size="sm" className="mt-2 w-full" disabled={!!busy} onClick={() => chooseStartingMoney(p)}>{busy === p.key ? "Setting up…" : "Take control"}</Button>
             </div>
           ))}
         </div>
         </>}
+        <Dialog open={pending !== null} onOpenChange={open=>{if(!open&&!busy)setPending(null);}}>
+          <DialogContent>
+            <DialogHeader><DialogTitle>{pending === 'rail' ? 'Great Northern' : pending?.name} starting money</DialogTitle></DialogHeader>
+            <StartingMoney amount={startingMoney} suggested={pending === 'rail' ? RAIL_STARTING_CAPITAL : pending ? suggestedBusCapital(pending.routes) : 0} onChange={setStartingMoney}/>
+            <Button disabled={!!busy} onClick={confirmStart}>{busy ? 'Setting up…' : 'Start company'}</Button>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
@@ -134,15 +170,23 @@ function CustomCompany({ onDone, area }: { onDone: (id: string) => void; area: A
   const [primary, setPrimary] = useState("#0b6b3a");
   const [secondary, setSecondary] = useState("#f2e6b8");
   const [hq, setHq] = useState<string>(AREA_TOWNS[area][0] ?? "");
+  const [startingMoney, setStartingMoney] = useState(String(suggestedBusCapital([])));
+  const [busy, setBusy] = useState(false);
   async function create() {
+    if (busy) return;
     if (!name.trim()) { toast.error("Give your company a name"); return; }
+    const amount = Number(startingMoney);
+    if (!startingMoney.trim() || !validStartingCapital(amount)) { toast.error('Enter a non-negative whole-pound amount'); return; }
+    setBusy(true);
+    try {
     const { data, error } = await supabase.from("companies").insert({
-      name, short_name: short || name.slice(0, 8), primary_color: primary, secondary_color: secondary, hq_town: hq, balance: 150000,
+      name, short_name: short || name.slice(0, 8), primary_color: primary, secondary_color: secondary, hq_town: hq, balance: amount, capital_boost_applied: true,
     }).select().single();
     if (error || !data) { toast.error(error?.message ?? "Failed"); return; }
     const depot = await supabase.from('depots').insert({company_id:data.id,name:`${hq} depot`,town:hq,capacity:5,daily_rent:0});
     if (depot.error) { toast.error('Starter depot could not be created'); return; }
     onDone(data.id);
+    } finally { setBusy(false); }
   }
   return (
     <Dialog>
@@ -163,7 +207,8 @@ function CustomCompany({ onDone, area }: { onDone: (id: string) => void; area: A
               <SelectContent>{AREA_TOWNS[area].map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-          <Button onClick={create}>Create company (£150,000 start)</Button>
+          <StartingMoney amount={startingMoney} suggested={suggestedBusCapital([])} onChange={setStartingMoney}/>
+          <Button disabled={busy} onClick={create}>{busy ? 'Setting up…' : 'Create company'}</Button>
         </div>
       </DialogContent>
     </Dialog>
