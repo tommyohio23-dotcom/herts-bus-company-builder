@@ -11,11 +11,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BusSide } from "@/components/BusSide";
-import { BUS_MODELS, FEATURES, HERTS_TOWNS, STAFF_ROLES, STATUSES } from "@/lib/herts";
+import { BUS_MODELS, FEATURES, HERTS_TOWNS, STATUSES } from "@/lib/herts";
 import { BusPhoto } from "@/components/BusPhoto";
 import { managementAction } from "@/lib/management.functions";
 import { ManagementExpansion } from "@/components/ManagementExpansion";
 import { NetworkPlanner } from "@/components/NetworkPlanner";
+import { Recruitment } from "@/components/Recruitment";
 
 export const Route = createFileRoute("/_authenticated/company/$id")({
   head: () => ({
@@ -45,7 +46,7 @@ function CompanyPage() {
   const { id } = Route.useParams();
   const qc = useQueryClient();
   const { company, buses, routes, drivers } = useCompanyData(id);
-  const refresh = () => ["company", "buses", "routes", "drivers", "depots", "tender_bids", "passenger_reviews", "day_reports"].forEach((k) => qc.invalidateQueries({ queryKey: [k, id] }));
+  const refresh = () => ["company", "buses", "routes", "drivers", "depots", "tender_bids", "passenger_reviews", "day_reports", "job_adverts", "job_applicants"].forEach((k) => qc.invalidateQueries({ queryKey: [k, id] }));
   const action = useServerFn(managementAction);
   const [running, setRunning] = useState(false);
 
@@ -95,7 +96,7 @@ function CompanyPage() {
           </TabsList>
           <TabsContent value="fleet"><Fleet companyId={id} company={company} buses={buses} routes={routes} refresh={refresh} spend={spend} /></TabsContent>
           <TabsContent value="routes"><Routes companyId={id} routes={routes} buses={buses} refresh={refresh} /></TabsContent>
-          <TabsContent value="drivers"><Drivers companyId={id} drivers={drivers} refresh={refresh} /></TabsContent>
+          <TabsContent value="drivers"><Recruitment companyId={id} drivers={drivers} refresh={refresh} /></TabsContent>
           <TabsContent value="ops">
             <Button size="lg" className="mt-3" disabled={running} onClick={runDay}>{running ? 'Running…' : `Run day ${company.day}`}</Button>
             <ManagementExpansion view="reports" company={company} buses={buses} drivers={drivers} refresh={refresh}/>
@@ -251,35 +252,6 @@ function Routes({ companyId, routes, buses, refresh }: { companyId: string; rout
         </div>
         <Button className="mt-3" onClick={add}>Register route</Button>
       </div>
-    </div>
-  );
-}
-
-function Drivers({ companyId, drivers, refresh }: { companyId: string; drivers: Drv[]; refresh: () => void }) {
-  const [name, setName] = useState("");
-  const [depot, setDepot] = useState("Hertford");
-  const [role, setRole] = useState("Driver");
-  async function hire() {
-    if (!name) { toast.error("Employee name needed"); return; }
-    await supabase.from("drivers").insert({ company_id: companyId, name, depot, role, wage: STAFF_ROLES[role] ?? 140, staff_no: String(1000 + drivers.length + Math.floor(Math.random() * 900)) });
-    setName(""); refresh();
-  }
-  return (
-    <div className="mt-2 space-y-2">
-      <div className="flex flex-wrap gap-2 rounded-lg border bg-card p-3">
-        <div className="w-40"><Select value={role} onValueChange={setRole}><SelectTrigger><SelectValue /></SelectTrigger>
-          <SelectContent>{Object.keys(STAFF_ROLES).map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent></Select></div>
-        <Input className="flex-1" placeholder="Employee name" value={name} onChange={(e) => setName(e.target.value)} />
-        <div className="w-44"><Select value={depot} onValueChange={setDepot}><SelectTrigger><SelectValue /></SelectTrigger>
-          <SelectContent>{HERTS_TOWNS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
-        <Button onClick={hire}>Hire (£{STAFF_ROLES[role]}/day)</Button>
-      </div>
-      {drivers.map((d) => (
-        <div key={d.id} className="flex items-center justify-between rounded-md border bg-card px-3 py-2">
-          <span><b>{d.name}</b> <span className="rounded bg-secondary px-1.5 text-xs">{d.role}</span> <span className="text-sm text-muted-foreground">#{d.staff_no} · {d.depot} · £{Number(d.wage)}/day</span></span>
-          <Button size="sm" variant="ghost" onClick={async () => { await supabase.from("drivers").delete().eq("id", d.id); refresh(); }}>Release</Button>
-        </div>
-      ))}
     </div>
   );
 }

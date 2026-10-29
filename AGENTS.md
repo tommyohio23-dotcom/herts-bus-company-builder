@@ -13,3 +13,4 @@
 - All game data is per-user rows (companies/routes/buses/drivers) guarded by owner RLS; signed-in pages live under `src/routes/_authenticated/`.
 - Expansion rules and repeatable stock/contracts live in `src/lib/management.ts`; authenticated management actions validate ownership and use transaction RPCs so spending and saved game results stay consistent.
 - Network planning uses Google Maps JavaScript with local active NaPTAN snapshots under public/data; map windows are geographic bounds, not exact county borders, and connector credentials stay out of server-call browser code.
+- Recruitment uses pure varied applicant generation and authenticated advert/review functions with owner-scoped transactional RPCs; accepted offers create staff once, while profiles and fictional portrait indexes remain saved with the application.
