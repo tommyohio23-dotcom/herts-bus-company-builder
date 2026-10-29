@@ -57,6 +57,13 @@
       "when": 1793266296899,
       "tag": "0007_review_ai_access_state",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793266469057,
+      "tag": "0008_enforce_operating_fleet_frequency",
+      "breakpoints": true
     }
   ]
 }
