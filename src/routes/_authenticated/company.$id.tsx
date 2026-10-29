@@ -137,7 +137,7 @@ function Fleet({ companyId, company, buses, routes, refresh, spend }: { companyI
               <div>
                 <p className="font-display text-2xl leading-none">{b.fleet_no} <span className="rounded bg-accent px-1.5 text-base text-accent-foreground">{b.registration}</span></p>
                 <p className="text-sm">{b.model} · {b.year}</p>
-                <p className="text-xs text-muted-foreground">{b.livery || "Fleet livery"} · {b.depot || "No depot"} · {b.mileage.toLocaleString()} mi</p>
+                <p className="text-xs text-muted-foreground">{b.livery || "Fleet livery"} · {b.depot || "No depot"} · {b.mileage.toLocaleString()} mi · {b.condition}% condition</p>
               </div>
               <Button size="sm" variant="ghost" onClick={() => remove(b)}>Sell</Button>
             </div>
