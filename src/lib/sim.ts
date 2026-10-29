@@ -1,5 +1,6 @@
 export type SimRoute = { id: string; frequency_mins: number; fare: number };
 export type SimBus = { route_id: string | null; status: string };
+import {assertFleetCoverage} from './service-frequency';
 
 export const BUS_DAILY_COST = 90; // fuel + upkeep per bus in service
 export const PASSENGERS_PER_TRIP = 22;
@@ -7,6 +8,7 @@ export const SERVICE_HOURS = 14;
 
 /** Revenue and costs for one simulated operating day. */
 export function simulateDay(routes: SimRoute[], buses: SimBus[], driverWages: number[]) {
+  assertFleetCoverage(routes,buses);
   let revenue = 0;
   let activeBuses = 0;
   for (const r of routes) {
