@@ -38,7 +38,7 @@ export function NetworkPlanner({companyId,refresh}: {companyId:string;refresh:()
   useEffect(()=>{
     if(!ready || !map.current)return;
     const nodes=[...new Map([...matches,...selected].map(s=>[s.id,s])).values()];
-    const markers=nodes.map(s=>{const index=selected.findIndex(p=>p.id===s.id);const m=new google.maps.Marker({position:{lat:s.lat,lng:s.lng},map:map.current,title:stopLabel(s),label:index>=0?String(index+1):undefined});m.addListener('click',()=>{if(!selectedRef.current.some(p=>p.id===s.id))setSelected(p=>[...p,s]);});return m;});
+    const markers=nodes.map(s=>{const index=selected.findIndex(p=>p.id===s.id);const m=new google.maps.Marker({position:{lat:s.lat,lng:s.lng},map:map.current,title:stopLabel(s),label:index>=0?String(index+1):null});m.addListener('click',()=>{if(!selectedRef.current.some(p=>p.id===s.id))setSelected(p=>[...p,s]);});return m;});
     const line=new google.maps.Polyline({path:selected.map(s=>({lat:s.lat,lng:s.lng})),map:map.current,strokeWeight:3});
     return()=>{markers.forEach(m=>m.setMap(null));line.setMap(null);};
   },[ready,stops.data,search,selected]);
