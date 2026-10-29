@@ -1,9 +1,11 @@
 # Game expansion
-- [ ] Add a post-login bus/train choice and Great Northern management with timetables and equivalent current game features; clarify timetable scope.
-- [ ] Charge in-game money for additional vehicle features; clarify pricing.
-- [ ] Expand used stock with repeated models/photos and varied years, specifications and prices.
-- [ ] Add a grouped north London/Borehamwood operating area and separate map menus; clarify area coverage.
-- [ ] Verify New Barnet Station Road services and assign them to actual operators rather than TfL branding; clarify current versus historical operators.
+- [x] Add separate post-login Great Northern mode with station timetables, platforms, train/driver assignments, turnaround checks, recruitment, market, depots, contracts, reports, reviews and corridor menus.
+- [x] Charge in-game installation and daily upkeep for vehicle features; verify shared pure pricing rules.
+- [x] Expand bus stock to 18 listings with repeated exact-model photos and varied years/specifications; rail stock has nine simulated listings.
+- [x] Add 2,637 stops covering ONS borough polygons for Barnet, Enfield and Haringey plus Borehamwood/Elstree localities, and separate map menus.
+- [x] Check all seven New Barnet Station Road routes against TfL and attribute current operators; add London presets and Uno 383.
+- [x] Verify signed-in train creation, applicant hiring, assigned timetable, operating report, review and reload persistence; 34 tests passed.
+- [ ] Obtain verified real Class 379/387 photographs; Wikimedia downloads blocked (403). Class 717 has a credited real photograph.
 - [x] Add London active bus-stop map data (25,049 verified active records in the map window).
 - [x] Replace direct hiring with job adverts, varied applicants, review/shortlist/reject and offer acceptance.
 - [x] Add 24 fictional applicant portraits and detailed saved employee profiles.
