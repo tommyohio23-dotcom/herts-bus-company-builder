@@ -50,6 +50,20 @@
       "when": 1793265517452,
       "tag": "0006_bus_purchase_optional_unit",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793266296899,
+      "tag": "0007_review_ai_access_state",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793266469057,
+      "tag": "0008_enforce_operating_fleet_frequency",
+      "breakpoints": true
     }
   ]
 }

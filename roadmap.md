@@ -1,4 +1,7 @@
 # Game expansion
+- [x] Add bus/rail route and review selection with authenticated AI complaint analysis and specific improvement recommendations.
+- [x] Enforce enough buses for the selected service frequency using a 60-minute game cycle, with saved sliders and operating-day validation.
+- [x] Verify real AI success in both modes, recurring complaints supported by two selected reviews, saved 60-minute frequency, one-bus half-hourly rejection, and narrow-screen layout.
 - [x] Add separate post-login Great Northern mode with station timetables, platforms, train/driver assignments, turnaround checks, recruitment, market, depots, contracts, reports, reviews and corridor menus.
 - [x] Charge in-game installation and daily upkeep for vehicle features; verify shared pure pricing rules.
 - [x] Expand bus stock to 18 listings with repeated exact-model photos and varied years/specifications; rail stock has nine simulated listings.

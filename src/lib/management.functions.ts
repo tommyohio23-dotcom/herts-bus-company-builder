@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { DEPOT_PACKAGES, managementDay, marketListings, tenderDecision, tenderOffers } from './management';
+import {assertFleetCoverage} from './service-frequency';
 
 export const managementAction = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
@@ -36,6 +37,7 @@ export const managementAction = createServerFn({ method: 'POST' })
       if (!pack || !data.town || !HERTS_TOWNS.includes(data.town)) throw new Error('Choose a depot package and town');
       payload = {...pack, name:`${data.town} ${pack.name}`,town:data.town};
     } else {
+      assertFleetCoverage(routes.filter(r=>r.contract_end_day==null||r.contract_end_day>=company.day),buses);
       const bids = await db.from('tender_bids').select('*').eq('company_id',company.id).eq('status','Pending');
       if (bids.error) throw new Error(bids.error.message);
       for (const bid of bids.data ?? []) {

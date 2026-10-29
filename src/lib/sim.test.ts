@@ -9,7 +9,7 @@ describe("simulateDay", () => {
   });
   it("only counts buses that are In service", () => {
     const r = simulateDay(
-      [{ id: "a", frequency_mins: 30, fare: 2 }],
+      [{ id: "a", frequency_mins: 60, fare: 2 }],
       [{ route_id: "a", status: "Workshop" }, { route_id: "a", status: "In service" }],
       [140],
     );

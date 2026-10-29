@@ -18,6 +18,8 @@ describe('management rules', () => {
   it('gives an unserved route one star', () => expect(passengerReview({number:'1',fare:2,frequency_mins:30},[]).rating).toBe(1));
   it('rewards frequent comfortable journeys with five stars', () => expect(passengerReview({number:'1',fare:2,frequency_mins:30},[{condition:85,features:['USB charging ports']}]).rating).toBe(5));
   it('adds depot rent even without services', () => expect(managementDay([],[],[],[35],1).profit).toBe(-35));
+  it('cannot settle a half-hourly contract with only one bus',()=>expect(()=>managementDay([{id:'a',number:'T2',fare:0,frequency_mins:30,contract_payment:680,contract_end_day:35}],[{route_id:'a',status:'In service',features:[],condition:85}],[],[],1)).toThrow('needs 2'));
+  it('settles a half-hourly contract with two in-service buses',()=>expect(managementDay([{id:'a',number:'T2',fare:0,frequency_mins:30,contract_payment:680,contract_end_day:35}],[{route_id:'a',status:'In service',features:[],condition:85},{route_id:'a',status:'In service',features:[],condition:85}],[],[],1).revenue).toBe(680));
   it('does not pay an expired contract', () => {
     const r = managementDay([{id:'a',number:'T1',fare:0,frequency_mins:60,contract_payment:360,contract_end_day:7}],[{route_id:'a',status:'In service',features:[],condition:85}],[],[],8);
     expect(r.revenue).toBe(0);
