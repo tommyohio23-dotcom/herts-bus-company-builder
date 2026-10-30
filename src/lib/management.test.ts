@@ -70,3 +70,16 @@ describe('uploaded review bank', () => {
     }
   });
 });
+import { COMPANY_INFO } from './company-info';
+import { starterFleet } from './operator-fleets';
+import { BUS_OPERATOR_PRESETS, LONDON_PRESETS } from './london';
+import { AREA_PRESETS } from './areas';
+import { BUS_MODELS } from './herts';
+describe('company picker details and starting fleets', () => {
+  const all = [...BUS_OPERATOR_PRESETS, ...LONDON_PRESETS, ...Object.values(AREA_PRESETS).flat()];
+  it('every playable company has an established year', () => { for (const p of all) expect(COMPANY_INFO[p.key]?.founded, p.key).toBeTruthy(); });
+  it('starting fleets use known models and fit 15 buses per starter depot', () => {
+    for (const p of all) { const f = starterFleet(p); expect(f.length).toBeLessThanOrEqual(15 * Math.max(1, p.depots.length)); expect(f.length).toBeGreaterThanOrEqual(p.fleet.length); for (const b of f) expect(BUS_MODELS).toContain(b.model); }
+  });
+  it('Uno starts with 13 buses', () => expect(starterFleet(all.find(p => p.key === 'uno')!).length).toBe(13));
+});

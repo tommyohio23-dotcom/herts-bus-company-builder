@@ -43,3 +43,5 @@
 - [x] Import 1,240 uploaded reviews (40 per company).
 - [x] Keep old reviews only where their places fit a company's routes; drop the rest (e.g. Hitchin bus reviews).
 - [x] Show established year, owner, base and history on the company picker.
+- [x] Established year and fuller history for every operator.
+- [x] Bigger starting fleets using each operator's real bus types.

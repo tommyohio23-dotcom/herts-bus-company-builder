@@ -21,6 +21,7 @@ import { AREAS, AREA_PRESETS, AREA_TOWNS, companyArea, type AreaKey } from '@/li
 import { AREA_CURRENCY } from '@/lib/currency';
 import { StartingMoney } from '@/components/StartingMoney';
 import { COMPANY_INFO } from '@/lib/company-info';
+import { starterFleet } from '@/lib/operator-fleets';
 import { suggestedBusCapital, validStartingCapital, RAIL_STARTING_CAPITAL } from '@/lib/starting-capital';
 const LONDON_KEYS = LONDON_PRESETS.map(p => p.key);
 function areaPresets(a: AreaKey): Preset[] { return a === 'herts' ? BUS_OPERATOR_PRESETS.filter(p => !LONDON_KEYS.includes(p.key)) : a === 'london' ? LONDON_PRESETS : AREA_PRESETS[a]; }
@@ -98,10 +99,12 @@ function Dashboard() {
     const { data: routes } = await supabase.from("routes").insert(
       p.routes.map((r) => ({ company_id: c.id, number: r.number, origin: r.origin, destination: r.destination, via: r.via, frequency_mins: r.frequency, fare: r.fare })),
     ).select();
-    await supabase.from("buses").insert(p.fleet.map((b, i) => ({
-      company_id: c.id, ...b, livery: p.livery, depot: p.depots[i % p.depots.length] ?? "", route_id: routes?.[i % (routes?.length || 1)]?.id ?? null,
+    const fleet = starterFleet(p);
+    const busResult = await supabase.from("buses").insert(fleet.map((b, i) => ({
+      company_id: c.id, ...b, livery: p.livery, depot: p.depots[i % p.depots.length] ?? "", route_id: routes && i < routes.length ? routes[i]!.id : null,
     })));
-    await supabase.from("drivers").insert(p.fleet.map((_, i) => ({ company_id: c.id, name: `Driver ${i + 1}`, depot: p.depots[i % p.depots.length] ?? "", staff_no: String(1000 + i), role: "Driver" })));
+    const driverResult = await supabase.from("drivers").insert(fleet.map((_, i) => ({ company_id: c.id, name: `Driver ${i + 1}`, depot: p.depots[i % p.depots.length] ?? "", staff_no: String(1000 + i), role: "Driver" })));
+    if (busResult.error || driverResult.error) toast.error(`Some starting buses or drivers could not be added: ${(busResult.error ?? driverResult.error)!.message}`);
     qc.invalidateQueries({ queryKey: ["companies"] });
     navigate({ to: "/company/$id", params: { id: c.id } });
   }
@@ -147,9 +150,9 @@ function Dashboard() {
             <div key={p.key} className="min-w-0 rounded-lg border bg-card p-3">
               <BusPhoto model={p.name} presetKey={p.key} credit={realOperatorPhoto(p.key)} className="overflow-hidden rounded-md" />
               <p className="font-display text-2xl">{p.name}</p>
-              <p className="text-xs text-muted-foreground">{p.livery} · {p.routes.length} routes · {p.fleet.length} buses</p>
+              <p className="text-xs text-muted-foreground">{p.livery} · {p.routes.length} routes · {starterFleet(p).length} buses</p>
               {COMPANY_INFO[p.key] && <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-2 text-xs">
-                {COMPANY_INFO[p.key]!.founded && <><dt className="font-semibold">Established</dt><dd>{COMPANY_INFO[p.key]!.founded}</dd></>}
+                <dt className="font-semibold">Established</dt><dd>{COMPANY_INFO[p.key]!.founded}</dd>
                 <dt className="font-semibold">Owner</dt><dd>{COMPANY_INFO[p.key]!.owner}</dd>
                 <dt className="font-semibold">Based</dt><dd>{p.hq}</dd>
               </dl>}
