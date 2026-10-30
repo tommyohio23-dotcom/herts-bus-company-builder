@@ -271,7 +271,7 @@
    "page": "https://commons.wikimedia.org/wiki/File:Mercedes-Benz_O530G_owned_by_MPK_Wroc%C5%82aw_(Poland,_June_2012).jpg",
    "author": "(GRAD)",
    "license": "CC BY-SA 3.0",
-   "title": "File:Mercedes-Benz O530G owned by MPK Wroc\u0142aw (Poland, June 2012).jpg"
+   "title": "File:Mercedes-Benz O530G owned by MPK Wrocław (Poland, June 2012).jpg"
   },
   "Routemaster (AEC)": {
    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6a/Ireland_Dublin_AEC_Routemaster_BW_2025-09-15_14-54-50.jpg/960px-Ireland_Dublin_AEC_Routemaster_BW_2025-09-15_14-54-50.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
@@ -393,6 +393,104 @@
    "author": "Arriva436",
    "license": "CC BY-SA 3.0",
    "title": "File:Sullivan Buses WVL1.JPG"
+  },
+  "arriva-london": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/Arriva_London_HA18_-_LK65_BYU.jpg/960px-Arriva_London_HA18_-_LK65_BYU.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Arriva_London_HA18_-_LK65_BYU.jpg",
+   "author": "Hullian111",
+   "license": "CC BY-SA 4.0",
+   "title": "File:Arriva London HA18 - LK65 BYU.jpg"
+  },
+  "metroline": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/Metroline_bus_VW1247_%28LK12_ABF%29%2C_23_June_2012.jpg/960px-Metroline_bus_VW1247_%28LK12_ABF%29%2C_23_June_2012.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Metroline_bus_VW1247_(LK12_ABF),_23_June_2012.jpg",
+   "author": "Chris Sampson",
+   "license": "CC BY 2.0",
+   "title": "File:Metroline bus VW1247 (LK12 ABF), 23 June 2012.jpg"
+  },
+  "go-ahead-london": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/94/Go_Ahead_London_Electric_bus_DEL1_LV74TLF%2C_Worcester_Park_2026-02-05.jpg/960px-Go_Ahead_London_Electric_bus_DEL1_LV74TLF%2C_Worcester_Park_2026-02-05.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Go_Ahead_London_Electric_bus_DEL1_LV74TLF,_Worcester_Park_2026-02-05.jpg",
+   "author": "Sludge G",
+   "license": "CC BY-SA 4.0",
+   "title": "File:Go Ahead London Electric bus DEL1 LV74TLF, Worcester Park 2026-02-05.jpg"
+  },
+  "first-london": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/33/First_London_bus_DM41445_%28LN51_DUH%29%2C_11_May_2013.jpg/960px-First_London_bus_DM41445_%28LN51_DUH%29%2C_11_May_2013.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:First_London_bus_DM41445_(LN51_DUH),_11_May_2013.jpg",
+   "author": "David McKay",
+   "license": "CC BY 2.0",
+   "title": "File:First London bus DM41445 (LN51 DUH), 11 May 2013.jpg"
+  },
+  "stagecoach-london": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/SN16OKF_Stagecoach_London_10324_ADL_Enviro400MMC.jpg/960px-SN16OKF_Stagecoach_London_10324_ADL_Enviro400MMC.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:SN16OKF_Stagecoach_London_10324_ADL_Enviro400MMC.jpg",
+   "author": "km30192002",
+   "license": "CC BY 2.0",
+   "title": "File:SN16OKF Stagecoach London 10324 ADL Enviro400MMC.jpg"
+  },
+  "arriva-beds": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/72/Arriva_Beds_and_Bucks_LT63_UNK_at_Luton_Airport.jpg/960px-Arriva_Beds_and_Bucks_LT63_UNK_at_Luton_Airport.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Arriva_Beds_and_Bucks_LT63_UNK_at_Luton_Airport.jpg",
+   "author": "Skye Haynes",
+   "license": "CC BY-SA 4.0",
+   "title": "File:Arriva Beds and Bucks LT63 UNK at Luton Airport.jpg"
+  },
+  "stagecoach-beds": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1b/Stagecoach_Bedford_R663_TKU_Nov_2006.jpg/960px-Stagecoach_Bedford_R663_TKU_Nov_2006.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Stagecoach_Bedford_R663_TKU_Nov_2006.jpg",
+   "author": "Ed Webster",
+   "license": "CC BY 2.0",
+   "title": "File:Stagecoach Bedford R663 TKU Nov 2006.jpg"
+  },
+  "grant-palmer-beds": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/59/Grant_Palmer_218_SN66_WPJ.jpg/960px-Grant_Palmer_218_SN66_WPJ.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Grant_Palmer_218_SN66_WPJ.jpg",
+   "author": "Editor5807",
+   "license": "CC BY-SA 4.0",
+   "title": "File:Grant Palmer 218 SN66 WPJ.jpg"
+  },
+  "arriva-bucks": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5c/Arriva_the_Shires_ADL_Enviro_400_5467_SN15_LPX_on_route_280_to_Aylesbury_%2839827915232%29.jpg/960px-Arriva_the_Shires_ADL_Enviro_400_5467_SN15_LPX_on_route_280_to_Aylesbury_%2839827915232%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Arriva_the_Shires_ADL_Enviro_400_5467_SN15_LPX_on_route_280_to_Aylesbury_(39827915232).jpg",
+   "author": "Kat's Transport Photography",
+   "license": "CC BY 2.0",
+   "title": "File:Arriva the Shires ADL Enviro 400 5467 SN15 LPX on route 280 to Aylesbury (39827915232).jpg"
+  },
+  "carousel-bucks": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Carousel_Buses_80479_in_High_Wycombe_Bus_Station_-_geograph.org.uk_-_7836900.jpg/960px-Carousel_Buses_80479_in_High_Wycombe_Bus_Station_-_geograph.org.uk_-_7836900.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Carousel_Buses_80479_in_High_Wycombe_Bus_Station_-_geograph.org.uk_-_7836900.jpg",
+   "author": "David Hillas",
+   "license": "CC BY-SA 2.0",
+   "title": "File:Carousel Buses 80479 in High Wycombe Bus Station - geograph.org.uk - 7836900.jpg"
+  },
+  "redline-bucks": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/35/Redline_Buses_MX58_KYS.JPG/960px-Redline_Buses_MX58_KYS.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Redline_Buses_MX58_KYS.JPG",
+   "author": "Arriva436",
+   "license": "CC BY 3.0",
+   "title": "File:Redline Buses MX58 KYS.JPG"
+  },
+  "first-essex": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/09/YX11AFN_First_Essex_44172_former_First_London_DML44172_ADL_Enviro200.jpg/960px-YX11AFN_First_Essex_44172_former_First_London_DML44172_ADL_Enviro200.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:YX11AFN_First_Essex_44172_former_First_London_DML44172_ADL_Enviro200.jpg",
+   "author": "km30192002",
+   "license": "CC BY 2.0",
+   "title": "File:YX11AFN First Essex 44172 former First London DML44172 ADL Enviro200.jpg"
+  },
+  "arriva-essex": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0f/Arriva_Herts_%26_Essex_-_6524_-_Route_2.jpg/960px-Arriva_Herts_%26_Essex_-_6524_-_Route_2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Arriva_Herts_%26_Essex_-_6524_-_Route_2.jpg",
+   "author": "Aubrey",
+   "license": "CC BY 2.0",
+   "title": "File:Arriva Herts & Essex - 6524 - Route 2.jpg"
+  },
+  "stephensons-essex": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a2/Stephensons_of_Essex_460_EU05_CZA.jpg/960px-Stephensons_of_Essex_460_EU05_CZA.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Stephensons_of_Essex_460_EU05_CZA.jpg",
+   "author": "Pimlico Badger",
+   "license": "CC BY-SA 2.0",
+   "title": "File:Stephensons of Essex 460 EU05 CZA.jpg"
   }
  },
  "fleet": {
