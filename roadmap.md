@@ -27,3 +27,8 @@
 - [x] Add real bus stops and maps covering Herts and nearby areas.
 - [x] Verify saved purchases, bids/awards, reviews, game rules, stop coordinates and narrow-screen layout.
 - [ ] Verify live Google Maps rendering and mapped-route selection on an authorized preview/published origin; sandbox live Maps testing is unsupported.
+# Staff & photos (Oct 30)
+- [x] Employees list shows all staff beyond 1,000.
+- [x] One depot manager per depot, assigned to a depot.
+- [x] Assign every employee to a depot, and drivers to bus routes.
+- [x] Real (non-AI) operator photos for London, Beds, Bucks and Essex operators showing "No photo yet".
