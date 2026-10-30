@@ -85,6 +85,13 @@
       "when": 1793350577590,
       "tag": "0011_split_assignment_triggers",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1793370917342,
+      "tag": "0012_raise_advert_positions_limit",
+      "breakpoints": true
     }
   ]
 }
