@@ -346,8 +346,11 @@ function EditStops({ route, refresh }: { route: Rt; refresh: () => void }) {
 
 function RouteDrivers({ route, needed, drivers, refresh }: { route: { id: string }; needed: number; drivers: Drv[]; refresh: () => void }) {
   const [busy, setBusy] = useState(false);
-  const assigned = drivers.filter((d) => d.route_id === route.id && d.role === "Driver");
-  const free = drivers.filter((d) => d.role === "Driver" && !d.route_id);
+  const crew = (d: Drv) => d.role === "Driver" || d.role === "Senior Driver";
+  const assigned = drivers.filter((d) => d.route_id === route.id && crew(d));
+  const free = drivers.filter((d) => crew(d) && !d.route_id);
+  const inspectors = drivers.filter((d) => d.route_id === route.id && d.role === "Ticket Inspector");
+  const freeInspectors = drivers.filter((d) => d.role === "Ticket Inspector" && !d.route_id);
   const save = async (ids: string[], routeId: string | null, msg: string) => {
     if (busy || !ids.length) return; setBusy(true);
     try { for (const part of chunk(ids)) { const r = await supabase.from("drivers").update({ route_id: routeId }).in("id", part); if (r.error) throw r.error; } toast.success(msg); refresh(); }
@@ -362,8 +365,13 @@ function RouteDrivers({ route, needed, drivers, refresh }: { route: { id: string
         <Button size="sm" variant="outline" disabled={busy || !free.length} onClick={() => save([free[0]!.id], route.id, "Driver assigned")}>Add one</Button>
         {assigned.length > 0 && <Button size="sm" variant="ghost" disabled={busy} onClick={() => save(assigned.map((d) => d.id), null, "Drivers unassigned")}>Unassign all</Button>}
       </div>
-      {assigned.length > 0 && <div className="mt-2 flex flex-wrap gap-2">{assigned.slice(0, 40).map((d) => <Button key={d.id} size="sm" variant="secondary" disabled={busy} title="Tap to unassign" onClick={() => save([d.id], null, `${d.name} unassigned`)}>{d.name} ✕</Button>)}{assigned.length > 40 && <span className="self-center text-xs text-muted-foreground">+{assigned.length - 40} more</span>}</div>}
-      {!drivers.some((d) => d.role === "Driver") && <p className="mt-2 text-sm text-muted-foreground">No drivers employed.</p>}
+      {assigned.length > 0 && <div className="mt-2 flex flex-wrap gap-2">{assigned.slice(0, 40).map((d) => <Button key={d.id} size="sm" variant="secondary" disabled={busy} title="Tap to unassign" onClick={() => save([d.id], null, `${d.name} unassigned`)}>{d.name}{d.role === "Senior Driver" ? " ★" : ""} ✕</Button>)}{assigned.length > 40 && <span className="self-center text-xs text-muted-foreground">+{assigned.length - 40} more</span>}</div>}
+      {!drivers.some(crew) && <p className="mt-2 text-sm text-muted-foreground">No drivers employed.</p>}
+      <p className="mt-3 text-sm font-semibold">Ticket inspectors · {inspectors.length} on route (+{Math.min(2, inspectors.length) * 6}% fares) · {freeInspectors.length} available</p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        <Button size="sm" variant="outline" disabled={busy || !freeInspectors.length} onClick={() => save([freeInspectors[0]!.id], route.id, "Ticket inspector assigned")}>Add inspector</Button>
+        {inspectors.map((d) => <Button key={d.id} size="sm" variant="secondary" disabled={busy} title="Tap to unassign" onClick={() => save([d.id], null, `${d.name} unassigned`)}>{d.name} ✕</Button>)}
+      </div>
     </div>
   );
 }
