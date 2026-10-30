@@ -1,0 +1,7 @@
+CREATE OR REPLACE FUNCTION public.validate_bus_assignment() RETURNS trigger LANGUAGE plpgsql SET search_path=public AS $$ BEGIN IF NEW.route_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM public.routes r WHERE r.id=NEW.route_id AND r.company_id=NEW.company_id AND r.user_id=NEW.user_id) THEN RAISE EXCEPTION 'Assign a route belonging to this company'; END IF; RETURN NEW; END $$;
+CREATE OR REPLACE FUNCTION public.validate_driver_assignment() RETURNS trigger LANGUAGE plpgsql SET search_path=public AS $$ BEGIN IF NEW.route_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM public.routes r WHERE r.id=NEW.route_id AND r.company_id=NEW.company_id AND r.user_id=NEW.user_id) THEN RAISE EXCEPTION 'Assign a route belonging to this company'; END IF; IF NEW.route_id IS NOT NULL AND NEW.role<>'Driver' THEN RAISE EXCEPTION 'Only drivers can be assigned to bus routes'; END IF; RETURN NEW; END $$;
+DROP TRIGGER IF EXISTS validate_bus_route ON public.buses;
+DROP TRIGGER IF EXISTS validate_driver_route ON public.drivers;
+CREATE TRIGGER validate_bus_route BEFORE INSERT OR UPDATE ON public.buses FOR EACH ROW EXECUTE FUNCTION public.validate_bus_assignment();
+CREATE TRIGGER validate_driver_route BEFORE INSERT OR UPDATE ON public.drivers FOR EACH ROW EXECUTE FUNCTION public.validate_driver_assignment();
+COMMENT ON FUNCTION public.validate_operating_assignment() IS 'DEPRECATED: replaced by validate_bus_assignment and validate_driver_assignment';
