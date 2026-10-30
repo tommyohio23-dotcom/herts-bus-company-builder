@@ -34,8 +34,8 @@ export const managementAction = createServerFn({ method: 'POST' })
       payload = {...listing, market_key:listing.key, fleet_no:data.fleetNo.trim(), registration:'', depot:data.town ?? '', features:listing.features};
     } else if (data.action === 'depot') {
       const pack = DEPOT_PACKAGES.find(p => p.name === data.key);
-      const { HERTS_TOWNS } = await import('./herts');
-      if (!pack || !data.town || !HERTS_TOWNS.includes(data.town)) throw new Error('Choose a depot package and town');
+      const { areaOf, areaTowns } = await import('./areas');
+      if (!pack || !data.town || !areaTowns(areaOf(company)).includes(data.town)) throw new Error('Choose a depot package and a town in your area');
       payload = {...pack, name:`${data.town} ${pack.name}`,town:data.town};
     } else {
       assertFleetCoverage(routes.filter(r=>r.contract_end_day==null||r.contract_end_day>=company.day),buses);

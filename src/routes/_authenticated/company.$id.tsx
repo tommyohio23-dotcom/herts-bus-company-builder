@@ -250,7 +250,7 @@ function AddBus({ companyId, company, routes, refresh, spend }: { companyId: str
 function Routes({ companyId, routes, buses, drivers, refresh }: { companyId: string; routes: Rt[]; buses: Bus[]; drivers: Drv[]; refresh: () => void }) {
   const area = useArea();
   const cur = useCur();
-  const [f, setF] = useState({ number: "", origin: "Hertford", destination: "Stevenage", via: "", frequency_mins: 30, fare: 2, journey_minutes:30, turnaround_minutes:5, recovery_percent:10 });
+  const [f, setF] = useState({ number: "", origin: areaTowns(area)[0] ?? "", destination: areaTowns(area)[1] ?? "", via: "", frequency_mins: 30, fare: 2, journey_minutes:30, turnaround_minutes:5, recovery_percent:10 });
   async function add() {
     if (!f.number) { toast.error("Route number needed"); return; }
     const { error } = await supabase.from("routes").insert({ ...f, company_id: companyId });

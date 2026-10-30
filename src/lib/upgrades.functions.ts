@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
-import { BUS_MODELS, FEATURES, HERTS_TOWNS } from './herts';
+import { BUS_MODELS, FEATURES } from './herts';
 import { newBusPrice, upgradeCost } from './upgrades';
 
 export const purchaseBusOrFeatures = createServerFn({method:'POST'}).middleware([requireSupabaseAuth])
@@ -20,7 +20,7 @@ export const purchaseBusOrFeatures = createServerFn({method:'POST'}).middleware(
       if(r.error)throw new Error(r.error.message);
       return {cost,bought:1};
     }
-    if(!data.fleet_no?.trim()||!data.model||!BUS_MODELS.includes(data.model)||!data.year||!data.depot||!HERTS_TOWNS.includes(data.depot))throw new Error('Choose bus details');
+    if(!data.fleet_no?.trim()||!data.model||!BUS_MODELS.includes(data.model)||!data.year||!data.depot)throw new Error('Choose bus details');
     if(data.route_id){const r=await db.from('routes').select('id').eq('id',data.route_id).eq('company_id',data.companyId).single();if(!r.data)throw new Error('Route not found');}
     const each=newBusPrice(data.year)+upgradeCost(data.features);
     const qty=data.quantity??1;
