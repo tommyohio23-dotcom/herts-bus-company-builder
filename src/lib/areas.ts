@@ -56,7 +56,7 @@ export function areaTowns(a: AreaKey): string[] {
 const WORLD_MODELS: Record<'boston' | 'nyc' | 'berlin', string[]> = {
   boston: ['New Flyer Xcelsior XDE40', 'New Flyer Xcelsior XDE60', 'New Flyer Xcelsior XE40 (battery electric)', 'New Flyer Xcelsior XE60 (battery electric)', 'Neoplan AN460LF (dual-mode)', 'Nova Bus LFS', 'MCI D4500 (coach)'],
   nyc: ['New Flyer Xcelsior XD40', 'New Flyer Xcelsior XD60', 'New Flyer Xcelsior XE40 (battery electric)', 'Nova Bus LFS', 'Nova Bus LFS Artic', 'Nova Bus LFSe+ (battery electric)', 'Orion VII Hybrid', 'Prevost X3-45 (express coach)', 'MCI D4500 (coach)'],
-  berlin: ['ADL Enviro500 MMC', "MAN Lion's City Hybrid", "MAN Lion's City 12 E", "MAN Lion's City 18 (articulated)", 'Mercedes-Benz Citaro', 'Mercedes-Benz Citaro G (bendy)', 'Mercedes-Benz eCitaro', 'Mercedes-Benz eCitaro G', 'Solaris Urbino 12 electric', 'Solaris Urbino 18', 'Scania Citywide'],
+  berlin: ['ADL Enviro500 MMC', "MAN Lion's City Hybrid", "MAN Lion's City 12 E", 'Mercedes-Benz Citaro', 'Mercedes-Benz Citaro G (bendy)', 'Mercedes-Benz eCitaro', 'Solaris Urbino 12 electric', 'Solaris Urbino 18', 'Scania Citywide'],
 };
 const NON_UK = new Set(Object.values(WORLD_MODELS).flat().filter(m => !['ADL Enviro500 MMC', "MAN Lion's City Hybrid", 'Mercedes-Benz Citaro', 'Mercedes-Benz Citaro G (bendy)'].includes(m)));
 /** Bus models sold in an area: city-specific lists abroad, British models at home. */
