@@ -6,7 +6,7 @@ export function ServiceFrequency({
   onChange,
   label = 'Service frequency',
   disabled = false,
-  cycleMinutes = 60,
+  cycleMinutes = 76,
 }: {
   value: number;
   onChange: (n: number) => void;
@@ -15,7 +15,7 @@ export function ServiceFrequency({
   cycleMinutes?: number;   // pass routeCycleMinutes(route.stops) from the parent
 }) {
   const busCount = requiredBuses(value, cycleMinutes);
-  const oneWay   = Math.round(cycleMinutes / 2);
+
   return (
     <div className="min-w-0 space-y-3 py-2">
       <div className="flex flex-wrap justify-between gap-2 text-sm">
@@ -35,7 +35,7 @@ export function ServiceFrequency({
         }}
       />
       <p className="text-xs text-muted-foreground">
-        {oneWay}-min journey · {cycleMinutes}-min round trip →{' '}
+        {cycleMinutes}-min cycle including terminal & recovery time →{' '}
         <strong>{busCount} bus{busCount > 1 ? 'es' : ''} needed</strong> at every {value} min
       </p>
     </div>

@@ -20,7 +20,8 @@ export function routeOneWayMinutes(stops?: LatLng[]): number {
   if (!stops || stops.length < 2) return 30;
   let distanceKm = 0;
   for (let i = 0; i < stops.length - 1; i++) {
-    distanceKm += haversineKm(stops[i], stops[i + 1]);
+    const a=stops[i], b=stops[i+1];
+    if(a && b) distanceKm += haversineKm(a, b);
   }
   const travelMins = (distanceKm / BUS_SPEED_KMH) * 60;
   const dwellMins  = (stops.length * DWELL_SECS_PER_STOP) / 60;
@@ -37,23 +38,21 @@ export function requiredBuses(frequencyMinutes: number, cycleMinutes = 60): numb
   return Math.max(1, Math.ceil(cycleMinutes / frequencyMinutes));
 }
 
-export function assertFleetCoverage(
-  routes: { id: string; number?: string; frequency_mins: number; stops?: LatLng[] }[],
-  buses:  { route_id: string | null; status: string }[],
-): void {
+export type TimedRoute = { id?: string; number?: string; frequency_mins?: number; journey_minutes?: number; turnaround_minutes?: number; recovery_percent?: number; origin?: string; via?: string; destination?: string; stops?: LatLng[] };
+export function timetableCycle(route: TimedRoute): number {
+  const journey = route.journey_minutes ?? (route.stops ? routeOneWayMinutes(route.stops) : routeCycleFromNames(route.origin ?? '', route.via ?? '', route.destination ?? '') / 2);
+  return journey * 2 + (route.turnaround_minutes ?? 5) * 2 + Math.ceil(journey * 2 * (route.recovery_percent ?? 10) / 100);
+}
+export function assertFleetCoverage(routes: (TimedRoute & {id:string;frequency_mins:number})[], buses: {route_id:string|null;status:string}[]): void {
   for (const route of routes) {
-    const stops  = route.stops || [];
-    const cycle  = routeCycleMinutes(stops);
-    const needed = requiredBuses(route.frequency_mins, cycle);
-    const oneWay = routeOneWayMinutes(stops);
-    const count  = buses.filter(b => b.route_id === route.id && b.status === 'In service').length;
-    if (count > 0 && count < needed) {
-      throw new Error(
-        `Route ${route.number ?? route.id}: ${oneWay}-min journey (${cycle}-min round trip). ` +
-        `Every ${route.frequency_mins} min needs ${needed} buses; only ${count} allocated.`,
-      );
-    }
+    const allocated = buses.filter(b=>b.route_id===route.id && ['In service','Broken down'].includes(b.status));
+    const count = allocated.filter(b=>b.status==='In service').length;
+    const needed = requiredBuses(route.frequency_mins, timetableCycle(route));
+    if (allocated.length && count < needed) throw new Error(`Route ${route.number ?? route.id}: ${timetableCycle(route)}-min cycle needs ${needed} buses; only ${count} available.`);
   }
+}
+export function assertDriverCoverage(routes:{id:string;number?:string}[],buses:{route_id:string|null;status:string}[],drivers:{route_id?:string|null;role?:string}[]) {
+  for(const r of routes){const active=buses.filter(b=>b.route_id===r.id&&b.status==='In service').length;const crew=drivers.filter(d=>d.route_id===r.id&&d.role==='Driver').length;if(active>crew)throw new Error(`Route ${r.number??r.id}: needs ${active} assigned drivers; only ${crew} assigned.`);}
 }
 
 /** Approximate coordinates for Hertfordshire towns. */
