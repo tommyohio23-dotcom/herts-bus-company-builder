@@ -78,22 +78,17 @@ export function localReview(theme: ReviewTheme, rating: number, ctx: ReviewConte
   return `${text} — ${pick(NAMES[fl], seed, 6)}`;
 }
 
-// Place names used in the uploaded UK review bank; swapped for the company's own route places.
-const BANK_PLACES = ["Welwyn Garden City", 'Hertford North', 'Enfield Chase', 'Finsbury Park', "King's Cross", 'Potters Bar', 'Wood Green', 'New Barnet', 'Borehamwood', 'St Albans', 'Stevenage', 'Hitchin', 'Hatfield', 'Enfield', 'Barnet', 'Watford', 'Finchley', 'Hertford'];
-const PLACE_RE = new RegExp(`\\b(${BANK_PLACES.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})\\b`, 'g');
-export function localisePlaces(text: string, places: string[], seed: number) {
-  if (!places.length) return text;
-  let n = 0;
-  return text.replace(PLACE_RE, () => pick(places, seed, 10 + n++));
-}
+const onRoute = (place: string, routePlaces: string[]) => routePlaces.some(p => p.toLowerCase().includes(place.toLowerCase()));
 
-/** Uploaded review for this company (if any were written for it), else a UK bank review with its places swapped in. */
+/**
+ * Uploaded review written for this company; otherwise (UK only) a review whose named
+ * places are all on this company's routes, or one that names no place. Never swaps places.
+ */
 export function bankReviewFor(mode: 'bus' | 'train', rating: number, ctx: ReviewContext, seed: number): string | null {
-  const own = REVIEW_BANK.filter(r => r.mode === mode && r.rating === rating && r.company && r.company === ctx.presetKey);
-  if (own.length) { const r = pick(own, seed); return `${r.text} — ${r.passenger}`; }
-  if (flavourOf(ctx.area) !== 'uk') return null;
-  const list = REVIEW_BANK.filter(r => r.mode === mode && r.rating === rating && !r.company);
+  const same = REVIEW_BANK.filter(r => r.mode === mode && r.rating === rating);
+  const own = ctx.presetKey ? same.filter(r => r.companies?.includes(ctx.presetKey!)) : [];
+  const list = own.length ? own : flavourOf(ctx.area) !== 'uk' ? [] : same.filter(r => r.places && (r.places.length ? r.places.every(p => onRoute(p, ctx.places)) : true));
   if (!list.length) return null;
   const r = pick(list, seed);
-  return `${localisePlaces(r.text, ctx.places, seed)} — ${r.passenger}`;
+  return `${r.text} — ${r.passenger}`;
 }
