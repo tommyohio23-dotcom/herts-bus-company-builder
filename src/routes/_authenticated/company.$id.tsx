@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCur } from "@/lib/currency";
+import { useCur, CurrencyContext, AREA_CURRENCY } from "@/lib/currency";
+import { areaOf, areaModels, areaTowns } from "@/lib/areas";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -59,6 +60,7 @@ function CompanyPage() {
   const [running, setRunning] = useState(false);
 
   if (!company) return <div className="p-8 text-muted-foreground">Loading depot…</div>;
+  const cur = AREA_CURRENCY[areaOf(company)];
 
   async function runDay() {
     if (!company || running) return;
@@ -76,6 +78,7 @@ function CompanyPage() {
   }
 
   return (
+    <CurrencyContext.Provider value={cur}>
     <div className="min-h-screen">
       <div className="stripe-band h-2" />
       <header className="mx-auto max-w-6xl px-4 py-4">
@@ -115,6 +118,7 @@ function CompanyPage() {
         </Tabs>
       </main>
     </div>
+    </CurrencyContext.Provider>
   );
 }
 
