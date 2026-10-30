@@ -16,6 +16,12 @@ export const MAP_AREAS = [
   { key: 'west-london', name: 'West London & Heathrow', lat: 51.49, lng: -0.37, file: 'london', bounds: [51.43, 51.56, -0.52, -0.25] },
   { key: 'central-london', name: 'Central London', lat: 51.512, lng: -0.12, file: 'london', bounds: [51.48, 51.54, -0.2, -0.05] },
   { key: 'east-london', name: 'East & North East London', lat: 51.56, lng: -0.03, file: 'london', bounds: [51.52, 51.62, -0.1, 0.08] },
+  { key: 'boston', name: 'Boston · Cambridge · Somerville', lat: 42.355, lng: -71.07 },
+  { key: 'nyc', name: 'New York (all four boroughs)', lat: 40.75, lng: -73.93, file: 'nyc' },
+  { key: 'manhattan', name: 'Manhattan', lat: 40.775, lng: -73.97, file: 'nyc', bounds: [40.70, 40.88, -74.02, -73.90] },
+  { key: 'brooklyn-queens', name: 'Brooklyn & Queens', lat: 40.68, lng: -73.88, file: 'nyc', bounds: [40.57, 40.80, -74.04, -73.70] },
+  { key: 'berlin', name: 'Berlin', lat: 52.52, lng: 13.405 },
+  { key: 'berlin-centre', name: 'Berlin Mitte & inner city', lat: 52.515, lng: 13.40, file: 'berlin', bounds: [52.48, 52.55, 13.30, 13.47] },
 ] as { key: string; name: string; lat: number; lng: number; file?: string; bounds?: [number, number, number, number] }[];
 export type RealStop = { id: string; name: string; locality: string; indicator: string; lat: number; lng: number };
 export const stopLabel = (s: RealStop) => `${s.locality} · ${s.name}${s.indicator ? ` (${s.indicator})` : ''}`;
