@@ -181,12 +181,20 @@ function AddBus({ companyId, company, routes, refresh, spend }: { companyId: str
   const purchase=useServerFn(purchaseBusOrFeatures);
   const [saving,setSaving]=useState(false);
   const [open, setOpen] = useState(false);
-  const [f, setF] = useState({ fleet_no: "", registration: "", model: BUS_MODELS[0] ?? "", year: 2012, depot: company.hq_town, livery: "", route_id: "none", features: [] as string[] });
-  const price = busPrice(f.year) + upgradeCost(f.features);
+  const [f, setF] = useState({ fleet_no: "", registration: "", model: BUS_MODELS[0] ?? "", year: 2012, depot: company.hq_town, livery: "", route_id: "none", features: [] as string[], quantity: 1 });
+  const each = busPrice(f.year) + upgradeCost(f.features);
+  const price = each * f.quantity;
   async function save() {
     if (!f.fleet_no) { toast.error("Fleet number needed"); return; }
     if(saving)return;setSaving(true);
-    try{await purchase({data:{...f,companyId,day:company.day,route_id:f.route_id==='none'?null:f.route_id}});toast.success(`${f.fleet_no} joins the fleet`);setOpen(false);refresh();}catch(e){toast.error(e instanceof Error?e.message:'Purchase failed');}finally{setSaving(false);}
+    try{
+      const res=await purchase({data:{...f,companyId,day:company.day,route_id:f.route_id==='none'?null:f.route_id}});
+      const bought=(res as {bought?:number;partial?:boolean;reason?:string})?.bought??f.quantity;
+      const partial=(res as {partial?:boolean;reason?:string})?.partial;
+      if(partial)toast.warning(`Only ${bought} of ${f.quantity} bought — ${(res as {reason?:string}).reason??'funds ran out'}`);
+      else toast.success(f.quantity>1?`${bought} buses join the fleet`:`${f.fleet_no} joins the fleet`);
+      setOpen(false);refresh();
+    }catch(e){toast.error(e instanceof Error?e.message:'Purchase failed');}finally{setSaving(false);}
   }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -202,8 +210,9 @@ function AddBus({ companyId, company, routes, refresh, spend }: { companyId: str
             <Select value={f.model} onValueChange={(v) => setF({ ...f, model: v })}><SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>{BUS_MODELS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent></Select>
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <div><Label>Year</Label><Input type="number" min={1970} max={2026} value={f.year} onChange={(e) => setF({ ...f, year: Number(e.target.value) })} /></div>
+            <div><Label>How many</Label><Input type="number" min={1} max={50} value={f.quantity} onChange={(e) => setF({ ...f, quantity: Math.max(1, Math.min(50, Number(e.target.value) || 1)) })} /></div>
             <div><Label>Depot</Label>
               <Select value={f.depot} onValueChange={(v) => setF({ ...f, depot: v })}><SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{HERTS_TOWNS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select>
@@ -216,8 +225,8 @@ function AddBus({ companyId, company, routes, refresh, spend }: { companyId: str
           </div>
           <div><Label>Spec & extras</Label><FeaturePicker value={f.features} onChange={(v) => setF({ ...f, features: v })} /></div>
           <BusPhoto model={f.model} presetKey={company.preset_key} className="overflow-hidden rounded-md" />
-          <p className="text-sm text-muted-foreground">Extras £{upgradeCost(f.features).toLocaleString()} · Upkeep £{upgradeUpkeep(f.features)}/day</p>
-          <Button disabled={saving} onClick={save}>Buy for £{price.toLocaleString()}</Button>
+          <p className="text-sm text-muted-foreground">Extras £{upgradeCost(f.features).toLocaleString()} each · Upkeep £{upgradeUpkeep(f.features)}/day each{f.quantity > 1 ? ` · ${f.quantity} buses at £${each.toLocaleString()} each` : ""}</p>
+          <Button disabled={saving} onClick={save}>{f.quantity > 1 ? `Buy ${f.quantity} for £${price.toLocaleString()}` : `Buy for £${price.toLocaleString()}`}</Button>
         </div>
       </DialogContent>
     </Dialog>
