@@ -613,6 +613,7 @@ export type Database = {
         Returns: undefined
       }
       boost_existing_network_capital: { Args: never; Returns: number }
+      hire_all_qualified: { Args: { p_company: string }; Returns: number }
       publish_job_advert: {
         Args: {
           p_candidates: Json

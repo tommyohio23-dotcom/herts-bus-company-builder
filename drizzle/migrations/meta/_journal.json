@@ -92,6 +92,13 @@
       "when": 1793370917342,
       "tag": "0012_raise_advert_positions_limit",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793371253311,
+      "tag": "0013_bulk_hire_qualified",
+      "breakpoints": true
     }
   ]
 }
