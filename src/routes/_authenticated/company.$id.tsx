@@ -279,7 +279,7 @@ function Routes({ companyId, routes, buses, drivers, refresh }: { companyId: str
           </div>
           <div><Label>One-way journey minutes</Label><Input aria-label="New route journey minutes" type="number" min={5} max={600} value={f.journey_minutes} onChange={e=>setF({...f,journey_minutes:Number(e.target.value)})}/></div>
           <ServiceFrequency cycleMinutes={timetableCycle(f)} value={f.frequency_mins} onChange={n=>setF({...f,frequency_mins:n})} label="New route frequency"/>
-          <div><Label>Fare £</Label><Input type="number" step="0.1" min={0} value={f.fare} onChange={(e) => setF({ ...f, fare: Number(e.target.value) })} /></div>
+          <div><Label>Fare {cur}</Label><Input type="number" step="0.1" min={0} value={f.fare} onChange={(e) => setF({ ...f, fare: Number(e.target.value) })} /></div>
         </div>
         <Button className="mt-3" onClick={add}>Register route</Button>
       </div>
