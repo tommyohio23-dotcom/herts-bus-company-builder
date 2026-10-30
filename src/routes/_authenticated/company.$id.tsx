@@ -197,6 +197,7 @@ function AddBus({ companyId, company, routes, refresh, spend }: { companyId: str
   const [f, setF] = useState({ fleet_no: "", registration: "", model: models[0] ?? "", year: 2012, depot: company.hq_town, livery: "", route_id: "none", features: [] as string[], quantity: 1 });
   const each = busPrice(f.year) + upgradeCost(f.features);
   const price = each * f.quantity;
+  const [qtyText, setQtyText] = useState("1");
   async function save() {
     if (!f.fleet_no) { toast.error("Fleet number needed"); return; }
     if (!depotTowns.includes(f.depot)) { toast.error("Choose one of your depots"); return; }
@@ -226,7 +227,7 @@ function AddBus({ companyId, company, routes, refresh, spend }: { companyId: str
           </div>
           <div className="grid grid-cols-3 gap-2">
             <div><Label>Year</Label><Input type="number" min={1970} max={2026} value={f.year} onChange={(e) => setF({ ...f, year: Number(e.target.value) })} /></div>
-            <div><Label>How many</Label><Input type="number" min={1} max={50} value={f.quantity} onChange={(e) => setF({ ...f, quantity: Math.max(1, Math.min(50, Number(e.target.value) || 1)) })} /></div>
+            <div><Label>How many</Label><Input type="text" inputMode="numeric" value={qtyText} onChange={(e) => { const t = e.target.value.replace(/\D/g, "").slice(0, 3); setQtyText(t); const n = Number(t); if (n >= 1) setF({ ...f, quantity: Math.min(100, n) }); }} onBlur={() => setQtyText(String(f.quantity))} /></div>
             <div><Label>Depot</Label>
               <Select value={depotTowns.includes(f.depot) ? f.depot : ""} onValueChange={(v) => setF({ ...f, depot: v })}><SelectTrigger><SelectValue placeholder="Choose depot" /></SelectTrigger>
                 <SelectContent>{depotTowns.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select>
