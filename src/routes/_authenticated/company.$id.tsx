@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BusSide } from "@/components/BusSide";
 import { BUS_MODELS, FEATURES, HERTS_TOWNS, STATUSES } from "@/lib/herts";
 import { BusPhoto } from "@/components/BusPhoto";
+import { fetchAll, chunk } from "@/lib/fetch-all";
 import { managementAction } from "@/lib/management.functions";
 import { ManagementExpansion } from "@/components/ManagementExpansion";
 import { NetworkPlanner } from "@/components/NetworkPlanner";
@@ -44,7 +45,7 @@ function useCompanyData(id: string) {
   const company = useQuery({ queryKey: ["company", id], queryFn: async () => (await supabase.from("companies").select("*").eq("id", id).single()).data });
   const buses = useQuery({ queryKey: ["buses", id], queryFn: async () => (await supabase.from("buses").select("*").eq("company_id", id).order("fleet_no")).data ?? [] });
   const routes = useQuery({ queryKey: ["routes", id], queryFn: async () => (await supabase.from("routes").select("*").eq("company_id", id).order("number")).data ?? [] });
-  const drivers = useQuery({ queryKey: ["drivers", id], queryFn: async () => (await supabase.from("drivers").select("*").eq("company_id", id).order("name")).data ?? [] });
+  const drivers = useQuery({ queryKey: ["drivers", id], queryFn: () => fetchAll((from, to) => supabase.from("drivers").select("*").eq("company_id", id).order("name").order("id").range(from, to)) });
   return { company: company.data, buses: buses.data ?? [], routes: routes.data ?? [], drivers: drivers.data ?? [] };
 }
 
@@ -102,7 +103,7 @@ function CompanyPage() {
           </TabsList>
           <TabsContent value="fleet"><Fleet companyId={id} company={company} buses={buses} routes={routes} refresh={refresh} spend={spend} /></TabsContent>
           <TabsContent value="routes"><Routes companyId={id} routes={routes} buses={buses} drivers={drivers} refresh={refresh} /></TabsContent>
-          <TabsContent value="drivers"><Recruitment companyId={id} drivers={drivers} refresh={refresh} /></TabsContent>
+          <TabsContent value="drivers"><Recruitment companyId={id} drivers={drivers} routes={routes} refresh={refresh} /></TabsContent>
           <TabsContent value="ops">
             <Button size="lg" className="mt-3" disabled={running} onClick={runDay}>{running ? 'Running…' : `Run day ${company.day}`}</Button>
             {routes.filter(r=>r.contract_end_day==null||r.contract_end_day>=company.day).map(r=>{let issue='';try{assertFleetCoverage([r],buses);assertDriverCoverage([r],buses,drivers);}catch(e){issue=e instanceof Error?e.message:'';}return issue?<p key={r.id} className="mt-2 text-sm text-destructive">{issue}</p>:null;})}
@@ -258,7 +259,7 @@ function Routes({ companyId, routes, buses, drivers, refresh }: { companyId: str
             </div>
             {r.stop_ids.length === 0 && <EditStops route={r} refresh={refresh} />}
             <RouteFrequency route={r} count={n} refresh={refresh}/>
-            <div className="w-full border-t pt-2"><p className="text-sm font-semibold">Drivers · {drivers.filter(d=>d.route_id===r.id&&d.role==='Driver').length} assigned / {n} needed</p><div className="mt-2 flex flex-wrap gap-2">{drivers.filter(d=>d.role==='Driver').map(d=><Button key={d.id} size="sm" variant={d.route_id===r.id?'default':'outline'} onClick={async()=>{const result=await supabase.from('drivers').update({route_id:d.route_id===r.id?null:r.id}).eq('id',d.id);if(result.error)toast.error(result.error.message);else{toast.success('Driver assignment saved');refresh();}}}>{d.name}{d.route_id&&d.route_id!==r.id?` · route ${routes.find(x=>x.id===d.route_id)?.number??''}`:''}</Button>)}</div>{!drivers.some(d=>d.role==='Driver')&&<p className="mt-2 text-sm text-muted-foreground">No drivers employed.</p>}</div>
+            <RouteDrivers route={r} needed={n} drivers={drivers} refresh={refresh} />
             <Button size="sm" variant="ghost" onClick={async () => { await supabase.from("routes").delete().eq("id", r.id); refresh(); }}>Withdraw</Button>
           </div>
         );
@@ -340,5 +341,29 @@ function EditStops({ route, refresh }: { route: Rt; refresh: () => void }) {
         <Button onClick={async () => { await supabase.from("routes").update({ via: stops.join(", ") }).eq("id", route.id); setOpen(false); refresh(); }}>Save stops</Button>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function RouteDrivers({ route, needed, drivers, refresh }: { route: { id: string }; needed: number; drivers: Drv[]; refresh: () => void }) {
+  const [busy, setBusy] = useState(false);
+  const assigned = drivers.filter((d) => d.route_id === route.id && d.role === "Driver");
+  const free = drivers.filter((d) => d.role === "Driver" && !d.route_id);
+  const save = async (ids: string[], routeId: string | null, msg: string) => {
+    if (busy || !ids.length) return; setBusy(true);
+    try { for (const part of chunk(ids)) { const r = await supabase.from("drivers").update({ route_id: routeId }).in("id", part); if (r.error) throw r.error; } toast.success(msg); refresh(); }
+    catch (e) { toast.error(e instanceof Error ? e.message : "Assignment failed"); } finally { setBusy(false); }
+  };
+  const gap = Math.max(0, needed - assigned.length);
+  return (
+    <div className="w-full border-t pt-2">
+      <p className="text-sm font-semibold">Drivers · {assigned.length} assigned / {needed} needed · {free.length} unassigned available</p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        <Button size="sm" disabled={busy || !gap || !free.length} onClick={() => save(free.slice(0, gap).map((d) => d.id), route.id, `Assigned ${Math.min(gap, free.length)} drivers`)}>Fill with unassigned drivers{gap ? ` (${Math.min(gap, free.length)})` : ""}</Button>
+        <Button size="sm" variant="outline" disabled={busy || !free.length} onClick={() => save([free[0]!.id], route.id, "Driver assigned")}>Add one</Button>
+        {assigned.length > 0 && <Button size="sm" variant="ghost" disabled={busy} onClick={() => save(assigned.map((d) => d.id), null, "Drivers unassigned")}>Unassign all</Button>}
+      </div>
+      {assigned.length > 0 && <div className="mt-2 flex flex-wrap gap-2">{assigned.slice(0, 40).map((d) => <Button key={d.id} size="sm" variant="secondary" disabled={busy} title="Tap to unassign" onClick={() => save([d.id], null, `${d.name} unassigned`)}>{d.name} ✕</Button>)}{assigned.length > 40 && <span className="self-center text-xs text-muted-foreground">+{assigned.length - 40} more</span>}</div>}
+      {!drivers.some((d) => d.role === "Driver") && <p className="mt-2 text-sm text-muted-foreground">No drivers employed.</p>}
+    </div>
   );
 }

@@ -1,3 +1,4 @@
+import { fetchAll } from './fetch-all';
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
@@ -14,7 +15,7 @@ export const managementAction = createServerFn({ method: 'POST' })
     if (company.day !== data.day) throw new Error('Company changed; refresh and retry');
     const [busResult, routeResult, staffResult, depotResult] = await Promise.all([
       db.from('buses').select('*').eq('company_id',company.id), db.from('routes').select('*').eq('company_id',company.id),
-      db.from('drivers').select('*').eq('company_id',company.id), db.from('depots').select('*').eq('company_id',company.id),
+      fetchAll((f,t)=>db.from('drivers').select('*').eq('company_id',company.id).order('id').range(f,t)).then(data=>({data,error:null}),error=>({data:null,error})), db.from('depots').select('*').eq('company_id',company.id),
     ]);
     for (const result of [busResult,routeResult,staffResult,depotResult]) if (result.error) throw new Error(result.error.message);
     const buses = busResult.data ?? [], routes = routeResult.data ?? [], staff = staffResult.data ?? [], depots = depotResult.data ?? [];
