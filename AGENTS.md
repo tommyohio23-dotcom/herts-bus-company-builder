@@ -28,3 +28,4 @@
 - Area rules (towns for depots/routes, buyable and used-market models, tender towns) derive from `areaOf(company)` in `src/lib/areas.ts`, and servers re-check them, so a company never mixes places or buses from another region.
 - Bus reviews come from `src/lib/local-reviews.ts`: area-voiced templates naming the route's own places, plus bank reviews tagged with the preset keys they fit (`companies`) and the towns they name (`places`); bank text is never place-swapped, so a review only appears where its places are real.
 - Company picker background (established, owner, history) lives in `src/lib/company-info.ts`, keyed by preset key, separate from gameplay presets.
+- UK starting fleets come from per-operator model mixes in `src/lib/operator-fleets.ts` (game fleet numbers, no real registrations), capped by starter depot capacity; buses beyond one per route start as unallocated spares.
