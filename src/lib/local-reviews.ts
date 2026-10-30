@@ -5,7 +5,9 @@ export type ReviewContext = { area: string; operator: string; presetKey?: string
 export type ReviewTheme = 'missing' | 'worn' | 'fare' | 'comfort' | 'frequent' | 'sparse';
 type Flavour = 'uk' | 'us' | 'de';
 const flavourOf = (area: string): Flavour => area === 'boston' || area === 'nyc' ? 'us' : area === 'berlin' ? 'de' : 'uk';
-const pick = <T,>(items: T[], seed: number): T => items[Math.abs(Math.floor(seed)) % items.length]!;
+/** Integer hash so neighbouring days and salts land on unrelated choices. */
+const mix = (seed: number, salt = 0) => { let h = (Math.floor(seed) ^ (salt * 0x9e3779b1)) >>> 0; h = Math.imul(h ^ (h >>> 16), 0x85ebca6b) >>> 0; h = Math.imul(h ^ (h >>> 13), 0xc2b2ae35) >>> 0; return (h ^ (h >>> 16)) >>> 0; };
+const pick = <T,>(items: T[], seed: number, salt = 0): T => items[mix(seed, salt) % items.length]!;
 
 // {p} = a place on the route, {q} = the other end, {r} = route number, {o} = operator, {c} = currency sign.
 const OPEN: Record<Flavour, Record<'bad' | 'mid' | 'good', string[]>> = {
@@ -65,15 +67,15 @@ const NAMES: Record<Flavour, string[]> = {
 };
 const fill = (t: string, ctx: ReviewContext, route: string, fare: number, seed: number) => {
   const places = ctx.places.length ? ctx.places : [ctx.operator];
-  const p = pick(places, seed), q = pick(places.filter(x => x !== p).length ? places.filter(x => x !== p) : places, seed * 3 + 1);
+  const p = pick(places, seed, 1), rest = places.filter(x => x !== p), q = pick(rest.length ? rest : places, seed, 2);
   return t.replaceAll('{p}', p).replaceAll('{q}', q).replaceAll('{r}', route).replaceAll('{o}', ctx.operator).replaceAll('{c}', ctx.cur).replaceAll('{f}', fare.toFixed(2));
 };
 
 /** Builds a varied review in the area's own voice, naming only places on that company's route. */
 export function localReview(theme: ReviewTheme, rating: number, ctx: ReviewContext, route: { number: string; fare: number }, seed: number): string {
   const fl = flavourOf(ctx.area), band = rating <= 2 ? 'bad' : rating === 3 ? 'mid' : 'good';
-  const text = [pick(OPEN[fl][band], seed), pick(DETAIL[fl][theme], seed * 7 + 3), pick(CLOSE[fl][band], seed * 11 + 5)].map(t => fill(t, ctx, route.number, route.fare, seed)).join(' ');
-  return `${text} — ${pick(NAMES[fl], seed * 13 + 2)}`;
+  const text = [pick(OPEN[fl][band], seed, 3), pick(DETAIL[fl][theme], seed, 4), pick(CLOSE[fl][band], seed, 5)].map(t => fill(t, ctx, route.number, route.fare, seed)).join(' ');
+  return `${text} — ${pick(NAMES[fl], seed, 6)}`;
 }
 
 // Place names used in the uploaded UK review bank; swapped for the company's own route places.
@@ -82,7 +84,7 @@ const PLACE_RE = new RegExp(`\\b(${BANK_PLACES.map(p => p.replace(/[.*+?^${}()|[
 export function localisePlaces(text: string, places: string[], seed: number) {
   if (!places.length) return text;
   let n = 0;
-  return text.replace(PLACE_RE, () => pick(places, seed + n++));
+  return text.replace(PLACE_RE, () => pick(places, seed, 10 + n++));
 }
 
 /** Uploaded review for this company (if any were written for it), else a UK bank review with its places swapped in. */
