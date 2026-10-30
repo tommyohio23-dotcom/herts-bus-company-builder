@@ -225,8 +225,8 @@ function AddBus({ companyId, company, routes, refresh, spend }: { companyId: str
           </div>
           <div><Label>Spec & extras</Label><FeaturePicker value={f.features} onChange={(v) => setF({ ...f, features: v })} /></div>
           <BusPhoto model={f.model} presetKey={company.preset_key} className="overflow-hidden rounded-md" />
-          <p className="text-sm text-muted-foreground">Extras £{upgradeCost(f.features).toLocaleString()} · Upkeep £{upgradeUpkeep(f.features)}/day</p>
-          <Button disabled={saving} onClick={save}>Buy for £{price.toLocaleString()}</Button>
+          <p className="text-sm text-muted-foreground">Extras £{upgradeCost(f.features).toLocaleString()} each · Upkeep £{upgradeUpkeep(f.features)}/day each{f.quantity > 1 ? ` · ${f.quantity} buses at £${each.toLocaleString()} each` : ""}</p>
+          <Button disabled={saving} onClick={save}>{f.quantity > 1 ? `Buy ${f.quantity} for £${price.toLocaleString()}` : `Buy for £${price.toLocaleString()}`}</Button>
         </div>
       </DialogContent>
     </Dialog>
