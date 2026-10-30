@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { AREA_PRESETS, areaModels, areaTowns, companyArea } from './areas';
 import { AREA_CURRENCY } from './currency';
 import { BUS_MODELS } from './herts';
-import { realOperatorPhoto } from './bus-photos';
+import { realBusPhoto, realOperatorPhoto } from './bus-photos';
 
 describe('Boston, New York and Berlin operators', () => {
   it('each city has its own operator menu', () => {
@@ -33,7 +33,7 @@ describe('Boston, New York and Berlin operators', () => {
   });
   it('city fleets use buyable models and every operator has a real photo', () => {
     for (const p of [...AREA_PRESETS.boston, ...AREA_PRESETS.nyc, ...AREA_PRESETS.berlin]) {
-      for (const b of p.fleet) { expect(BUS_MODELS).toContain(b.model); expect(realModelPhoto(b.model)).toBeDefined(); }
+      for (const b of p.fleet) { expect(BUS_MODELS).toContain(b.model); expect(realBusPhoto(null, b.model)).toBeDefined(); }
       expect(realOperatorPhoto(p.key)).toBeDefined();
     }
   });
