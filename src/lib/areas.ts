@@ -63,3 +63,8 @@ const NON_UK = new Set(Object.values(WORLD_MODELS).flat().filter(m => !['ADL Env
 export function areaModels(a: AreaKey): string[] {
   return a === 'boston' || a === 'nyc' || a === 'berlin' ? WORLD_MODELS[a] : BUS_MODELS.filter(m => !NON_UK.has(m));
 }
+const isWorld = (a: AreaKey) => a === 'boston' || a === 'nyc' || a === 'berlin';
+/** Used-market models for an area (British default stock unless abroad). */
+export const areaMarketModels = (a: AreaKey) => isWorld(a) ? areaModels(a) : undefined;
+/** Tender towns for areas outside the original Herts/London tender list. */
+export const areaTenderTowns = (a: AreaKey) => a === 'herts' || a === 'london' ? undefined : AREA_TOWNS[a];
