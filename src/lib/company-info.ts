@@ -16,6 +16,7 @@ export const COMPANY_INFO: Record<string, CompanyInfo> = {
   'go-ahead-london': { founded: '1996 (Go-Ahead in London)', owner: 'Go-Ahead Group', about: 'Go-Ahead’s London bus business, built on London General and London Central, and London’s biggest operator by routes.' },
   'first-london': { founded: '2022 (current company)', owner: 'FirstGroup', about: 'FirstGroup returned to London buses in 2022 by buying RATP Dev’s London companies.' },
   'stagecoach-london': { founded: '1994', owner: 'Stagecoach Group', about: 'Began when Stagecoach bought East London and Selkent at privatisation; now runs many east and north London routes.' },
+  'london-sovereign': { owner: 'FirstGroup (since 2022)', about: 'Small north-west London operator based at Edgware, now part of First Bus London.' },
   'london-united': { founded: '1989', owner: 'FirstGroup (since 2022)', about: 'West and south-west London operator from the London Buses era, run by RATP Dev before First Bus London bought it.' },
   'transport-uk-london': { founded: '2009 (as Abellio London)', owner: 'Transport UK Group', about: 'Formerly Abellio London, renamed Transport UK after a 2023 management buyout; runs south and west London routes.' },
   'london-general': { founded: '1989', owner: 'Go-Ahead Group (since 1996)', about: 'Historic south-west London company, privatised in 1994 and part of Go-Ahead London.' },
