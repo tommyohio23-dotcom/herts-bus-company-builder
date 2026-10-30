@@ -1,7 +1,7 @@
 import type { Preset } from './herts';
 
 // Boston, New York and Berlin operators. Routes are well-known services listed from memory,
-// not a live timetable feed. Fares are converted to pounds so all game money stays in £.
+// not a live timetable feed. Fares are local single fares ($ in Boston/New York, € in Berlin).
 type R = [number: string, origin: string, destination: string, via: string, frequency: number];
 type Raw = Omit<Preset, 'routes' | 'fleet' | 'photoKind'> & { photoKind: Preset['photoKind']; fare: number; routes: R[]; models: [string, number][] };
 const make = (p: Raw): Preset => ({
@@ -12,7 +12,7 @@ const make = (p: Raw): Preset => ({
 
 export const WORLD_PRESETS: Record<'boston' | 'nyc' | 'berlin', Preset[]> = {
   boston: [make({
-    key: 'mbta', name: 'MBTA Bus', short: 'MBTA', primary: '#ffc72c', secondary: '#80276c', livery: 'MBTA yellow & silver', hq: 'Boston', photoKind: 'single', fare: 1.4,
+    key: 'mbta', name: 'MBTA Bus', short: 'MBTA', primary: '#ffc72c', secondary: '#80276c', livery: 'MBTA yellow & silver', hq: 'Boston', photoKind: 'single', fare: 1.7,
     depots: ['Cabot (South Boston)', 'Charlestown', 'Arborway', 'Quincy', 'Lynn', 'North Cambridge'],
     routes: [
       ['1', 'Harvard Square', 'Nubian Station', 'Massachusetts Avenue', 10],
@@ -27,11 +27,27 @@ export const WORLD_PRESETS: Record<'boston' | 'nyc' | 'berlin', Preset[]> = {
       ['116', 'Wonderland Station', 'Maverick Station', 'Revere', 12],
       ['SL4', 'Nubian Station', 'South Station', 'Washington Street', 10],
       ['SL5', 'Nubian Station', 'Downtown Crossing', 'Washington Street', 10],
+      ['SL1', 'Logan Airport', 'South Station', 'Ted Williams Tunnel', 10],
+      ['15', 'Fields Corner Station', 'Ruggles Station', 'Dudley Street', 12],
+      ['22', 'Ashmont Station', 'Ruggles Station', 'Talbot Avenue', 10],
+      ['71', 'Watertown Square', 'Harvard Square', 'Mount Auburn Street', 10],
+      ['73', 'Waverley Square', 'Harvard Square', 'Belmont Street', 12],
     ],
-    models: [['New Flyer Xcelsior XDE40', 2016], ['New Flyer Xcelsior XDE60', 2018], ['New Flyer Xcelsior XDE40', 2019], ['New Flyer Xcelsior XDE40', 2022]],
+    models: [['New Flyer Xcelsior XDE40', 2016], ['New Flyer Xcelsior XDE60', 2018], ['New Flyer Xcelsior XDE40', 2019], ['New Flyer Xcelsior XDE40', 2022], ['New Flyer Xcelsior XE40 (battery electric)', 2024], ['New Flyer Xcelsior XE60 (battery electric)', 2023], ['Neoplan AN460LF (dual-mode)', 2005]],
+  }), make({
+    key: 'logan-express', name: 'Logan Express (Massport)', short: 'Logan Exp', primary: '#00467f', secondary: '#f2f2f2', livery: 'Massport blue & white', hq: 'Boston', photoKind: 'single', fare: 9,
+    depots: ['Braintree', 'Framingham', 'Woburn', 'Peabody'],
+    routes: [
+      ['BRA', 'Braintree', 'Logan Airport', 'I-93', 30],
+      ['FRA', 'Framingham', 'Logan Airport', 'Mass Pike', 30],
+      ['WOB', 'Woburn', 'Logan Airport', 'I-93', 30],
+      ['PEA', 'Peabody', 'Logan Airport', 'Route 1', 60],
+      ['BB', 'Back Bay', 'Logan Airport', 'Copley Square', 20],
+    ],
+    models: [['MCI D4500 (coach)', 2017], ['MCI D4500 (coach)', 2020], ['New Flyer Xcelsior XDE40', 2019]],
   })],
   nyc: [make({
-    key: 'mta-nyct', name: 'MTA New York City Transit', short: 'NYCT', primary: '#0039a6', secondary: '#f2f2f2', livery: 'MTA blue & white', hq: 'Manhattan', photoKind: 'single', fare: 2.3,
+    key: 'mta-nyct', name: 'MTA New York City Transit', short: 'NYCT', primary: '#0039a6', secondary: '#f2f2f2', livery: 'MTA blue & white', hq: 'Manhattan', photoKind: 'single', fare: 2.9,
     depots: ['Michael J. Quill (Manhattan)', 'Kingsbridge (Bronx)', 'Flatbush (Brooklyn)', 'Jackie Gleason (Brooklyn)', 'Casey Stengel (Queens)'],
     routes: [
       ['M15', 'South Ferry', 'East Harlem', '1st & 2nd Avenues', 8],
@@ -45,10 +61,15 @@ export const WORLD_PRESETS: Record<'boston' | 'nyc' | 'berlin', Preset[]> = {
       ['B46', 'Williamsburg', 'Kings Plaza', 'Utica Avenue', 8],
       ['Q44', 'Jamaica', 'West Farms (Bronx)', 'Flushing, Whitestone Bridge', 10],
       ['Q58', 'Ridgewood', 'Flushing', 'Corona Avenue', 10],
+      ['M34-SBS', 'Javits Center', 'East 34th Street Ferry', '34th Street', 8],
+      ['M79-SBS', 'West 79th Street', 'East 79th Street', 'Central Park crosstown', 8],
+      ['M101', 'East Village', 'Fort George', 'Lexington & 3rd Avenues', 8],
+      ['B6', 'Bath Beach', 'East New York', 'Bay Parkway, Flatlands', 8],
+      ['Bx41-SBS', 'The Hub', 'Williamsbridge', 'Webster Avenue', 10],
     ],
-    models: [['New Flyer Xcelsior XD40', 2016], ['Nova Bus LFS', 2011], ['New Flyer Xcelsior XD40', 2018], ['Nova Bus LFS', 2019]],
+    models: [['New Flyer Xcelsior XD40', 2016], ['Nova Bus LFS', 2011], ['New Flyer Xcelsior XD40', 2018], ['Nova Bus LFS', 2019], ['Nova Bus LFS Artic', 2016], ['New Flyer Xcelsior XD60', 2019], ['New Flyer Xcelsior XE40 (battery electric)', 2023], ['Orion VII Hybrid', 2010]],
   }), make({
-    key: 'mta-bus', name: 'MTA Bus Company', short: 'MTABC', primary: '#0039a6', secondary: '#f2a900', livery: 'MTA select-bus blue', hq: 'Queens', photoKind: 'single', fare: 2.3,
+    key: 'mta-bus', name: 'MTA Bus Company', short: 'MTABC', primary: '#0039a6', secondary: '#f2a900', livery: 'MTA select-bus blue', hq: 'Queens', photoKind: 'single', fare: 2.9,
     depots: ['LaGuardia (Queens)', 'JFK (Queens)', 'Baisley Park (Queens)', 'College Point (Queens)', 'Eastchester (Bronx)'],
     routes: [
       ['Q10', 'Kew Gardens', 'JFK Airport', 'Lefferts Boulevard', 10],
@@ -57,11 +78,33 @@ export const WORLD_PRESETS: Record<'boston' | 'nyc' | 'berlin', Preset[]> = {
       ['Q60', 'Jamaica', 'East Midtown Manhattan', 'Queens Boulevard', 10],
       ['Q70', 'Woodside', 'LaGuardia Airport', 'LaGuardia Link', 10],
       ['BxM1', 'Riverdale', 'Midtown Manhattan', 'Express via Madison Avenue', 20],
+      ['Q25', 'Jamaica', 'College Point', 'Parsons Boulevard, Flushing', 10],
+      ['Q65', 'Jamaica', 'College Point', '164th Street, Flushing', 10],
     ],
-    models: [['Nova Bus LFS', 2015], ['New Flyer Xcelsior XD40', 2017], ['Nova Bus LFS', 2020]],
+    models: [['Nova Bus LFS', 2015], ['New Flyer Xcelsior XD40', 2017], ['Nova Bus LFS', 2020], ['Prevost X3-45 (express coach)', 2018], ['MCI D4500 (coach)', 2015], ['Nova Bus LFSe+ (battery electric)', 2024]],
+  }), make({
+    key: 'nice-bus', name: 'NICE Bus (Nassau Inter-County Express)', short: 'NICE', primary: '#0072bc', secondary: '#8dc63f', livery: 'NICE blue & green', hq: 'Jamaica', photoKind: 'single', fare: 2.9,
+    depots: ['Mitchel Field (Garden City)', 'Rockville Centre'],
+    routes: [
+      ['n4', 'Freeport', 'Jamaica', 'Merrick Road', 20],
+      ['n6', 'Hempstead', 'Jamaica', 'Hempstead Turnpike', 10],
+      ['n22', 'Hicksville', 'Jamaica', 'Jericho Turnpike', 20],
+      ['n24', 'Hempstead', 'Jamaica', 'Jamaica Avenue', 20],
+    ],
+    models: [['New Flyer Xcelsior XD40', 2018], ['Nova Bus LFS', 2016], ['New Flyer Xcelsior XD40', 2021]],
+  }), make({
+    key: 'nj-transit-bus', name: 'NJ Transit Bus', short: 'NJT', primary: '#003da5', secondary: '#f58025', livery: 'NJ Transit blue & orange', hq: 'Manhattan', photoKind: 'single', fare: 3.5,
+    depots: ['Meadowlands (Secaucus)', 'Hudson (Hoboken)', 'Northvale'],
+    routes: [
+      ['126', 'Hoboken', 'Port Authority Bus Terminal', 'Lincoln Tunnel', 10],
+      ['158', 'Fort Lee', 'Port Authority Bus Terminal', 'Edgewater', 15],
+      ['159', 'Fort Lee', 'Port Authority Bus Terminal', 'Palisades Avenue', 15],
+      ['166', 'Dumont', 'Port Authority Bus Terminal', 'Bergenfield, Teaneck', 15],
+    ],
+    models: [['MCI D4500 (coach)', 2016], ['Prevost X3-45 (express coach)', 2019], ['New Flyer Xcelsior XD40', 2018]],
   })],
   berlin: [make({
-    key: 'bvg', name: 'BVG (Berliner Verkehrsbetriebe)', short: 'BVG', primary: '#f0d722', secondary: '#1d1d1b', livery: 'BVG yellow', hq: 'Mitte', photoKind: 'double', fare: 3,
+    key: 'bvg', name: 'BVG (Berliner Verkehrsbetriebe)', short: 'BVG', primary: '#f0d722', secondary: '#1d1d1b', livery: 'BVG yellow', hq: 'Mitte', photoKind: 'double', fare: 3.8,
     depots: ['Britz', 'Cicerostraße', 'Indira-Gandhi-Straße', 'Lichtenberg', 'Müllerstraße', 'Spandau'],
     routes: [
       ['100', 'Zoologischer Garten', 'Alexanderplatz', 'Unter den Linden, Brandenburger Tor', 8],
@@ -73,7 +116,13 @@ export const WORLD_PRESETS: Record<'boston' | 'nyc' | 'berlin', Preset[]> = {
       ['M85', 'Hauptbahnhof', 'Lichterfelde Süd', 'Potsdamer Platz, Steglitz', 10],
       ['X7', 'Rudow', 'Flughafen BER', 'Schönefeld', 10],
       ['X10', 'Zoologischer Garten', 'Teltow', 'Kurfürstendamm, Zehlendorf', 10],
+      ['300', 'Warschauer Straße', 'Philharmonie', 'East Side Gallery, Ostbahnhof, Unter den Linden, Potsdamer Platz', 10],
+      ['147', 'Hauptbahnhof', 'Ostbahnhof', 'Friedrichstraße, Unter den Linden, Märkisches Museum', 10],
+      ['M45', 'Zoologischer Garten', 'Johannesstift (Spandau)', 'Ernst-Reuter-Platz, Rathaus Spandau', 10],
+      ['M46', 'Zoologischer Garten', 'Britz Süd', 'Wittenbergplatz, Schöneberg', 10],
+      ['M77', 'Marienfelde', 'Lichterfelde Ost', 'Waldsassener Straße', 20],
+      ['M82', 'Waldsassener Straße', 'Steglitz', 'Marienfelde', 20],
     ],
-    models: [['ADL Enviro500 MMC', 2017], ["MAN Lion's City Hybrid", 2019], ['ADL Enviro500 MMC', 2021], ["MAN Lion's City Hybrid", 2023]],
+    models: [['ADL Enviro500 MMC', 2017], ["MAN Lion's City Hybrid", 2019], ['ADL Enviro500 MMC', 2021], ["MAN Lion's City Hybrid", 2023], ['Mercedes-Benz eCitaro', 2021], ['Mercedes-Benz eCitaro G', 2022], ['Solaris Urbino 12 electric', 2020], ["MAN Lion's City 18 (articulated)", 2020]],
   })],
 };
