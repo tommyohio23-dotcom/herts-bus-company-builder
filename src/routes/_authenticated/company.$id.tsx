@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useCur, useArea, CurrencyContext, AreaContext, AREA_CURRENCY } from "@/lib/currency";
+import { areaOf, areaModels, areaTowns } from "@/lib/areas";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -11,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BusSide } from "@/components/BusSide";
-import { BUS_MODELS, FEATURES, HERTS_TOWNS, STATUSES } from "@/lib/herts";
+import { FEATURES, STATUSES } from "@/lib/herts";
 import { BusPhoto } from "@/components/BusPhoto";
 import { fetchAll, chunk } from "@/lib/fetch-all";
 import { managementAction } from "@/lib/management.functions";
@@ -58,11 +60,13 @@ function CompanyPage() {
   const [running, setRunning] = useState(false);
 
   if (!company) return <div className="p-8 text-muted-foreground">Loading depot…</div>;
+  const area = areaOf(company);
+  const cur = AREA_CURRENCY[area];
 
   async function runDay() {
     if (!company || running) return;
     setRunning(true);
-    try { const r = await action({data:{companyId:id,day:company.day,action:'day'}}); toast.success(`${r.message} · Profit £${r.profit?.toLocaleString() ?? 0}`); refresh(); }
+    try { const r = await action({data:{companyId:id,day:company.day,action:'day'}}); toast.success(`${r.message} · Profit ${cur}${r.profit?.toLocaleString() ?? 0}`); refresh(); }
     catch(e) { toast.error(e instanceof Error ? e.message : 'Day could not save'); }
     finally { setRunning(false); }
   }
@@ -75,6 +79,7 @@ function CompanyPage() {
   }
 
   return (
+    <AreaContext.Provider value={area}><CurrencyContext.Provider value={cur}>
     <div className="min-h-screen">
       <div className="stripe-band h-2" />
       <header className="mx-auto max-w-6xl px-4 py-4">
@@ -87,7 +92,7 @@ function CompanyPage() {
           </div>
           <div className="text-right">
             <p className="text-xs uppercase text-muted-foreground">Balance</p>
-            <p className={`font-display text-4xl ${Number(company.balance) < 0 ? "text-destructive" : "text-primary"}`}>£{Number(company.balance).toLocaleString()}</p>
+            <p className={`font-display text-4xl ${Number(company.balance) < 0 ? "text-destructive" : "text-primary"}`}>{cur}{Number(company.balance).toLocaleString()}</p>
           </div>
         </div>
         <div className="mt-4 grid grid-cols-3 gap-2 text-center">
@@ -114,6 +119,7 @@ function CompanyPage() {
         </Tabs>
       </main>
     </div>
+    </CurrencyContext.Provider></AreaContext.Provider>
   );
 }
 
@@ -127,13 +133,14 @@ type Drv = ReturnType<typeof useCompanyData>["drivers"][number];
 type Co = NonNullable<ReturnType<typeof useCompanyData>["company"]>;
 
 function Fleet({ companyId, company, buses, routes, refresh, spend }: { companyId: string; company: Co; buses: Bus[]; routes: Rt[]; refresh: () => void; spend: (n: number) => Promise<boolean> }) {
+  const cur = useCur();
   const repair=useServerFn(repairBus);
   const purchase = useServerFn(purchaseBusOrFeatures);
   const [upgrading,setUpgrading]=useState(false);
-  async function upgrade(b:Bus, features:string[]){if(upgrading)return;setUpgrading(true);try{const r=await purchase({data:{companyId,day:company.day,busId:b.id,features}});toast.success(`Specification saved · £${r.cost.toLocaleString()}`);refresh();}catch(e){toast.error(e instanceof Error?e.message:'Could not save');}finally{setUpgrading(false);}}
+  async function upgrade(b:Bus, features:string[]){if(upgrading)return;setUpgrading(true);try{const r=await purchase({data:{companyId,day:company.day,busId:b.id,features}});toast.success(`Specification saved · ${cur}${r.cost.toLocaleString()}`);refresh();}catch(e){toast.error(e instanceof Error?e.message:'Could not save');}finally{setUpgrading(false);}}
   const update = async (id: string, patch: Partial<Bus>) => { await supabase.from("buses").update(patch).eq("id", id); refresh(); };
   const remove = async (b: Bus) => {
-    if (!confirm(`Sell ${b.fleet_no} for £${Math.round(busPrice(b.year) * 0.3).toLocaleString()}?`)) return;
+    if (!confirm(`Sell ${b.fleet_no} for ${cur}${Math.round(busPrice(b.year) * 0.3).toLocaleString()}?`)) return;
     await supabase.from("buses").delete().eq("id", b.id);
     await supabase.from("companies").update({ balance: Number(company.balance) + Math.round(busPrice(b.year) * 0.3) }).eq("id", companyId);
     refresh();
@@ -167,9 +174,9 @@ function Fleet({ companyId, company, buses, routes, refresh, spend }: { companyI
                 </SelectContent>
               </Select>
             </div>
-            {b.status==='Broken down'&&<Button className="mt-2" disabled={upgrading} onClick={async()=>{setUpgrading(true);try{await repair({data:{companyId,day:company.day,busId:b.id}});toast.success('Bus repaired');refresh();}catch(e){toast.error(e instanceof Error?e.message:'Repair failed');}finally{setUpgrading(false);}}}>Repair · £{busRepairCost(b.condition).toLocaleString()}</Button>}
+            {b.status==='Broken down'&&<Button className="mt-2" disabled={upgrading} onClick={async()=>{setUpgrading(true);try{await repair({data:{companyId,day:company.day,busId:b.id}});toast.success('Bus repaired');refresh();}catch(e){toast.error(e instanceof Error?e.message:'Repair failed');}finally{setUpgrading(false);}}}>Repair · {cur}{busRepairCost(b.condition).toLocaleString()}</Button>}
             <FeaturePicker value={b.features} disabled={upgrading} onChange={(v) => upgrade(b, v)} />
-            <p className="mt-2 text-xs text-muted-foreground">Extras upkeep · £{upgradeUpkeep(b.features)}/day</p>
+            <p className="mt-2 text-xs text-muted-foreground">Extras upkeep · {cur}{upgradeUpkeep(b.features)}/day</p>
             </div>
           </div>
         ))}
@@ -179,14 +186,20 @@ function Fleet({ companyId, company, buses, routes, refresh, spend }: { companyI
 }
 
 function AddBus({ companyId, company, routes, refresh, spend }: { companyId: string; company: Co; routes: Rt[]; refresh: () => void; spend: (n: number) => Promise<boolean> }) {
+  const cur = useCur();
   const purchase=useServerFn(purchaseBusOrFeatures);
   const [saving,setSaving]=useState(false);
   const [open, setOpen] = useState(false);
-  const [f, setF] = useState({ fleet_no: "", registration: "", model: BUS_MODELS[0] ?? "", year: 2012, depot: company.hq_town, livery: "", route_id: "none", features: [] as string[], quantity: 1 });
+  const area = useArea();
+  const models = areaModels(area);
+  const depotList = useQuery({ queryKey: ['depots', companyId], queryFn: async () => { const r = await supabase.from('depots').select('*').eq('company_id', companyId); if (r.error) throw r.error; return r.data; } });
+  const depotTowns = (depotList.data ?? []).map(d => d.town);
+  const [f, setF] = useState({ fleet_no: "", registration: "", model: models[0] ?? "", year: 2012, depot: company.hq_town, livery: "", route_id: "none", features: [] as string[], quantity: 1 });
   const each = busPrice(f.year) + upgradeCost(f.features);
   const price = each * f.quantity;
   async function save() {
     if (!f.fleet_no) { toast.error("Fleet number needed"); return; }
+    if (!depotTowns.includes(f.depot)) { toast.error("Choose one of your depots"); return; }
     if(saving)return;setSaving(true);
     try{
       const res=await purchase({data:{...f,companyId,day:company.day,route_id:f.route_id==='none'?null:f.route_id}});
@@ -209,14 +222,14 @@ function AddBus({ companyId, company, routes, refresh, spend }: { companyId: str
           </div>
           <div><Label>Model</Label>
             <Select value={f.model} onValueChange={(v) => setF({ ...f, model: v })}><SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{BUS_MODELS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent></Select>
+              <SelectContent>{models.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent></Select>
           </div>
           <div className="grid grid-cols-3 gap-2">
             <div><Label>Year</Label><Input type="number" min={1970} max={2026} value={f.year} onChange={(e) => setF({ ...f, year: Number(e.target.value) })} /></div>
             <div><Label>How many</Label><Input type="number" min={1} max={50} value={f.quantity} onChange={(e) => setF({ ...f, quantity: Math.max(1, Math.min(50, Number(e.target.value) || 1)) })} /></div>
             <div><Label>Depot</Label>
-              <Select value={f.depot} onValueChange={(v) => setF({ ...f, depot: v })}><SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{HERTS_TOWNS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select>
+              <Select value={depotTowns.includes(f.depot) ? f.depot : ""} onValueChange={(v) => setF({ ...f, depot: v })}><SelectTrigger><SelectValue placeholder="Choose depot" /></SelectTrigger>
+                <SelectContent>{depotTowns.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select>
             </div>
           </div>
           <div><Label>Livery</Label><Input value={f.livery} onChange={(e) => setF({ ...f, livery: e.target.value })} placeholder="e.g. Green Line, Sapphire, heritage NBC" /></div>
@@ -226,8 +239,8 @@ function AddBus({ companyId, company, routes, refresh, spend }: { companyId: str
           </div>
           <div><Label>Spec & extras</Label><FeaturePicker value={f.features} onChange={(v) => setF({ ...f, features: v })} /></div>
           <BusPhoto model={f.model} presetKey={company.preset_key} className="overflow-hidden rounded-md" />
-          <p className="text-sm text-muted-foreground">Extras £{upgradeCost(f.features).toLocaleString()} each · Upkeep £{upgradeUpkeep(f.features)}/day each{f.quantity > 1 ? ` · ${f.quantity} buses at £${each.toLocaleString()} each` : ""}</p>
-          <Button disabled={saving} onClick={save}>{f.quantity > 1 ? `Buy ${f.quantity} for £${price.toLocaleString()}` : `Buy for £${price.toLocaleString()}`}</Button>
+          <p className="text-sm text-muted-foreground">Extras {cur}{upgradeCost(f.features).toLocaleString()} each · Upkeep {cur}{upgradeUpkeep(f.features)}/day each{f.quantity > 1 ? ` · ${f.quantity} buses at ${cur}${each.toLocaleString()} each` : ""}</p>
+          <Button disabled={saving} onClick={save}>{f.quantity > 1 ? `Buy ${f.quantity} for ${cur}${price.toLocaleString()}` : `Buy for ${cur}${price.toLocaleString()}`}</Button>
         </div>
       </DialogContent>
     </Dialog>
@@ -235,7 +248,9 @@ function AddBus({ companyId, company, routes, refresh, spend }: { companyId: str
 }
 
 function Routes({ companyId, routes, buses, drivers, refresh }: { companyId: string; routes: Rt[]; buses: Bus[]; drivers: Drv[]; refresh: () => void }) {
-  const [f, setF] = useState({ number: "", origin: "Hertford", destination: "Stevenage", via: "", frequency_mins: 30, fare: 2, journey_minutes:30, turnaround_minutes:5, recovery_percent:10 });
+  const area = useArea();
+  const cur = useCur();
+  const [f, setF] = useState({ number: "", origin: areaTowns(area)[0] ?? "", destination: areaTowns(area)[1] ?? "", via: "", frequency_mins: 30, fare: 2, journey_minutes:30, turnaround_minutes:5, recovery_percent:10 });
   async function add() {
     if (!f.number) { toast.error("Route number needed"); return; }
     const { error } = await supabase.from("routes").insert({ ...f, company_id: companyId });
@@ -244,7 +259,7 @@ function Routes({ companyId, routes, buses, drivers, refresh }: { companyId: str
   }
   const townSelect = (k: "origin" | "destination") => (
     <Select value={f[k]} onValueChange={(v) => setF({ ...f, [k]: v })}><SelectTrigger><SelectValue /></SelectTrigger>
-      <SelectContent>{HERTS_TOWNS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select>
+      <SelectContent>{areaTowns(area).map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select>
   );
   return (
     <div className="mt-2 space-y-3">
@@ -255,7 +270,7 @@ function Routes({ companyId, routes, buses, drivers, refresh }: { companyId: str
             <span className="blind min-w-16 px-2 py-1 text-center text-3xl">{r.number}</span>
             <div className="min-w-0 flex-1 basis-40">
               <p className="font-semibold">{r.origin} → {r.destination}</p>
-              <p className="break-words text-xs text-muted-foreground">{r.service_type} · {r.via && `via ${r.via} · `}every {r.frequency_mins} min · £{Number(r.fare).toFixed(2)} · {n} bus{n === 1 ? "" : "es"}{r.contract_end_day != null && ` · Contract ends day ${r.contract_end_day}`}</p>
+              <p className="break-words text-xs text-muted-foreground">{r.service_type} · {r.via && `via ${r.via} · `}every {r.frequency_mins} min · {cur}{Number(r.fare).toFixed(2)} · {n} bus{n === 1 ? "" : "es"}{r.contract_end_day != null && ` · Contract ends day ${r.contract_end_day}`}</p>
             </div>
             {r.stop_ids.length === 0 && <EditStops route={r} refresh={refresh} />}
             <RouteFrequency route={r} count={n} refresh={refresh}/>
@@ -275,7 +290,7 @@ function Routes({ companyId, routes, buses, drivers, refresh }: { companyId: str
           </div>
           <div><Label>One-way journey minutes</Label><Input aria-label="New route journey minutes" type="number" min={5} max={600} value={f.journey_minutes} onChange={e=>setF({...f,journey_minutes:Number(e.target.value)})}/></div>
           <ServiceFrequency cycleMinutes={timetableCycle(f)} value={f.frequency_mins} onChange={n=>setF({...f,frequency_mins:n})} label="New route frequency"/>
-          <div><Label>Fare £</Label><Input type="number" step="0.1" min={0} value={f.fare} onChange={(e) => setF({ ...f, fare: Number(e.target.value) })} /></div>
+          <div><Label>Fare {cur}</Label><Input type="number" step="0.1" min={0} value={f.fare} onChange={(e) => setF({ ...f, fare: Number(e.target.value) })} /></div>
         </div>
         <Button className="mt-3" onClick={add}>Register route</Button>
       </div>
@@ -284,13 +299,14 @@ function Routes({ companyId, routes, buses, drivers, refresh }: { companyId: str
 }
 
 function FeaturePicker({ value, onChange, disabled=false }: { value: string[]; onChange: (v: string[]) => void; disabled?:boolean }) {
+  const cur = useCur();
   return (
     <div className="mt-2 flex flex-wrap gap-1">
       {FEATURES.map((ft) => {
         const on = value.includes(ft);
         return (
           <Button key={ft} type="button" size="sm" variant={on?'default':'outline'} disabled={disabled} onClick={() => onChange(on ? value.filter((x) => x !== ft) : [...value, ft])} className="h-auto whitespace-normal text-xs">
-            {ft}{!on && ` · £${UPGRADE_PRICES[ft]?.install.toLocaleString()}`}
+            {ft}{!on && ` · ${cur}${UPGRADE_PRICES[ft]?.install.toLocaleString()}`}
           </Button>
         );
       })}
@@ -306,6 +322,7 @@ function RouteFrequency({route,count,refresh}:{route:Rt;count:number;refresh:()=
 }
 
 function StopPicker({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
+  const area = useArea();
   const [pick, setPick] = useState("");
   const move = (i: number, d: number) => { const v = [...value]; const j = i + d; const a=v[i],b=v[j]; if(a===undefined||b===undefined)return;v[i]=b;v[j]=a;onChange(v); };
   return (
@@ -322,7 +339,7 @@ function StopPicker({ value, onChange }: { value: string[]; onChange: (v: string
       </ol>
       <div className="flex gap-2">
         <div className="flex-1"><Select value={pick} onValueChange={setPick}><SelectTrigger><SelectValue placeholder="Choose a stop" /></SelectTrigger>
-          <SelectContent>{HERTS_TOWNS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
+          <SelectContent>{areaTowns(area).map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
         <Button type="button" variant="secondary" disabled={!pick} onClick={() => { onChange([...value, pick]); setPick(""); }}>Add stop</Button>
       </div>
     </div>

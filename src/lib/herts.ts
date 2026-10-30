@@ -89,7 +89,21 @@ export const BUS_MODELS = [
   "Wright StreetDeck",
   "Wright StreetDeck Electroliner",
   "Wright StreetLite",
-  "Yutong E10"
+  "Yutong E10",
+  "New Flyer Xcelsior XE40 (battery electric)",
+  "New Flyer Xcelsior XE60 (battery electric)",
+  "New Flyer Xcelsior XD60",
+  "Neoplan AN460LF (dual-mode)",
+  "MCI D4500 (coach)",
+  "Nova Bus LFS Artic",
+  "Nova Bus LFSe+ (battery electric)",
+  "Orion VII Hybrid",
+  "Prevost X3-45 (express coach)",
+  "MAN Lion's City 12 E",
+  "Mercedes-Benz eCitaro",
+  "Solaris Urbino 12 electric",
+  "Solaris Urbino 18",
+  "Scania Citywide",
 ];
 
 export const STATUSES = ["In service", "Spare", "Workshop", "MOT due", "Withdrawn", "Preserved"];

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useCur } from "@/lib/currency";
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,7 @@ const NONE = '__none__';
 const PAGE = 60;
 
 export function StaffList({ drivers, routes, depots, refresh }: { drivers: Tables<'drivers'>[]; routes: Tables<'routes'>[]; depots: Tables<'depots'>[]; refresh: () => void }) {
+  const cur = useCur();
   const [role, setRole] = useState('All'), [depot, setDepot] = useState('All'), [shown, setShown] = useState(PAGE), [busy, setBusy] = useState(false), [moveTo, setMoveTo] = useState('');
   const roles = useMemo(() => [...new Set(drivers.map(d => d.role))].sort(), [drivers]);
   const list = drivers.filter(d => (role === 'All' || d.role === role) && (depot === 'All' || (depot === NONE ? !d.depot : d.depot === depot)));
@@ -44,7 +46,7 @@ export function StaffList({ drivers, routes, depots, refresh }: { drivers: Table
     </div>
     <p className="text-sm text-muted-foreground">Showing {Math.min(shown, list.length)} of {list.length} employees ({drivers.length} total). Depot managers are moved one at a time.</p>
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{list.slice(0, shown).map(d => <article className="rounded-md border bg-card p-4" key={d.id}>
-      <div className="flex gap-3"><ApplicantPortrait index={d.portrait_index} name={d.name} className="h-20 w-20" /><div className="min-w-0"><h3 className="text-2xl">{d.name}</h3><p className="text-sm">{d.role}</p>{BUS_PERKS[d.role] && <p className="text-xs text-muted-foreground">{BUS_PERKS[d.role]}</p>}<p className="text-xs text-muted-foreground">#{d.staff_no} · £{d.wage}/day</p></div></div>
+      <div className="flex gap-3"><ApplicantPortrait index={d.portrait_index} name={d.name} className="h-20 w-20" /><div className="min-w-0"><h3 className="text-2xl">{d.name}</h3><p className="text-sm">{d.role}</p>{BUS_PERKS[d.role] && <p className="text-xs text-muted-foreground">{BUS_PERKS[d.role]}</p>}<p className="text-xs text-muted-foreground">#{d.staff_no} · {cur}{d.wage}/day</p></div></div>
       <div className="mt-3 grid gap-2">
         <Select value={d.depot || NONE} onValueChange={v => update([d.id], { depot: v === NONE ? '' : v }, `${d.name} moved`)}><SelectTrigger aria-label={`Depot for ${d.name}`}><SelectValue /></SelectTrigger><SelectContent><SelectItem value={NONE}>No depot</SelectItem>{depots.map(x => <SelectItem key={x.id} value={x.town}>{x.town}{d.role === 'Depot Manager' && managerOf(x.town) && managerOf(x.town)!.id !== d.id ? ' (has manager)' : ''}</SelectItem>)}</SelectContent></Select>
         {(ROUTE_ROLES as readonly string[]).includes(d.role) && <Select value={d.route_id ?? NONE} onValueChange={v => update([d.id], { route_id: v === NONE ? null : v }, `${d.name} assignment saved`)}><SelectTrigger aria-label={`Route for ${d.name}`}><SelectValue /></SelectTrigger><SelectContent><SelectItem value={NONE}>No route</SelectItem>{routes.map(r => <SelectItem key={r.id} value={r.id}>Route {r.number} · {r.origin} → {r.destination}</SelectItem>)}</SelectContent></Select>}

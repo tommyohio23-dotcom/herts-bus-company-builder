@@ -18,6 +18,7 @@ import { Bus,TrainFront } from 'lucide-react';
 import { Tabs,TabsList,TabsTrigger } from '@/components/ui/tabs';
 import { BUS_OPERATOR_PRESETS, LONDON_PRESETS } from '@/lib/london';
 import { AREAS, AREA_PRESETS, AREA_TOWNS, companyArea, type AreaKey } from '@/lib/areas';
+import { AREA_CURRENCY } from '@/lib/currency';
 import { StartingMoney } from '@/components/StartingMoney';
 import { suggestedBusCapital, validStartingCapital, RAIL_STARTING_CAPITAL } from '@/lib/starting-capital';
 const LONDON_KEYS = LONDON_PRESETS.map(p => p.key);
@@ -128,7 +129,7 @@ function Dashboard() {
             <Link to={c.transport_mode==='train'?'/rail/$id':'/company/$id'} params={{ id: c.id }} className="block">
               {c.transport_mode==='train'?<TrainFront className="my-4 size-12 text-primary"/>:<BusSide primary={c.primary_color} secondary={c.secondary_color} label={c.short_name} className="w-full" />}
               <p className="font-display text-2xl">{c.name}</p>
-              <p className="text-sm text-muted-foreground">Day {c.day} · £{Number(c.balance).toLocaleString()}</p>
+              <p className="text-sm text-muted-foreground">Day {c.day} · {c.transport_mode==='train'?'£':AREA_CURRENCY[companyArea(c,LONDON_KEYS)]}{Number(c.balance).toLocaleString()}</p>
             </Link>
             <Button size="sm" variant="ghost" className="mt-1 text-destructive" onClick={() => removeCompany(c.id, c.name)}>Delete</Button>
             </div>
@@ -146,7 +147,7 @@ function Dashboard() {
               <BusPhoto model={p.name} presetKey={p.key} credit={realOperatorPhoto(p.key)} className="overflow-hidden rounded-md" />
               <p className="font-display text-2xl">{p.name}</p>
               <p className="text-xs text-muted-foreground">{p.livery} · {p.routes.length} routes · {p.fleet.length} buses</p>
-              <p className="mt-2 text-sm text-muted-foreground">Suggested start: £{suggestedBusCapital(p.routes).toLocaleString('en-GB')}</p>
+              <p className="mt-2 text-sm text-muted-foreground">Suggested start: {AREA_CURRENCY[area]}{suggestedBusCapital(p.routes).toLocaleString('en-GB')}</p>
               <Button size="sm" className="mt-2 w-full" disabled={!!busy} onClick={() => chooseStartingMoney(p)}>{busy === p.key ? "Setting up…" : "Take control"}</Button>
             </div>
           ))}
@@ -155,7 +156,7 @@ function Dashboard() {
         <Dialog open={pending !== null} onOpenChange={open=>{if(!open&&!busy)setPending(null);}}>
           <DialogContent>
             <DialogHeader><DialogTitle>{pending === 'rail' ? 'Great Northern' : pending?.name} starting money</DialogTitle></DialogHeader>
-            <StartingMoney amount={startingMoney} suggested={pending === 'rail' ? RAIL_STARTING_CAPITAL : pending ? suggestedBusCapital(pending.routes) : 0} onChange={setStartingMoney}/>
+            <StartingMoney amount={startingMoney} suggested={pending === 'rail' ? RAIL_STARTING_CAPITAL : pending ? suggestedBusCapital(pending.routes) : 0} onChange={setStartingMoney} cur={pending === 'rail' ? '£' : AREA_CURRENCY[area]}/>
             <Button disabled={!!busy} onClick={confirmStart}>{busy ? 'Setting up…' : 'Start company'}</Button>
           </DialogContent>
         </Dialog>
@@ -207,7 +208,7 @@ function CustomCompany({ onDone, area }: { onDone: (id: string) => void; area: A
               <SelectContent>{AREA_TOWNS[area].map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-          <StartingMoney amount={startingMoney} suggested={suggestedBusCapital([])} onChange={setStartingMoney}/>
+          <StartingMoney amount={startingMoney} suggested={suggestedBusCapital([])} onChange={setStartingMoney} cur={AREA_CURRENCY[area]}/>
           <Button disabled={busy} onClick={create}>{busy ? 'Setting up…' : 'Create company'}</Button>
         </div>
       </DialogContent>
