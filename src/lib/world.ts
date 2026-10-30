@@ -123,6 +123,6 @@ export const WORLD_PRESETS: Record<'boston' | 'nyc' | 'berlin', Preset[]> = {
       ['M77', 'Marienfelde', 'Lichterfelde Ost', 'Waldsassener Straße', 20],
       ['M82', 'Waldsassener Straße', 'Steglitz', 'Marienfelde', 20],
     ],
-    models: [['ADL Enviro500 MMC', 2017], ["MAN Lion's City Hybrid", 2019], ['ADL Enviro500 MMC', 2021], ["MAN Lion's City Hybrid", 2023], ['Mercedes-Benz eCitaro', 2021], ['Mercedes-Benz Citaro G (bendy)', 2018], ['Solaris Urbino 12 electric', 2020], ['Solaris Urbino 18', 2019], ['Scania Citywide', 2016]],
+    models: [['ADL Enviro500 MMC', 2017], ["MAN Lion's City Hybrid", 2019], ['ADL Enviro500 MMC', 2021], ["MAN Lion's City Hybrid", 2023], ['Mercedes-Benz eCitaro', 2021], ['Mercedes-Benz Citaro G (bendy)', 2018], ['Solaris Urbino 12 electric', 2020], ['Solaris Urbino 18', 2019]],
   })],
 };
