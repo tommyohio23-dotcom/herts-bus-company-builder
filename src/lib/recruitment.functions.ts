@@ -13,7 +13,7 @@ export const publishAdvert=createServerFn({method:'POST'}).middleware([requireSu
     const count=await context.supabase.from('job_adverts').select('id',{count:'exact',head:true}).eq('company_id',data.companyId);
     if(count.error)throw new Error(count.error.message);
     const seed=company.data.day+(count.count??0)*7;
-    const result=await context.supabase.rpc('publish_job_advert',{p_company:data.companyId,p_role:data.role,p_depot:data.depot,p_wage:data.wage,p_positions:data.positions,p_description:data.description,p_candidates:generateApplicants(data.role,data.wage,seed,Math.max(12,Math.ceil(data.positions*1.3)))});
+    const result=await context.supabase.rpc('publish_job_advert',{p_company:data.companyId,p_role:data.role,p_depot:data.depot,p_wage:data.wage,p_positions:data.positions,p_description:data.description,p_candidates:generateApplicants(data.role,data.wage,seed,Math.max(12,Math.ceil(data.positions*1.6)))});
     if(result.error)throw new Error(result.error.message);
     return {id:result.data};
   });
@@ -23,4 +23,10 @@ export const reviewApplicant=createServerFn({method:'POST'}).middleware([require
     const result=await context.supabase.rpc('review_job_applicant',{p_applicant:data.applicantId,p_action:data.action});
     if(result.error)throw new Error(result.error.message);
     return {status:result.data};
+  });export const hireAllQualified=createServerFn({method:'POST'}).middleware([requireSupabaseAuth])
+  .inputValidator(z.object({companyId:z.string().uuid()}))
+  .handler(async({data,context})=>{
+    const result=await context.supabase.rpc('hire_all_qualified',{p_company:data.companyId});
+    if(result.error)throw new Error(result.error.message);
+    return {hired:result.data as number};
   });

@@ -24,6 +24,11 @@ export const purchaseBusOrFeatures = createServerFn({method:'POST'}).middleware(
     if(data.route_id){const r=await db.from('routes').select('id').eq('id',data.route_id).eq('company_id',data.companyId).single();if(!r.data)throw new Error('Route not found');}
     const each=newBusPrice(data.year)+upgradeCost(data.features);
     const qty=data.quantity??1;
+    const dep=await db.from('depots').select('capacity').eq('company_id',data.companyId).eq('town',data.depot).maybeSingle();
+    if(!dep.data)throw new Error('Open a depot in '+data.depot+' first');
+    const used=await db.from('buses').select('id',{count:'exact',head:true}).eq('company_id',data.companyId).eq('depot',data.depot);
+    const room=dep.data.capacity-(used.count??0);
+    if(qty>room)throw new Error(room<=0?`${data.depot} depot is full`:`Only room for ${room} more bus${room===1?'':'es'} at ${data.depot} depot`);
     const baseFleet=data.fleet_no.trim();
     const baseNum=/^\d+$/.test(baseFleet)?parseInt(baseFleet,10):null;
     let bought=0;
