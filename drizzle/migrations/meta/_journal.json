@@ -71,6 +71,13 @@
       "when": 1793273657218,
       "tag": "0009_network_starting_capital",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793346828098,
+      "tag": "0010_journey_staffing_and_breakdowns",
+      "breakpoints": true
     }
   ]
 }

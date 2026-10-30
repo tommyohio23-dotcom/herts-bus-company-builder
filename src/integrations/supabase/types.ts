@@ -228,6 +228,7 @@ export type Database = {
           portrait_index: number | null
           qualifications: string[]
           role: string
+          route_id: string | null
           staff_no: string
           user_id: string
           wage: number
@@ -243,6 +244,7 @@ export type Database = {
           portrait_index?: number | null
           qualifications?: string[]
           role?: string
+          route_id?: string | null
           staff_no?: string
           user_id?: string
           wage?: number
@@ -258,6 +260,7 @@ export type Database = {
           portrait_index?: number | null
           qualifications?: string[]
           role?: string
+          route_id?: string | null
           staff_no?: string
           user_id?: string
           wage?: number
@@ -268,6 +271,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drivers_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
             referencedColumns: ["id"]
           },
         ]
@@ -489,11 +499,14 @@ export type Database = {
           fare: number
           frequency_mins: number
           id: string
+          journey_minutes: number
           number: string
           origin: string
+          recovery_percent: number
           service_type: string
           stop_ids: string[]
           tender_key: string | null
+          turnaround_minutes: number
           user_id: string
           via: string
         }
@@ -506,11 +519,14 @@ export type Database = {
           fare?: number
           frequency_mins?: number
           id?: string
+          journey_minutes?: number
           number: string
           origin: string
+          recovery_percent?: number
           service_type?: string
           stop_ids?: string[]
           tender_key?: string | null
+          turnaround_minutes?: number
           user_id?: string
           via?: string
         }
@@ -523,11 +539,14 @@ export type Database = {
           fare?: number
           frequency_mins?: number
           id?: string
+          journey_minutes?: number
           number?: string
           origin?: string
+          recovery_percent?: number
           service_type?: string
           stop_ids?: string[]
           tender_key?: string | null
+          turnaround_minutes?: number
           user_id?: string
           via?: string
         }
@@ -613,6 +632,15 @@ export type Database = {
           p_cost: number
           p_day: number
           p_payload: Json
+          p_user: string
+        }
+        Returns: undefined
+      }
+      repair_game_bus: {
+        Args: {
+          p_bus: string
+          p_company: string
+          p_day: number
           p_user: string
         }
         Returns: undefined
