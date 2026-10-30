@@ -32,7 +32,7 @@ export function modelKind(model: string): PhotoKind {
   const m = model.toLowerCase();
   if (/ev|electric|yutong|byd|switch/.test(m)) return "electric";
   if (/solo|sprinter|tempo|versa/.test(m)) return "mini";
-  if (/400|olympian|gemini|streetdeck|b5lh|b9tl|b7tl|n230ud|omnicity|atlantean|bristol vr|trident|routemaster|titan|metrobus|dominator/.test(m)) return "double";
+  if (/400|500|olympian|gemini|streetdeck|b5lh|b9tl|b7tl|n230ud|omnicity|atlantean|bristol vr|trident|routemaster|titan|metrobus|dominator/.test(m)) return "double";
   return "single";
 }
 
@@ -43,6 +43,7 @@ export const BUS_MODELS = [
   "ADL Enviro400",
   "ADL Enviro400 MMC",
   "ADL Enviro400EV",
+  "ADL Enviro500 MMC",
   "BYD / ADL Enviro200EV",
   "Bristol VR",
   "Dennis Dart / Caetano Nimbus",
@@ -60,6 +61,11 @@ export const BUS_MODELS = [
   "Mercedes-Benz Citaro",
   "Mercedes-Benz Citaro G (bendy)",
   "Mercedes-Benz Sprinter",
+  "MAN Lion's City Hybrid",
+  "New Flyer Xcelsior XD40",
+  "New Flyer Xcelsior XDE40",
+  "New Flyer Xcelsior XDE60",
+  "Nova Bus LFS",
   "New Routemaster",
   "Optare Excel",
   "Optare MetroCity",
