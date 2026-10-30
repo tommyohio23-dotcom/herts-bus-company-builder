@@ -328,6 +328,48 @@
    "author": "Graham Richardson from Plymouth, England",
    "license": "CC BY 2.0",
    "title": "File:Alexander Dennis Enviro400 for Newport Bus, 2012 EuroBus Expo (2).jpg"
+  },
+  "New Flyer Xcelsior XDE40": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a9/MBTA_XDE40_bus_displaying_Go_Celtics.jpg/960px-MBTA_XDE40_bus_displaying_Go_Celtics.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:MBTA_XDE40_bus_displaying_Go_Celtics.jpg",
+   "author": "4300streetcar",
+   "license": "CC BY 4.0",
+   "title": "File:MBTA XDE40 bus displaying Go Celtics.jpg"
+  },
+  "New Flyer Xcelsior XDE60": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/15/MBTA_Silver_Line_XDE60_bus_1311_parked_at_Silver_Line_Way.jpg/960px-MBTA_Silver_Line_XDE60_bus_1311_parked_at_Silver_Line_Way.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:MBTA_Silver_Line_XDE60_bus_1311_parked_at_Silver_Line_Way.jpg",
+   "author": "4300streetcar",
+   "license": "CC BY 4.0",
+   "title": "File:MBTA Silver Line XDE60 bus 1311 parked at Silver Line Way.jpg"
+  },
+  "New Flyer Xcelsior XD40": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0d/MTA_New_Flyer_XD40_7238.jpg/960px-MTA_New_Flyer_XD40_7238.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:MTA_New_Flyer_XD40_7238.jpg",
+   "author": "Kidfly182",
+   "license": "CC BY 4.0",
+   "title": "File:MTA New Flyer XD40 7238.jpg"
+  },
+  "Nova Bus LFS": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/LFS_Q35.jpg/960px-LFS_Q35.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:LFS_Q35.jpg",
+   "author": "Nikitos.67121",
+   "license": "CC BY-SA 4.0",
+   "title": "File:LFS Q35.jpg"
+  },
+  "ADL Enviro500 MMC": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/BVG-Bus_Alexander_Dennis_Enviro_500_in_Berlin_%282022%29.jpg/960px-BVG-Bus_Alexander_Dennis_Enviro_500_in_Berlin_%282022%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:BVG-Bus_Alexander_Dennis_Enviro_500_in_Berlin_(2022).jpg",
+   "author": "JoachimKohler-HB",
+   "license": "CC BY-SA 4.0",
+   "title": "File:BVG-Bus Alexander Dennis Enviro 500 in Berlin (2022).jpg"
+  },
+  "MAN Lion's City Hybrid": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/07/MAN_Lions_City_Efficient_Hybrid%2C_Berlin_%28LRM_20240609_124750%29.jpg/960px-MAN_Lions_City_Efficient_Hybrid%2C_Berlin_%28LRM_20240609_124750%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:MAN_Lions_City_Efficient_Hybrid,_Berlin_(LRM_20240609_124750).jpg",
+   "author": "Matti Blume",
+   "license": "CC BY-SA 4.0",
+   "title": "File:MAN Lions City Efficient Hybrid, Berlin (LRM 20240609 124750).jpg"
   }
  },
  "operators": {
@@ -491,6 +533,34 @@
    "author": "Pimlico Badger",
    "license": "CC BY-SA 2.0",
    "title": "File:Stephensons of Essex 460 EU05 CZA.jpg"
+  },
+  "mbta": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ec/MBTA_route_1_bus_on_Massachusetts_Avenue_Boston_March_2024.jpg/960px-MBTA_route_1_bus_on_Massachusetts_Avenue_Boston_March_2024.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:MBTA_route_1_bus_on_Massachusetts_Avenue_Boston_March_2024.jpg",
+   "author": "4300streetcar",
+   "license": "CC BY 4.0",
+   "title": "File:MBTA route 1 bus on Massachusetts Avenue Boston March 2024.jpg"
+  },
+  "mta-nyct": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/MTA_New_Flyer_XD40_7098.jpg/960px-MTA_New_Flyer_XD40_7098.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:MTA_New_Flyer_XD40_7098.jpg",
+   "author": "Kidfly182",
+   "license": "CC BY 4.0",
+   "title": "File:MTA New Flyer XD40 7098.jpg"
+  },
+  "mta-bus": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/94/MTABC_LFS_Q60.jpg/960px-MTABC_LFS_Q60.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:MTABC_LFS_Q60.jpg",
+   "author": "Transitsylveonkpop",
+   "license": "CC BY-SA 4.0",
+   "title": "File:MTABC LFS Q60.jpg"
+  },
+  "bvg": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/BVG-Bus_Alexander_Dennis_Enviro_500_in_Berlin_%282022%29.jpg/960px-BVG-Bus_Alexander_Dennis_Enviro_500_in_Berlin_%282022%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:BVG-Bus_Alexander_Dennis_Enviro_500_in_Berlin_(2022).jpg",
+   "author": "JoachimKohler-HB",
+   "license": "CC BY-SA 4.0",
+   "title": "File:BVG-Bus Alexander Dennis Enviro 500 in Berlin (2022).jpg"
   }
  },
  "fleet": {
@@ -577,6 +647,48 @@
    "author": "BigToe7000",
    "license": "Public domain",
    "title": "File:Centrebus (Trustybus) LK07 GTF.jpg"
+  },
+  "mbta|New Flyer Xcelsior XDE40": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a9/MBTA_XDE40_bus_displaying_Go_Celtics.jpg/960px-MBTA_XDE40_bus_displaying_Go_Celtics.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:MBTA_XDE40_bus_displaying_Go_Celtics.jpg",
+   "author": "4300streetcar",
+   "license": "CC BY 4.0",
+   "title": "File:MBTA XDE40 bus displaying Go Celtics.jpg"
+  },
+  "mbta|New Flyer Xcelsior XDE60": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/15/MBTA_Silver_Line_XDE60_bus_1311_parked_at_Silver_Line_Way.jpg/960px-MBTA_Silver_Line_XDE60_bus_1311_parked_at_Silver_Line_Way.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:MBTA_Silver_Line_XDE60_bus_1311_parked_at_Silver_Line_Way.jpg",
+   "author": "4300streetcar",
+   "license": "CC BY 4.0",
+   "title": "File:MBTA Silver Line XDE60 bus 1311 parked at Silver Line Way.jpg"
+  },
+  "mta-nyct|New Flyer Xcelsior XD40": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/MTA_New_Flyer_XD40_7098.jpg/960px-MTA_New_Flyer_XD40_7098.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:MTA_New_Flyer_XD40_7098.jpg",
+   "author": "Kidfly182",
+   "license": "CC BY 4.0",
+   "title": "File:MTA New Flyer XD40 7098.jpg"
+  },
+  "mta-nyct|Nova Bus LFS": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/30/NYCT_Bus_2011_NovaBus_LFS_8032_Q88.jpg/960px-NYCT_Bus_2011_NovaBus_LFS_8032_Q88.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:NYCT_Bus_2011_NovaBus_LFS_8032_Q88.jpg",
+   "author": "Gh9449",
+   "license": "CC BY-SA 4.0",
+   "title": "File:NYCT Bus 2011 NovaBus LFS 8032 Q88.jpg"
+  },
+  "mta-bus|Nova Bus LFS": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/94/MTABC_LFS_Q60.jpg/960px-MTABC_LFS_Q60.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:MTABC_LFS_Q60.jpg",
+   "author": "Transitsylveonkpop",
+   "license": "CC BY-SA 4.0",
+   "title": "File:MTABC LFS Q60.jpg"
+  },
+  "bvg|ADL Enviro500 MMC": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/ba/Alexander_Dennis_Enviro_500_MMC_der_BVG-Linie_M85_%282025%29.jpg/960px-Alexander_Dennis_Enviro_500_MMC_der_BVG-Linie_M85_%282025%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "page": "https://commons.wikimedia.org/wiki/File:Alexander_Dennis_Enviro_500_MMC_der_BVG-Linie_M85_(2025).jpg",
+   "author": "JoachimKohler-HB",
+   "license": "CC BY-SA 4.0",
+   "title": "File:Alexander Dennis Enviro 500 MMC der BVG-Linie M85 (2025).jpg"
   }
  }
 }
