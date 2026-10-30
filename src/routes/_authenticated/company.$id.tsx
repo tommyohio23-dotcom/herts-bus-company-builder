@@ -228,7 +228,7 @@ function AddBus({ companyId, company, routes, refresh, spend }: { companyId: str
             <div><Label>Year</Label><Input type="number" min={1970} max={2026} value={f.year} onChange={(e) => setF({ ...f, year: Number(e.target.value) })} /></div>
             <div><Label>How many</Label><Input type="number" min={1} max={50} value={f.quantity} onChange={(e) => setF({ ...f, quantity: Math.max(1, Math.min(50, Number(e.target.value) || 1)) })} /></div>
             <div><Label>Depot</Label>
-              <Select value={depotTowns.includes(f.depot) ? f.depot : undefined} onValueChange={(v) => setF({ ...f, depot: v })}><SelectTrigger><SelectValue placeholder="Choose depot" /></SelectTrigger>
+              <Select value={depotTowns.includes(f.depot) ? f.depot : ""} onValueChange={(v) => setF({ ...f, depot: v })}><SelectTrigger><SelectValue placeholder="Choose depot" /></SelectTrigger>
                 <SelectContent>{depotTowns.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select>
             </div>
           </div>
