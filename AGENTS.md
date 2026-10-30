@@ -24,3 +24,4 @@
 - Starting-capital suggestions use shared pure rules; saved-network funding is an owner-scoped atomic RPC with a per-company one-time marker, so reopening the company list cannot duplicate grants.
 - Staff/applicant lists load through paged fetchAll (1,000-row API limit); depot-manager limits (one per depot, total ≤ depots) live in a drivers DB trigger so every hiring path obeys them.
 - Staff perks (route inspectors/senior drivers, depot cleaners/engineers/managers, company-wide controllers/trainers, rail roles) live in pure capped rules in `src/lib/staff-perks.ts`; DB triggers decide which roles may hold routes and count as crew.
+- Boston, New York and Berlin presets live in `src/lib/world.ts` and join the area menus via `src/lib/areas.ts`; their stop snapshots come from OpenStreetMap (Boston, Berlin) and MTA bus GTFS (NYC), and all game money stays in pounds.
