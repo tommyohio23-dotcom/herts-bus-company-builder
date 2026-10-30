@@ -18,7 +18,7 @@ import type { Tables } from '@/integrations/supabase/types';
 
 export function Recruitment({companyId,drivers,refresh}:{companyId:string;drivers:Tables<'drivers'>[];refresh:()=>void}) {
   const publish=useServerFn(publishAdvert),review=useServerFn(reviewApplicant),hireAll_=useServerFn(hireAllQualified);
-  const [role,setRole]=useState('Driver'),[depot,setDepot]=useState(''),[wage,setWage]=useState(140),[positions,setPositions]=useState(1),[description,setDescription]=useState(''),[busy,setBusy]=useState(false),[filter,setFilter]=useState('Active'),[advertFilter,setAdvertFilter]=useState('all'),[selected,setSelected]=useState<string|null>(null);
+  const [role,setRole]=useState('Driver'),[depot,setDepot]=useState(''),[wage,setWage]=useState(140),[positions,setPositions]=useState(10),[description,setDescription]=useState(''),[busy,setBusy]=useState(false),[filter,setFilter]=useState('Active'),[advertFilter,setAdvertFilter]=useState('all'),[selected,setSelected]=useState<string|null>(null);
   const adverts=useQuery({queryKey:['job_adverts',companyId],queryFn:async()=>{const r=await supabase.from('job_adverts').select('*').eq('company_id',companyId).order('posted_day',{ascending:false});if(r.error)throw r.error;return r.data;}});
   const applicants=useQuery({queryKey:['job_applicants',companyId],queryFn:async()=>{const r=await supabase.from('job_applicants').select('*').eq('company_id',companyId).order('name');if(r.error)throw r.error;return r.data;}});
   const depots=useQuery({queryKey:['depots',companyId],queryFn:async()=>{const r=await supabase.from('depots').select('*').eq('company_id',companyId);if(r.error)throw r.error;return r.data;}});
