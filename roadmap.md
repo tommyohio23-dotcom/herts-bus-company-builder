@@ -32,3 +32,10 @@
 - [x] One depot manager per depot, assigned to a depot.
 - [x] Assign every employee to a depot, and drivers to bus routes.
 - [x] Real (non-AI) operator photos for London, Beds, Bucks and Essex operators showing "No photo yet".
+# Regions (Oct 30)
+- [ ] Show local money ($ Boston/NYC, € Berlin) per company area.
+- [ ] Depot opening and bus-purchase depot choices limited to the company's own area/depots.
+- [ ] More bus models per city, and city-only model lists when buying.
+- [ ] More companies where real (NJ Transit, NICE, Logan Express); Berlin 300 and 147 plus re-checked routes.
+- [ ] Reviews use each company's own places (no Finchley in Berlin) with many more variations.
+- [ ] Give user a prompt for another AI to write lots of reviews per company.
