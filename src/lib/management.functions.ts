@@ -47,7 +47,7 @@ export const managementAction = createServerFn({ method: 'POST' })
         const resolution = await db.rpc('resolve_game_bid',{p_company:company.id,p_key:bid.tender_key,p_won:won,p_route:offer});
         if (resolution.error) throw new Error(resolution.error.message);
       }
-      payload = managementDay(routes.map(r => ({...r,fare:Number(r.fare),contract_payment:Number(r.contract_payment)})),buses,staff.map(d => Number(d.wage)),depots.map(d => Number(d.daily_rent)),company.day);
+      payload = managementDay(routes.map(r => ({...r,fare:Number(r.fare),contract_payment:Number(r.contract_payment)})),buses,staff.map(d => ({...d,wage:Number(d.wage)})),depots.map(d => Number(d.daily_rent)),company.day);
     }
     const result = await db.rpc('apply_management_action',{p_company:company.id,p_day:company.day,p_action:data.action,p_payload:payload});
     if (result.error) throw new Error(result.error.message);

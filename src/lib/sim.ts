@@ -1,9 +1,9 @@
-import { assertFleetCoverage, routeCycleMinutes, LatLng } from './service-frequency';
+import { assertFleetCoverage, assertDriverCoverage, timetableCycle, type TimedRoute } from './service-frequency';
 import { operatingConditions, routeDemand } from './operating-conditions';
 
-export type SimRoute  = { id: string; frequency_mins: number; fare: number; stops: LatLng[] };
-export type SimBus    = { id: string; route_id: string | null; status: string };
-export type SimDriver = { id: string; bus_id: string | null; wage: number };
+export type SimRoute  = TimedRoute & { id: string; frequency_mins: number; fare: number; journey_minutes?: number; turnaround_minutes?: number; recovery_percent?: number };
+export type SimBus    = { id?: string; route_id: string | null; status: string };
+export type SimDriver = { id?: string; route_id?: string | null; role?: string; wage: number };
 
 export const BUS_DAILY_COST      = 90;
 export const PASSENGERS_PER_TRIP = 22;
@@ -18,18 +18,8 @@ export function simulateDay(
   // 1. Check every active route has enough buses for its actual journey time.
   assertFleetCoverage(routes, buses);
 
-  // 2. Every in-service bus must have a driver.
-  const inServiceBuses = buses.filter(
-    b => b.status === 'In service' && routes.some(r => r.id === b.route_id),
-  );
-
-  const uncrewed = inServiceBuses.filter(b => !drivers.some(d => d.bus_id === b.id));
-  if (uncrewed.length > 0) {
-    throw new Error(
-      `Cannot operate service: ${uncrewed.length} in-service ` +
-      `${uncrewed.length === 1 ? 'bus has' : 'buses have'} no driver assigned.`,
-    );
-  }
+  assertDriverCoverage(routes,buses,drivers);
+  const inServiceBuses = buses.filter(b=>b.status==='In service' && routes.some(r=>r.id===b.route_id));
 
   // 3. Revenue — trips per bus depends on real journey length, not a fixed constant.
   let revenue = 0;
@@ -37,7 +27,7 @@ export function simulateDay(
     const n = buses.filter(b => b.route_id === r.id && b.status === 'In service').length;
     if (n === 0) continue;
 
-    const cycle       = routeCycleMinutes(r.stops);        // derived from real geography
+    const cycle       = timetableCycle(r);        // derived from real geography
     const tripsPerBus = (SERVICE_HOURS * 60) / cycle;
     const tripsRun    = Math.floor(n * tripsPerBus);
 
