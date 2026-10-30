@@ -99,6 +99,13 @@
       "when": 1793371253311,
       "tag": "0013_bulk_hire_qualified",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1793371747385,
+      "tag": "0014_hire_all_ignores_places",
+      "breakpoints": true
     }
   ]
 }
