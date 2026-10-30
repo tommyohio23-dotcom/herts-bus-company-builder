@@ -12,7 +12,11 @@ export const MAP_AREAS = [
   { key: 'essex', name: 'West Essex', lat: 51.825, lng: 0.30 },
   { key: 'london', name: 'London & borders', lat: 51.5074, lng: -0.1278 },
   { key: 'north-london', name: 'Barnet · Enfield · Haringey · Borehamwood', lat: 51.637, lng: -0.12 },
-];
+  { key: 'nw-london', name: 'North West London (Harrow · Wembley · Edgware)', lat: 51.575, lng: -0.27, file: 'london', bounds: [51.53, 51.63, -0.38, -0.18] },
+  { key: 'west-london', name: 'West London & Heathrow', lat: 51.49, lng: -0.37, file: 'london', bounds: [51.43, 51.56, -0.52, -0.25] },
+  { key: 'central-london', name: 'Central London', lat: 51.512, lng: -0.12, file: 'london', bounds: [51.48, 51.54, -0.2, -0.05] },
+  { key: 'east-london', name: 'East & North East London', lat: 51.56, lng: -0.03, file: 'london', bounds: [51.52, 51.62, -0.1, 0.08] },
+] as { key: string; name: string; lat: number; lng: number; file?: string; bounds?: [number, number, number, number] }[];
 export type RealStop = { id: string; name: string; locality: string; indicator: string; lat: number; lng: number };
 export const stopLabel = (s: RealStop) => `${s.locality} · ${s.name}${s.indicator ? ` (${s.indicator})` : ''}`;
 export const DEPOT_PACKAGES = [
