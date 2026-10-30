@@ -36,6 +36,7 @@ export function tenderOffers(day: number) {
   return [
     { number: 'T1', origin: 'Hertford', destination: 'Ware', via: '', frequency_mins: 60, budget: 360, required: 1 },
     { number: 'T2', origin: 'St Albans', destination: 'Hatfield', via: 'London Colney', frequency_mins: 30, budget: 680, required: 2 },
+    { number: 'RR1', origin: 'New Barnet', destination: 'Potters Bar', via: 'Hadley Wood', frequency_mins: 60, budget: 900, required: 2 },
     { number: 'T3', origin: 'Watford', destination: 'Rickmansworth', via: 'Croxley Green', frequency_mins: 60, budget: 420, required: 1 },
   ].map((t, i) => ({ ...t, key: `tender-${week}-${i}`, close_day: week * 7 + 7, end_day: week * 7 + 35 }));
 }
