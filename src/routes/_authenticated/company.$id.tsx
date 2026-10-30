@@ -181,12 +181,20 @@ function AddBus({ companyId, company, routes, refresh, spend }: { companyId: str
   const purchase=useServerFn(purchaseBusOrFeatures);
   const [saving,setSaving]=useState(false);
   const [open, setOpen] = useState(false);
-  const [f, setF] = useState({ fleet_no: "", registration: "", model: BUS_MODELS[0] ?? "", year: 2012, depot: company.hq_town, livery: "", route_id: "none", features: [] as string[] });
-  const price = busPrice(f.year) + upgradeCost(f.features);
+  const [f, setF] = useState({ fleet_no: "", registration: "", model: BUS_MODELS[0] ?? "", year: 2012, depot: company.hq_town, livery: "", route_id: "none", features: [] as string[], quantity: 1 });
+  const each = busPrice(f.year) + upgradeCost(f.features);
+  const price = each * f.quantity;
   async function save() {
     if (!f.fleet_no) { toast.error("Fleet number needed"); return; }
     if(saving)return;setSaving(true);
-    try{await purchase({data:{...f,companyId,day:company.day,route_id:f.route_id==='none'?null:f.route_id}});toast.success(`${f.fleet_no} joins the fleet`);setOpen(false);refresh();}catch(e){toast.error(e instanceof Error?e.message:'Purchase failed');}finally{setSaving(false);}
+    try{
+      const res=await purchase({data:{...f,companyId,day:company.day,route_id:f.route_id==='none'?null:f.route_id}});
+      const bought=(res as {bought?:number;partial?:boolean;reason?:string})?.bought??f.quantity;
+      const partial=(res as {partial?:boolean;reason?:string})?.partial;
+      if(partial)toast.warning(`Only ${bought} of ${f.quantity} bought — ${(res as {reason?:string}).reason??'funds ran out'}`);
+      else toast.success(f.quantity>1?`${bought} buses join the fleet`:`${f.fleet_no} joins the fleet`);
+      setOpen(false);refresh();
+    }catch(e){toast.error(e instanceof Error?e.message:'Purchase failed');}finally{setSaving(false);}
   }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
