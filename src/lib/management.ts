@@ -31,25 +31,26 @@ export const DEPOT_PACKAGES = [
   { name: 'Main depot', capacity: 40, cost: 60000, daily_rent: 160 },
 ];
 const marketModels = ['Optare Solo', 'ADL Enviro200', 'Dennis Dart SLF / Plaxton Pointer', 'ADL Enviro400', 'Wright StreetLite', 'Volvo B9TL / Wright Gemini 2'];
-export function marketListings(day: number) {
+export function marketListings(day: number, models: string[] = marketModels) {
+  if (!models.length) models = marketModels;
   const week = Math.floor((day - 1) / 7);
   return Array.from({length: 18}, (_, i) => {
-    const model = marketModels[i % marketModels.length] ?? 'Optare Solo';
-    const variant = Math.floor(i / marketModels.length);
-    const year = ([2009, 2013, 2004, 2011, 2017, 2010][i % marketModels.length] ?? 2010) + variant * 2;
+    const model = models[i % models.length] ?? 'Optare Solo';
+    const variant = Math.floor(i / models.length);
+    const year = ([2009, 2013, 2004, 2011, 2017, 2010, 2015, 2012, 2019, 2008, 2014][i % models.length] ?? 2010) + Math.min(variant, 3) * 2;
     const mileage = 80000 + (i % 6) * 42000 + (week % 5) * 12000 - variant * 18000;
     const condition = 62 + ((i * 7 + week * 3) % 33);
     return { key: `used-${week}-${i}`, model, year, mileage, condition, price: Math.round((18000 + (year - 2000) * 3000) * (condition / 100)), features: ['CCTV', 'Wheelchair space', ...(variant >= 1 ? ['Contactless ticket machine'] : []), ...(variant === 2 ? ['USB charging ports', 'Free Wi-Fi'] : [])] };
   });
 }
-export function tenderOffers(day: number) {
+export function tenderOffers(day: number, towns?: string[]) {
   const week = Math.floor((day - 1) / 7);
   return [
     { number: 'T1', origin: 'Hertford', destination: 'Ware', via: '', frequency_mins: 60, budget: 360, required: 1 },
     { number: 'T2', origin: 'St Albans', destination: 'Hatfield', via: 'London Colney', frequency_mins: 30, budget: 680, required: 2 },
     { number: 'RR1', origin: 'New Barnet', destination: 'Potters Bar', via: 'Hadley Wood', frequency_mins: 60, budget: 900, required: 2 },
     { number: 'T3', origin: 'Watford', destination: 'Rickmansworth', via: 'Croxley Green', frequency_mins: 60, budget: 420, required: 1 },
-  ].map((t, i) => ({ ...t, key: `tender-${week}-${i}`, close_day: week * 7 + 7, end_day: week * 7 + 35 }));
+  ].map((t, i) => towns && towns.length > 3 ? { ...t, origin: towns[(i * 2 + week) % towns.length]!, destination: towns[(i * 2 + week + 3) % towns.length]!, via: '' } : t).map((t, i) => ({ ...t, key: `tender-${week}-${i}`, close_day: week * 7 + 7, end_day: week * 7 + 35 }));
 }
 export function tenderDecision(bid: number, budget: number, eligibleBuses: number, required: number) {
   return Number.isFinite(bid) && bid > 0 && bid <= budget * 0.95 && eligibleBuses >= required;
