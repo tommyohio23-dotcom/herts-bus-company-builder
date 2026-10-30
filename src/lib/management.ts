@@ -1,4 +1,4 @@
-import { bankReview } from './review-bank';
+import { bankReviewFor, localReview, type ReviewContext, type ReviewTheme } from './local-reviews';
 import { simulateDay, type SimBus, type SimRoute, type SimDriver } from './sim';
 import { upgradeUpkeep } from './upgrades';
 import { breakdownOccurs } from './disruptions';
@@ -64,17 +64,24 @@ const REVIEW_TEXT = {
   frequent: ['A regular service and a straightforward journey.', 'Having another bus soon after makes this route convenient.', 'Frequent buses make this route easy to rely on.', 'The regular service makes everyday journeys easier.'],
   sparse: ['A useful service, though I would like more frequent buses.', 'Handy route, but the gaps between buses are long.', 'If I miss one, the wait for the next is frustrating.', 'Decent journey; an extra bus each hour would help.'],
 };
-export function passengerReview(route: { number: string; fare: number; frequency_mins: number }, buses: { features: string[]; condition: number }[], day = 1) {
+export function passengerReview(route: { number: string; fare: number; frequency_mins: number; origin?: string; destination?: string; via?: string }, buses: { features: string[]; condition: number }[], day = 1, ctx?: Partial<ReviewContext>) {
   const routeSeed = Number.parseInt(route.number.replace(/\D/g, ''), 10);
   const seed = day * 7 + (Number.isFinite(routeSeed) ? routeSeed : [...route.number].reduce((n, c, i) => n + c.charCodeAt(0) * (i + 1), 0));
-  if (!buses.length) return { route_number: route.number, rating: 1, comment: pick(REVIEW_TEXT.missing, seed) };
+  const places = [route.origin, route.destination, ...(route.via ?? '').split(/,| and /)].map(p => p?.trim() ?? '').filter(p => p && !/^via$/i.test(p));
+  const full: ReviewContext | null = ctx?.area ? { area: ctx.area, operator: ctx.operator ?? 'the operator', presetKey: ctx.presetKey ?? null, places: ctx.places?.length ? ctx.places : places, cur: ctx.cur ?? '£' } : null;
+  const say = (theme: ReviewTheme, rating: number, generic: string) => {
+    if (!full) return seed % 4 === 0 || theme === 'missing' ? generic : bankReviewFor('bus', rating, { area: 'herts', operator: '', places, cur: '£' }, seed * 13 + day) ?? generic;
+    if (theme !== 'missing' && seed % 3 === 0) { const b = bankReviewFor('bus', rating, full, seed * 13 + day); if (b) return b; }
+    return localReview(theme, rating, full, route, seed * 17 + day);
+  };
+  if (!buses.length) return { route_number: route.number, rating: 1, comment: say('missing', 1, pick(REVIEW_TEXT.missing, seed)) };
   const avgCondition = buses.reduce((n, b) => n + b.condition, 0) / buses.length;
   const comfortable = buses.some(b => b.features.includes('Leather seats') || b.features.includes('USB charging ports') || b.features.includes('Air conditioning'));
   const rating = Math.max(1, Math.min(5, 3 + (route.frequency_mins <= 30 ? 1 : 0) + (comfortable ? 1 : 0) - (route.fare > 3 ? 1 : 0) - (avgCondition < 65 ? 1 : 0)));
-  const comment = pick(avgCondition < 65 ? REVIEW_TEXT.worn : route.fare > 3 ? REVIEW_TEXT.fare : comfortable ? REVIEW_TEXT.comfort : route.frequency_mins <= 30 ? REVIEW_TEXT.frequent : REVIEW_TEXT.sparse, seed);
-  return { route_number: route.number, rating, comment: seed % 4 === 0 ? comment : bankReview('bus', rating, seed * 13 + day) ?? comment };
+  const theme: ReviewTheme = avgCondition < 65 ? 'worn' : route.fare > 3 ? 'fare' : comfortable ? 'comfort' : route.frequency_mins <= 30 ? 'frequent' : 'sparse';
+  return { route_number: route.number, rating, comment: say(theme, rating, pick(REVIEW_TEXT[theme], seed)) };
 }
-export function managementDay(routes: (SimRoute & { number: string; contract_payment: number; contract_end_day: number | null })[], buses: (SimBus & { features: string[]; condition: number })[], staff: SimDriver[], rents: (number | { rent: number; town: string })[], day: number) {
+export function managementDay(routes: (SimRoute & { number: string; contract_payment: number; contract_end_day: number | null })[], buses: (SimBus & { features: string[]; condition: number })[], staff: SimDriver[], rents: (number | { rent: number; town: string })[], day: number, reviewCtx?: Partial<ReviewContext>) {
   const busesAt = (d?: string | null) => buses.filter(b => b.depot === d && b.status !== 'Withdrawn').length;
   const care = (b: SimBus) => depotCare(b.depot, staff, busesAt(b.depot));
   const inspected = (id: string) => staff.some(d => d.role === 'Ticket Inspector' && d.route_id === id);
@@ -83,5 +90,5 @@ export function managementDay(routes: (SimRoute & { number: string; contract_pay
   const contractRevenue = activeRoutes.reduce((sum, r) => sum + (buses.some(b => b.route_id === r.id && b.status === 'In service') ? r.contract_payment : 0), 0);
   const depotCosts = rents.reduce<number>((sum, r) => sum + (typeof r === 'number' ? r : managerRent(r.rent, r.town, staff)), 0);
   const upgradeCosts = buses.filter(b => b.status !== 'Withdrawn').reduce((n,b) => n + upgradeUpkeep(b.features), 0);
-  return { revenue: result.revenue + contractRevenue, costs: result.costs + depotCosts + upgradeCosts, profit: result.profit + contractRevenue - depotCosts - upgradeCosts, details: { conditions: operatingConditions(day).label, fares: result.revenue, contractRevenue, depotCosts, upgradeCosts, wages: staff.reduce((a,b) => a+b.wage,0), breakdowns: buses.filter(b=>b.id&&b.status==='In service'&&activeRoutes.some(r=>r.id===b.route_id)&&breakdownOccurs(day,b.id,Math.min(100,b.condition+care(b).breakdown))).map(b=>({id:b.id})), busCosts: result.busCost, activeBuses: result.activeBuses }, reviews: activeRoutes.map(r => { const rv = passengerReview(r, buses.filter(b => b.route_id === r.id && b.status === 'In service').map(b => ({ ...b, condition: Math.min(100, b.condition + care(b).review) })), day); return inspected(r.id) ? { ...rv, rating: Math.min(5, rv.rating + 1) } : rv; }) };
+  return { revenue: result.revenue + contractRevenue, costs: result.costs + depotCosts + upgradeCosts, profit: result.profit + contractRevenue - depotCosts - upgradeCosts, details: { conditions: operatingConditions(day).label, fares: result.revenue, contractRevenue, depotCosts, upgradeCosts, wages: staff.reduce((a,b) => a+b.wage,0), breakdowns: buses.filter(b=>b.id&&b.status==='In service'&&activeRoutes.some(r=>r.id===b.route_id)&&breakdownOccurs(day,b.id,Math.min(100,b.condition+care(b).breakdown))).map(b=>({id:b.id})), busCosts: result.busCost, activeBuses: result.activeBuses }, reviews: activeRoutes.map(r => { const rv = passengerReview(r, buses.filter(b => b.route_id === r.id && b.status === 'In service').map(b => ({ ...b, condition: Math.min(100, b.condition + care(b).review) })), day, reviewCtx); return inspected(r.id) ? { ...rv, rating: Math.min(5, rv.rating + 1) } : rv; }) };
 }

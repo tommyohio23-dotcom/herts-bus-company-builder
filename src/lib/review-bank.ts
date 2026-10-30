@@ -1,5 +1,5 @@
 import bank from './review-bank.json';
-export type BankReview={mode:'bus'|'train';rating:number;theme:string;text:string;passenger:string};
+export type BankReview={mode:'bus'|'train';rating:number;theme:string;text:string;passenger:string;company?:string};
 export const REVIEW_BANK=bank as BankReview[];
 /** Picks a passenger-written review matching mode and star rating; deterministic for the same seed. */
 export function bankReview(mode:'bus'|'train',rating:number,seed:number):string|null{
