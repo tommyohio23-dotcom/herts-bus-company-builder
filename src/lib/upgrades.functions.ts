@@ -5,7 +5,7 @@ import { BUS_MODELS, FEATURES } from './herts';
 import { newBusPrice, upgradeCost } from './upgrades';
 
 export const purchaseBusOrFeatures = createServerFn({method:'POST'}).middleware([requireSupabaseAuth])
-  .inputValidator(z.object({companyId:z.string().uuid(),day:z.number().int().positive(),busId:z.string().uuid().optional(),features:z.array(z.string()),fleet_no:z.string().optional(),registration:z.string().optional(),model:z.string().optional(),year:z.number().int().min(1970).max(2026).optional(),depot:z.string().optional(),livery:z.string().optional(),route_id:z.string().uuid().nullable().optional(),quantity:z.number().int().min(1).max(50).optional()}))
+  .inputValidator(z.object({companyId:z.string().uuid(),day:z.number().int().positive(),busId:z.string().uuid().optional(),features:z.array(z.string()),fleet_no:z.string().optional(),registration:z.string().optional(),model:z.string().optional(),year:z.number().int().min(1970).max(2026).optional(),depot:z.string().optional(),livery:z.string().optional(),route_id:z.string().uuid().nullable().optional(),quantity:z.number().int().min(1).max(100).optional()}))
   .handler(async({data,context})=>{
     const db=context.supabase;
     const c=await db.from('companies').select('*').eq('id',data.companyId).single();
