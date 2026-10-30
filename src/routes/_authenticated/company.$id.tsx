@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCur, CurrencyContext, AREA_CURRENCY } from "@/lib/currency";
+import { useCur, useArea, CurrencyContext, AreaContext, AREA_CURRENCY } from "@/lib/currency";
 import { areaOf, areaModels, areaTowns } from "@/lib/areas";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BusSide } from "@/components/BusSide";
-import { BUS_MODELS, FEATURES, HERTS_TOWNS, STATUSES } from "@/lib/herts";
+import { FEATURES, STATUSES } from "@/lib/herts";
 import { BusPhoto } from "@/components/BusPhoto";
 import { fetchAll, chunk } from "@/lib/fetch-all";
 import { managementAction } from "@/lib/management.functions";
@@ -60,7 +60,8 @@ function CompanyPage() {
   const [running, setRunning] = useState(false);
 
   if (!company) return <div className="p-8 text-muted-foreground">Loading depot…</div>;
-  const cur = AREA_CURRENCY[areaOf(company)];
+  const area = areaOf(company);
+  const cur = AREA_CURRENCY[area];
 
   async function runDay() {
     if (!company || running) return;
@@ -78,7 +79,7 @@ function CompanyPage() {
   }
 
   return (
-    <CurrencyContext.Provider value={cur}>
+    <AreaContext.Provider value={area}><CurrencyContext.Provider value={cur}>
     <div className="min-h-screen">
       <div className="stripe-band h-2" />
       <header className="mx-auto max-w-6xl px-4 py-4">
@@ -118,7 +119,7 @@ function CompanyPage() {
         </Tabs>
       </main>
     </div>
-    </CurrencyContext.Provider>
+    </CurrencyContext.Provider></AreaContext.Provider>
   );
 }
 
@@ -189,11 +190,16 @@ function AddBus({ companyId, company, routes, refresh, spend }: { companyId: str
   const purchase=useServerFn(purchaseBusOrFeatures);
   const [saving,setSaving]=useState(false);
   const [open, setOpen] = useState(false);
-  const [f, setF] = useState({ fleet_no: "", registration: "", model: BUS_MODELS[0] ?? "", year: 2012, depot: company.hq_town, livery: "", route_id: "none", features: [] as string[], quantity: 1 });
+  const area = useArea();
+  const models = areaModels(area);
+  const depotList = useQuery({ queryKey: ['depots', companyId], queryFn: async () => { const r = await supabase.from('depots').select('*').eq('company_id', companyId); if (r.error) throw r.error; return r.data; } });
+  const depotTowns = (depotList.data ?? []).map(d => d.town);
+  const [f, setF] = useState({ fleet_no: "", registration: "", model: models[0] ?? "", year: 2012, depot: company.hq_town, livery: "", route_id: "none", features: [] as string[], quantity: 1 });
   const each = busPrice(f.year) + upgradeCost(f.features);
   const price = each * f.quantity;
   async function save() {
     if (!f.fleet_no) { toast.error("Fleet number needed"); return; }
+    if (!depotTowns.includes(f.depot)) { toast.error("Choose one of your depots"); return; }
     if(saving)return;setSaving(true);
     try{
       const res=await purchase({data:{...f,companyId,day:company.day,route_id:f.route_id==='none'?null:f.route_id}});
@@ -216,14 +222,14 @@ function AddBus({ companyId, company, routes, refresh, spend }: { companyId: str
           </div>
           <div><Label>Model</Label>
             <Select value={f.model} onValueChange={(v) => setF({ ...f, model: v })}><SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{BUS_MODELS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent></Select>
+              <SelectContent>{models.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent></Select>
           </div>
           <div className="grid grid-cols-3 gap-2">
             <div><Label>Year</Label><Input type="number" min={1970} max={2026} value={f.year} onChange={(e) => setF({ ...f, year: Number(e.target.value) })} /></div>
             <div><Label>How many</Label><Input type="number" min={1} max={50} value={f.quantity} onChange={(e) => setF({ ...f, quantity: Math.max(1, Math.min(50, Number(e.target.value) || 1)) })} /></div>
             <div><Label>Depot</Label>
-              <Select value={f.depot} onValueChange={(v) => setF({ ...f, depot: v })}><SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{HERTS_TOWNS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select>
+              <Select value={depotTowns.includes(f.depot) ? f.depot : undefined} onValueChange={(v) => setF({ ...f, depot: v })}><SelectTrigger><SelectValue placeholder="Choose depot" /></SelectTrigger>
+                <SelectContent>{depotTowns.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select>
             </div>
           </div>
           <div><Label>Livery</Label><Input value={f.livery} onChange={(e) => setF({ ...f, livery: e.target.value })} placeholder="e.g. Green Line, Sapphire, heritage NBC" /></div>
@@ -242,6 +248,7 @@ function AddBus({ companyId, company, routes, refresh, spend }: { companyId: str
 }
 
 function Routes({ companyId, routes, buses, drivers, refresh }: { companyId: string; routes: Rt[]; buses: Bus[]; drivers: Drv[]; refresh: () => void }) {
+  const area = useArea();
   const cur = useCur();
   const [f, setF] = useState({ number: "", origin: "Hertford", destination: "Stevenage", via: "", frequency_mins: 30, fare: 2, journey_minutes:30, turnaround_minutes:5, recovery_percent:10 });
   async function add() {
@@ -252,7 +259,7 @@ function Routes({ companyId, routes, buses, drivers, refresh }: { companyId: str
   }
   const townSelect = (k: "origin" | "destination") => (
     <Select value={f[k]} onValueChange={(v) => setF({ ...f, [k]: v })}><SelectTrigger><SelectValue /></SelectTrigger>
-      <SelectContent>{HERTS_TOWNS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select>
+      <SelectContent>{areaTowns(area).map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select>
   );
   return (
     <div className="mt-2 space-y-3">
@@ -315,6 +322,7 @@ function RouteFrequency({route,count,refresh}:{route:Rt;count:number;refresh:()=
 }
 
 function StopPicker({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
+  const area = useArea();
   const [pick, setPick] = useState("");
   const move = (i: number, d: number) => { const v = [...value]; const j = i + d; const a=v[i],b=v[j]; if(a===undefined||b===undefined)return;v[i]=b;v[j]=a;onChange(v); };
   return (
@@ -331,7 +339,7 @@ function StopPicker({ value, onChange }: { value: string[]; onChange: (v: string
       </ol>
       <div className="flex gap-2">
         <div className="flex-1"><Select value={pick} onValueChange={setPick}><SelectTrigger><SelectValue placeholder="Choose a stop" /></SelectTrigger>
-          <SelectContent>{HERTS_TOWNS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
+          <SelectContent>{areaTowns(area).map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
         <Button type="button" variant="secondary" disabled={!pick} onClick={() => { onChange([...value, pick]); setPick(""); }}>Add stop</Button>
       </div>
     </div>
