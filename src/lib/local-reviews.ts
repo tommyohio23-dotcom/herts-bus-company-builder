@@ -58,7 +58,7 @@ const DETAIL: Record<Flavour, Record<ReviewTheme, string[]>> = {
 const CLOSE: Record<Flavour, Record<'bad' | 'mid' | 'good', string[]>> = {
   uk: { bad: ['Sort it out, please.', 'Not good enough.', 'I\'ll be writing in.', 'Rubbish, frankly.', 'Really disappointing.', 'Do better.'], mid: ['Could be worse.', 'Room to improve.', 'Fine for now.', 'Six out of ten.', 'It\'ll do.', 'Getting there.'], good: ['Cheers, driver!', 'Keep it up.', 'More like this please.', 'Made my day.', 'Top notch.', 'Proper service.'] },
   us: { bad: ['Fix it, please.', 'Not acceptable.', 'Filing a complaint.', 'Ridiculous, honestly.', 'So disappointing.', 'Do better.'], mid: ['Could be worse.', 'Room for improvement.', 'Fine for now.', 'Solid six out of ten.', 'It works.', 'Getting there.'], good: ['Thanks, driver!', 'Keep it up.', 'More of this please.', 'Made my day.', 'Top notch.', 'Love it.'] },
-  de: { bad: ['Bitte ändern.', 'Not acceptable.', 'I\'ll complain to the BVG.', 'Echt schlecht.', 'Very disappointing.', 'Do better.'], mid: ['Geht so.', 'Room to improve.', 'Fine for now.', 'Passt.', 'It\'ll do.', 'Getting there.'], good: ['Danke, driver!', 'Weiter so.', 'More like this please.', 'Made my day.', 'Top.', 'Super.'] },
+  de: { bad: ['Bitte ändern.', 'Not acceptable.', 'I\'ll complain to {o}.', 'Echt schlecht.', 'Very disappointing.', 'Do better.'], mid: ['Geht so.', 'Room to improve.', 'Fine for now.', 'Passt.', 'It\'ll do.', 'Getting there.'], good: ['Danke, driver!', 'Weiter so.', 'More like this please.', 'Made my day.', 'Top.', 'Super.'] },
 };
 const NAMES: Record<Flavour, string[]> = {
   uk: ['Sam', 'Priya', 'Gary', 'Chloe', 'Tom', 'Aisha', 'Brenda', 'Dev', 'Megan', 'Ollie', 'Sue', 'Kwame', 'Holly', 'Raj', 'Jean', 'Callum'],
