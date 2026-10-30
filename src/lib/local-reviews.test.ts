@@ -22,3 +22,7 @@ describe('company-specific passenger reviews', () => {
     expect(texts.size).toBeGreaterThan(60);
   });
 });
+it('a normal €3.80 Berlin fare is not marked down as expensive', () => {
+  const r = passengerReview(route, [{ features: [], condition: 90 }], 3, berlin);
+  expect(r.rating).toBe(4);
+});

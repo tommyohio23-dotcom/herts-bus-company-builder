@@ -77,8 +77,9 @@ export function passengerReview(route: { number: string; fare: number; frequency
   if (!buses.length) return { route_number: route.number, rating: 1, comment: say('missing', 1, pick(REVIEW_TEXT.missing, seed)) };
   const avgCondition = buses.reduce((n, b) => n + b.condition, 0) / buses.length;
   const comfortable = buses.some(b => b.features.includes('Leather seats') || b.features.includes('USB charging ports') || b.features.includes('Air conditioning'));
-  const rating = Math.max(1, Math.min(5, 3 + (route.frequency_mins <= 30 ? 1 : 0) + (comfortable ? 1 : 0) - (route.fare > 3 ? 1 : 0) - (avgCondition < 65 ? 1 : 0)));
-  const theme: ReviewTheme = avgCondition < 65 ? 'worn' : route.fare > 3 ? 'fare' : comfortable ? 'comfort' : route.frequency_mins <= 30 ? 'frequent' : 'sparse';
+  const fareLimit = ctx?.area === 'berlin' ? 4.5 : ctx?.area === 'boston' || ctx?.area === 'nyc' ? 4 : 3;
+  const rating = Math.max(1, Math.min(5, 3 + (route.frequency_mins <= 30 ? 1 : 0) + (comfortable ? 1 : 0) - (route.fare > fareLimit ? 1 : 0) - (avgCondition < 65 ? 1 : 0)));
+  const theme: ReviewTheme = avgCondition < 65 ? 'worn' : route.fare > fareLimit ? 'fare' : comfortable ? 'comfort' : route.frequency_mins <= 30 ? 'frequent' : 'sparse';
   return { route_number: route.number, rating, comment: say(theme, rating, pick(REVIEW_TEXT[theme], seed)) };
 }
 export function managementDay(routes: (SimRoute & { number: string; contract_payment: number; contract_end_day: number | null })[], buses: (SimBus & { features: string[]; condition: number })[], staff: SimDriver[], rents: (number | { rent: number; town: string })[], day: number, reviewCtx?: Partial<ReviewContext>) {
