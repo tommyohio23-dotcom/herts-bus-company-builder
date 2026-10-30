@@ -208,7 +208,7 @@ function CustomCompany({ onDone, area }: { onDone: (id: string) => void; area: A
               <SelectContent>{AREA_TOWNS[area].map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-          <StartingMoney amount={startingMoney} suggested={suggestedBusCapital([])} onChange={setStartingMoney}/>
+          <StartingMoney amount={startingMoney} suggested={suggestedBusCapital([])} onChange={setStartingMoney} cur={AREA_CURRENCY[area]}/>
           <Button disabled={busy} onClick={create}>{busy ? 'Setting up…' : 'Create company'}</Button>
         </div>
       </DialogContent>
