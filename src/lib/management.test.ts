@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { DEPOT_PACKAGES, managementDay, marketListings, passengerReview, tenderDecision } from './management';
 describe('management rules', () => {
   it('varies daily income and running costs without changing wages, rent or contract payments', () => {
-    const routes = [{id:'a',number:'1',fare:2,frequency_mins:60,contract_payment:360,contract_end_day:35}];
+    const routes = [{id:'a',number:'1',fare:2,frequency_mins:120,contract_payment:360,contract_end_day:35}];
     const buses = [{route_id:'a',status:'In service',features:[],condition:85}];
-    const days = [1,2,3].map(day => managementDay(routes,buses,[140],[35],day));
+    const days = [1,2,3].map(day => managementDay(routes,buses,[{wage:140,role:"Driver",route_id:"a"}],[35],day));
     expect(new Set(days.map(d => d.revenue)).size).toBe(3);
     expect(new Set(days.map(d => d.costs)).size).toBe(3);
     for (const d of days) {
@@ -14,7 +14,7 @@ describe('management rules', () => {
       expect(d.profit).toBe(d.revenue - d.costs);
       expect(d.costs).toBe(d.details.busCosts + 140 + 35);
     }
-    expect(managementDay(routes,buses,[140],[35],2)).toEqual(days[1]);
+    expect(managementDay(routes,buses,[{wage:140,role:"Driver",route_id:"a"}],[35],2)).toEqual(days[1]);
   });
   it('offers eighteen distinct used listings and renews after seven days', () => {
     expect(new Set(marketListings(1).map(b => b.key)).size).toBe(18);
@@ -33,10 +33,10 @@ describe('management rules', () => {
   it('gives an unserved route one star', () => expect(passengerReview({number:'1',fare:2,frequency_mins:30},[]).rating).toBe(1));
   it('rewards frequent comfortable journeys with five stars', () => expect(passengerReview({number:'1',fare:2,frequency_mins:30},[{condition:85,features:['USB charging ports']}]).rating).toBe(5));
   it('adds depot rent even without services', () => expect(managementDay([],[],[],[35],1).profit).toBe(-35));
-  it('cannot settle a half-hourly contract with only one bus',()=>expect(()=>managementDay([{id:'a',number:'T2',fare:0,frequency_mins:30,contract_payment:680,contract_end_day:35}],[{route_id:'a',status:'In service',features:[],condition:85}],[],[],1)).toThrow('needs 2'));
-  it('settles a half-hourly contract with two in-service buses',()=>expect(managementDay([{id:'a',number:'T2',fare:0,frequency_mins:30,contract_payment:680,contract_end_day:35}],[{route_id:'a',status:'In service',features:[],condition:85},{route_id:'a',status:'In service',features:[],condition:85}],[],[],1).revenue).toBe(680));
+  it('cannot settle a half-hourly contract with only one bus',()=>expect(()=>managementDay([{id:'a',number:'T2',fare:0,frequency_mins:30,journey_minutes:20,contract_payment:680,contract_end_day:35}],[{route_id:'a',status:'In service',features:[],condition:85}],[],[],1)).toThrow('needs 2'));
+  it('settles a half-hourly contract with two in-service buses',()=>expect(managementDay([{id:'a',number:'T2',fare:0,frequency_mins:30,journey_minutes:20,contract_payment:680,contract_end_day:35}],[{route_id:'a',status:'In service',features:[],condition:85},{route_id:'a',status:'In service',features:[],condition:85}],[{role:'Driver',route_id:'a',wage:140},{role:'Driver',route_id:'a',wage:140}],[],1).revenue).toBe(680));
   it('does not pay an expired contract', () => {
-    const r = managementDay([{id:'a',number:'T1',fare:0,frequency_mins:60,contract_payment:360,contract_end_day:7}],[{route_id:'a',status:'In service',features:[],condition:85}],[],[],8);
+    const r = managementDay([{id:'a',number:'T1',fare:0,frequency_mins:120,contract_payment:360,contract_end_day:7}],[{route_id:'a',status:'In service',features:[],condition:85}],[],[],8);
     expect(r.revenue).toBe(0);
   });
 });describe('passenger review variety', () => {

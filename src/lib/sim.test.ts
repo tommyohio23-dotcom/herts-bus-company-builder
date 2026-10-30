@@ -9,9 +9,9 @@ describe("simulateDay", () => {
   });
   it("only counts buses that are In service", () => {
     const r = simulateDay(
-      [{ id: "a", frequency_mins: 60, fare: 2 }],
+      [{ id: "a", frequency_mins: 120, fare: 2 }],
       [{ route_id: "a", status: "Workshop" }, { route_id: "a", status: "In service" }],
-      [140],
+      [{wage:140,role:"Driver",route_id:"a"}],
     );
     expect(r.activeBuses).toBe(1);
     expect(r.costs).toBe(BUS_DAILY_COST + 140);
