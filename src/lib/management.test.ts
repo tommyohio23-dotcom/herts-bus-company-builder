@@ -47,10 +47,26 @@ describe('management rules', () => {
   });
 });
 import { REVIEW_BANK } from './review-bank';
+import { bankReviewFor } from './local-reviews';
 describe('uploaded review bank', () => {
-  it('contains all 300 uploaded reviews', () => expect(REVIEW_BANK.length).toBe(300));
-  it('uses uploaded reviews for served routes on most days', () => {
-    const texts = [1,2,3,4,5,6,7,8].map(d => passengerReview({number:'1',fare:2,frequency_mins:60},[{condition:85,features:[]}],d).comment);
-    expect(texts.filter(t => REVIEW_BANK.some(r => t.startsWith(r.text))).length).toBeGreaterThan(4);
+  it('holds the 1,240 company reviews, 40 for each of the 31 companies', () => {
+    const own = REVIEW_BANK.filter(r => r.companies?.length === 1 && !r.places);
+    expect(own.length).toBe(1240);
+    expect(own.filter(r => r.companies![0] === 'bvg').length).toBe(40);
+  });
+  it('drops old reviews naming places no company serves (Hitchin)', () => expect(REVIEW_BANK.some(r => r.mode === 'bus' && r.text.includes('Hitchin'))).toBe(false));
+  it('gives a company only its own reviews', () => {
+    const bvgTexts = new Set(REVIEW_BANK.filter(r => r.companies?.includes('bvg')).map(r => r.text));
+    for (let s = 0; s < 30; s++) {
+      const t = bankReviewFor('bus', 1 + (s % 5), { area: 'berlin', operator: 'BVG', presetKey: 'bvg', places: ['Alexanderplatz'], cur: '€' }, s)!;
+      expect(bvgTexts.has(t.split(' — ')[0]!)).toBe(true);
+    }
+  });
+  it('custom UK companies only get old reviews naming their own places', () => {
+    for (let s = 0; s < 30; s++) {
+      const t = bankReviewFor('bus', 1 + (s % 5), { area: 'herts', operator: 'Mine', presetKey: null, places: ['Watford', 'St Albans'], cur: '£' }, s);
+      const r = REVIEW_BANK.find(x => t?.startsWith(x.text));
+      if (r) expect(r.places!.every(p => ['Watford', 'St Albans'].includes(p))).toBe(true);
+    }
   });
 });
