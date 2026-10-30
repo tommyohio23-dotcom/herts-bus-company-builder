@@ -39,3 +39,7 @@
 - [x] More companies where real (NJ Transit, NICE, Logan Express); Berlin 300 and 147 plus re-checked routes.
 - [x] Reviews use each company's own places (no Finchley in Berlin) with many more variations.
 - [x] Give user a prompt for another AI to write lots of reviews per company.
+# Reviews & company details (Oct 30)
+- [x] Import 1,240 uploaded reviews (40 per company).
+- [x] Keep old reviews only where their places fit a company's routes; drop the rest (e.g. Hitchin bus reviews).
+- [x] Show established year, owner, base and history on the company picker.
