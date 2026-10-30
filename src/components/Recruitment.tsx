@@ -12,12 +12,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { STAFF_ROLES } from '@/lib/herts';
-import { publishAdvert, reviewApplicant } from '@/lib/recruitment.functions';
+import { publishAdvert, reviewApplicant, hireAllQualified } from '@/lib/recruitment.functions';
 import { ApplicantPortrait } from './ApplicantPortrait';
 import type { Tables } from '@/integrations/supabase/types';
 
 export function Recruitment({companyId,drivers,refresh}:{companyId:string;drivers:Tables<'drivers'>[];refresh:()=>void}) {
-  const publish=useServerFn(publishAdvert),review=useServerFn(reviewApplicant);
+  const publish=useServerFn(publishAdvert),review=useServerFn(reviewApplicant),hireAll_=useServerFn(hireAllQualified);
   const [role,setRole]=useState('Driver'),[depot,setDepot]=useState(''),[wage,setWage]=useState(140),[positions,setPositions]=useState(1),[description,setDescription]=useState(''),[busy,setBusy]=useState(false),[filter,setFilter]=useState('Active'),[advertFilter,setAdvertFilter]=useState('all'),[selected,setSelected]=useState<string|null>(null);
   const adverts=useQuery({queryKey:['job_adverts',companyId],queryFn:async()=>{const r=await supabase.from('job_adverts').select('*').eq('company_id',companyId).order('posted_day',{ascending:false});if(r.error)throw r.error;return r.data;}});
   const applicants=useQuery({queryKey:['job_applicants',companyId],queryFn:async()=>{const r=await supabase.from('job_applicants').select('*').eq('company_id',companyId).order('name');if(r.error)throw r.error;return r.data;}});
@@ -27,7 +27,7 @@ export function Recruitment({companyId,drivers,refresh}:{companyId:string;driver
   const candidate=applicants.data?.find(a=>a.id===selected),ad=candidate?adverts.data?.find(a=>a.id===candidate.advert_id):undefined;
   const filtered=applicants.data?.filter(a=>(advertFilter==='all'||a.advert_id===advertFilter)&&(filter==='All'||(filter==='Active'?['Applied','Shortlisted'].includes(a.status):a.status===filter)))??[];
   const qualified=filtered.filter(a=>{const ad=adverts.data?.find(x=>x.id===a.advert_id);return !!ad&&ad.status==='Open'&&['Applied','Shortlisted'].includes(a.status)&&a.expected_wage<=ad.wage;});
-  async function hireAll(){if(busy||!qualified.length)return;setBusy(true);let hired=0;try{const full=new Set<string>();for(const a of qualified){if(full.has(a.advert_id))continue;try{const r=await review({data:{applicantId:a.id,action:'offer'}});if(r.status==='Hired')hired++;}catch{full.add(a.advert_id);}}toast.success(`Hired ${hired} of ${qualified.length} applicants`);}catch(e){toast.error(`Hired ${hired}; stopped: ${e instanceof Error?e.message:'error'}`);}finally{setBusy(false);refresh();}}
+  async function hireAll(){if(busy||!qualified.length)return;setBusy(true);try{const r=await hireAll_({data:{companyId}});toast.success(`Hired ${r.hired} new staff`);}catch(e){toast.error(e instanceof Error?e.message:'Hiring failed');}finally{setBusy(false);refresh();}}
   const inactive=(s:string)=>['Hired','Rejected','Declined'].includes(s);
   if(adverts.isError||applicants.isError||depots.isError)return <p className="mt-4 text-destructive">Recruitment records could not load. Please refresh.</p>;
   return <section className="mt-4 space-y-4"><div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-3xl">People & recruitment</h2><p className="text-sm text-muted-foreground">Fictional applicants and portraits · In-game adverts</p></div>
