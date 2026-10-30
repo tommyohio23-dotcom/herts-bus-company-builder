@@ -20,6 +20,7 @@ import { BUS_OPERATOR_PRESETS, LONDON_PRESETS } from '@/lib/london';
 import { AREAS, AREA_PRESETS, AREA_TOWNS, companyArea, type AreaKey } from '@/lib/areas';
 import { AREA_CURRENCY } from '@/lib/currency';
 import { StartingMoney } from '@/components/StartingMoney';
+import { COMPANY_INFO } from '@/lib/company-info';
 import { suggestedBusCapital, validStartingCapital, RAIL_STARTING_CAPITAL } from '@/lib/starting-capital';
 const LONDON_KEYS = LONDON_PRESETS.map(p => p.key);
 function areaPresets(a: AreaKey): Preset[] { return a === 'herts' ? BUS_OPERATOR_PRESETS.filter(p => !LONDON_KEYS.includes(p.key)) : a === 'london' ? LONDON_PRESETS : AREA_PRESETS[a]; }
@@ -147,6 +148,12 @@ function Dashboard() {
               <BusPhoto model={p.name} presetKey={p.key} credit={realOperatorPhoto(p.key)} className="overflow-hidden rounded-md" />
               <p className="font-display text-2xl">{p.name}</p>
               <p className="text-xs text-muted-foreground">{p.livery} · {p.routes.length} routes · {p.fleet.length} buses</p>
+              {COMPANY_INFO[p.key] && <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-2 text-xs">
+                {COMPANY_INFO[p.key]!.founded && <><dt className="font-semibold">Established</dt><dd>{COMPANY_INFO[p.key]!.founded}</dd></>}
+                <dt className="font-semibold">Owner</dt><dd>{COMPANY_INFO[p.key]!.owner}</dd>
+                <dt className="font-semibold">Based</dt><dd>{p.hq}</dd>
+              </dl>}
+              {COMPANY_INFO[p.key] && <p className="mt-1 text-xs text-muted-foreground">{COMPANY_INFO[p.key]!.about}</p>}
               <p className="mt-2 text-sm text-muted-foreground">Suggested start: {AREA_CURRENCY[area]}{suggestedBusCapital(p.routes).toLocaleString('en-GB')}</p>
               <Button size="sm" className="mt-2 w-full" disabled={!!busy} onClick={() => chooseStartingMoney(p)}>{busy === p.key ? "Setting up…" : "Take control"}</Button>
             </div>
