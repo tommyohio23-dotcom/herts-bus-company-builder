@@ -1,3 +1,4 @@
+import {railPerks,managerRent} from './staff-perks';
 import {breakdownOccurs,TRAIN_REPAIR_COST,RAIL_REPLACEMENT_COST} from './disruptions';
 import { bankReview } from './review-bank';
 import { generateApplicants } from './recruitment';
@@ -32,22 +33,22 @@ export function validateTimetable(service:RailService,others:RailService[]){
 const RAIL_REVIEWS={missing:['My train did not run as planned.','The departure boards showed my train, then it vanished.','Waited on the platform for a train that never came.'],good:['A comfortable journey on a well-kept train.','The train felt well cared for throughout the journey.','A pleasant rail journey; the onboard comfort was welcome.'],ok:['A useful rail journey; onboard comfort and reliability matter.','Got there fine, though the train felt a bit tired.','Decent trip, but a few extras would improve it.']};
 export function railReviewComment(served:boolean,rating:number,day:number,name:string){const list=!served?RAIL_REVIEWS.missing:rating>=4?RAIL_REVIEWS.good:RAIL_REVIEWS.ok;const seed=day*5+[...name].reduce((n,c)=>n+c.charCodeAt(0),0);const fallback=list[seed%list.length]??list[0]??'';return served&&seed%4!==0?bankReview('train',rating,seed*13+day)??fallback:fallback;}
 export function railDay(s:RailState){
- const next=structuredClone(s);let revenue=0;
+ const next=structuredClone(s);let revenue=0;const perks=railPerks(s.staff,s.services.filter(r=>r.contractEnd===undefined||r.contractEnd>=s.day).length,s.trains.filter(t=>t.status==='In service').length);
  for(const service of s.services){
    if(service.contractEnd!==undefined&&service.contractEnd<s.day)continue;
    validateTimetable(service,s.services);
    const train=s.trains.find(t=>t.id===service.trainId),driver=s.staff.find(d=>d.id===service.driverId&&d.role==='Train Driver');
    const byBus=service.replacementBus===true;
    if(!byBus&&(!train||train.status!=='In service'||!driver))throw new Error(`${service.name}: assign an available train and train driver, or hire rail replacement.`);
-   const rating=byBus?3:Math.min(5,3+((train?.condition??0)>=80?1:0)+(train?.features.includes('Free Wi-Fi')?1:0));
-   revenue+=Math.round(service.fare*(byBus?100:180)*routeDemand(s.day,service.id))+(service.contract??0);
+   const rating=byBus?3:Math.min(5,3+((train?.condition??0)>=80?1:0)+(train?.features.includes('Free Wi-Fi')?1:0)+perks.cleanRating);
+   revenue+=Math.round(service.fare*(byBus?100:180)*routeDemand(s.day,service.id)*perks.fare)+(service.contract??0);
    next.reviews.unshift({day:s.day,service:service.name,rating,comment:byBus?'Rail replacement got me to my destination, but the bus journey took longer than the train.':railReviewComment(true,rating,s.day,service.name)});
  }
  const active=s.services.filter(r=>r.contractEnd===undefined||r.contractEnd>=s.day);
  const replacementCosts=active.filter(r=>r.replacementBus).length*RAIL_REPLACEMENT_COST;
- const costs=replacementCosts+s.staff.reduce((n,d)=>n+d.wage,0)+s.depots.reduce((n,d)=>n+d.rent,0)+s.trains.reduce((n,t)=>n+Math.round(350*(active.some(r=>!r.replacementBus&&r.trainId===t.id)&&t.status==='In service'?operatingConditions(s.day).runningCost:1))+upgradeUpkeep(t.features,4),0);
+ const costs=replacementCosts+s.staff.reduce((n,d)=>n+d.wage,0)+s.depots.reduce((n,d)=>n+managerRent(d.rent,d.name,s.staff),0)+s.trains.reduce((n,t)=>n+Math.round(350*(active.some(r=>!r.replacementBus&&r.trainId===t.id)&&t.status==='In service'?operatingConditions(s.day).runningCost:1))+upgradeUpkeep(t.features,4),0);
  if(replacementCosts>s.balance+revenue)throw new Error('Not enough money for rail replacement');
- const broken=s.trains.filter(t=>t.status==='In service'&&active.some(r=>!r.replacementBus&&r.trainId===t.id)&&breakdownOccurs(s.day,t.id,t.condition));
+ const broken=s.trains.filter(t=>t.status==='In service'&&active.some(r=>!r.replacementBus&&r.trainId===t.id)&&breakdownOccurs(s.day,t.id,Math.min(100,t.condition+perks.breakdown)));
  const profit=revenue-costs;next.balance+=profit;next.reports.unshift({day:s.day,revenue,costs,profit,conditions:operatingConditions(s.day).label,breakdowns:broken.map(t=>t.number),replacementCosts});next.day++;
  next.trains=next.trains.map(t=>({...t,status:broken.some(b=>b.id===t.id)?'Broken down':t.status,mileage:t.mileage+(active.some(r=>!r.replacementBus&&r.trainId===t.id)?150:0)}));return next;
 }

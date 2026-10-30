@@ -1,9 +1,10 @@
 import { assertFleetCoverage, assertDriverCoverage, timetableCycle, type TimedRoute } from './service-frequency';
 import { operatingConditions, routeDemand } from './operating-conditions';
+import { routeFareBoost, depotCare, trainerCostCut } from './staff-perks';
 
 export type SimRoute  = TimedRoute & { id: string; frequency_mins: number; fare: number; journey_minutes?: number; turnaround_minutes?: number; recovery_percent?: number };
-export type SimBus    = { id?: string; route_id: string | null; status: string };
-export type SimDriver = { id?: string; route_id?: string | null; role?: string; wage: number };
+export type SimBus    = { id?: string; route_id: string | null; status: string; depot?: string | null };
+export type SimDriver = { id?: string; route_id?: string | null; role?: string; depot?: string | null; wage: number };
 
 export const BUS_DAILY_COST      = 90;
 export const PASSENGERS_PER_TRIP = 22;
@@ -34,14 +35,16 @@ export function simulateDay(
     const fareFactor = Math.max(0.3, 1.3 - r.fare * 0.1);
     revenue += Math.round(
       tripsRun * PASSENGERS_PER_TRIP * fareFactor * r.fare *
-      (day === undefined ? 1 : routeDemand(day, r.id)),
+      (day === undefined ? 1 : routeDemand(day, r.id)) * routeFareBoost(r.id, drivers),
     );
   }
 
   // 4. Costs.
   const activeBuses = inServiceBuses.length;
+  const atDepot = (d?: string | null) => buses.filter(b => b.depot === d && b.status !== 'Withdrawn').length;
+  const trainerCut = trainerCostCut(drivers);
   const busCost = Math.round(
-    activeBuses * BUS_DAILY_COST *
+    inServiceBuses.reduce((n, b) => n + BUS_DAILY_COST * (1 - depotCare(b.depot, drivers, atDepot(b.depot)).costCut - trainerCut), 0) *
     (day === undefined ? 1 : operatingConditions(day).runningCost),
   );
   const wages = drivers.reduce((sum, d) => sum + d.wage, 0);

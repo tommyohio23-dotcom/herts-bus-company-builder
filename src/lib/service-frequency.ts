@@ -52,7 +52,7 @@ export function assertFleetCoverage(routes: (TimedRoute & {id:string;frequency_m
   }
 }
 export function assertDriverCoverage(routes:{id:string;number?:string}[],buses:{route_id:string|null;status:string}[],drivers:{route_id?:string|null;role?:string}[]) {
-  for(const r of routes){const active=buses.filter(b=>b.route_id===r.id&&b.status==='In service').length;const crew=drivers.filter(d=>d.route_id===r.id&&d.role==='Driver').length;if(active>crew)throw new Error(`Route ${r.number??r.id}: needs ${active} assigned drivers; only ${crew} assigned.`);}
+  for(const r of routes){const active=buses.filter(b=>b.route_id===r.id&&b.status==='In service').length;const crew=drivers.filter(d=>d.route_id===r.id&&(d.role==='Driver'||d.role==='Senior Driver')).length;if(active>crew)throw new Error(`Route ${r.number??r.id}: needs ${active} assigned drivers; only ${crew} assigned.`);}
 }
 
 /** Approximate coordinates for Hertfordshire towns. */
