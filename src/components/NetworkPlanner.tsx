@@ -1,4 +1,5 @@
 /// <reference types="google.maps" />
+import { useCur } from "@/lib/currency";
 import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -28,6 +29,7 @@ function loadMaps() {
 }
 declare global { interface Window { hertsMapsReady?: () => void } }
 export function NetworkPlanner({companyId,refresh}: {companyId:string;refresh:()=>void}) {
+  const cur = useCur();
   const [areaKey,setAreaKey]=useState('herts'),[search,setSearch]=useState(''),[selected,setSelected]=useState<RealStop[]>([]);
   const [number,setNumber]=useState(''),[serviceType,setServiceType]=useState('Commercial'),[fare,setFare]=useState(2),[frequency,setFrequency]=useState(30),[saving,setSaving]=useState(false),[error,setError]=useState('');
   const container=useRef<HTMLDivElement>(null),map=useRef<google.maps.Map | null>(null);

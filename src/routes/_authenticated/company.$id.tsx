@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useCur } from "@/lib/currency";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -62,7 +63,7 @@ function CompanyPage() {
   async function runDay() {
     if (!company || running) return;
     setRunning(true);
-    try { const r = await action({data:{companyId:id,day:company.day,action:'day'}}); toast.success(`${r.message} · Profit £${r.profit?.toLocaleString() ?? 0}`); refresh(); }
+    try { const r = await action({data:{companyId:id,day:company.day,action:'day'}}); toast.success(`${r.message} · Profit ${cur}${r.profit?.toLocaleString() ?? 0}`); refresh(); }
     catch(e) { toast.error(e instanceof Error ? e.message : 'Day could not save'); }
     finally { setRunning(false); }
   }
@@ -87,7 +88,7 @@ function CompanyPage() {
           </div>
           <div className="text-right">
             <p className="text-xs uppercase text-muted-foreground">Balance</p>
-            <p className={`font-display text-4xl ${Number(company.balance) < 0 ? "text-destructive" : "text-primary"}`}>£{Number(company.balance).toLocaleString()}</p>
+            <p className={`font-display text-4xl ${Number(company.balance) < 0 ? "text-destructive" : "text-primary"}`}>{cur}{Number(company.balance).toLocaleString()}</p>
           </div>
         </div>
         <div className="mt-4 grid grid-cols-3 gap-2 text-center">
@@ -127,13 +128,14 @@ type Drv = ReturnType<typeof useCompanyData>["drivers"][number];
 type Co = NonNullable<ReturnType<typeof useCompanyData>["company"]>;
 
 function Fleet({ companyId, company, buses, routes, refresh, spend }: { companyId: string; company: Co; buses: Bus[]; routes: Rt[]; refresh: () => void; spend: (n: number) => Promise<boolean> }) {
+  const cur = useCur();
   const repair=useServerFn(repairBus);
   const purchase = useServerFn(purchaseBusOrFeatures);
   const [upgrading,setUpgrading]=useState(false);
-  async function upgrade(b:Bus, features:string[]){if(upgrading)return;setUpgrading(true);try{const r=await purchase({data:{companyId,day:company.day,busId:b.id,features}});toast.success(`Specification saved · £${r.cost.toLocaleString()}`);refresh();}catch(e){toast.error(e instanceof Error?e.message:'Could not save');}finally{setUpgrading(false);}}
+  async function upgrade(b:Bus, features:string[]){if(upgrading)return;setUpgrading(true);try{const r=await purchase({data:{companyId,day:company.day,busId:b.id,features}});toast.success(`Specification saved · ${cur}${r.cost.toLocaleString()}`);refresh();}catch(e){toast.error(e instanceof Error?e.message:'Could not save');}finally{setUpgrading(false);}}
   const update = async (id: string, patch: Partial<Bus>) => { await supabase.from("buses").update(patch).eq("id", id); refresh(); };
   const remove = async (b: Bus) => {
-    if (!confirm(`Sell ${b.fleet_no} for £${Math.round(busPrice(b.year) * 0.3).toLocaleString()}?`)) return;
+    if (!confirm(`Sell ${b.fleet_no} for ${cur}${Math.round(busPrice(b.year) * 0.3).toLocaleString()}?`)) return;
     await supabase.from("buses").delete().eq("id", b.id);
     await supabase.from("companies").update({ balance: Number(company.balance) + Math.round(busPrice(b.year) * 0.3) }).eq("id", companyId);
     refresh();
@@ -167,9 +169,9 @@ function Fleet({ companyId, company, buses, routes, refresh, spend }: { companyI
                 </SelectContent>
               </Select>
             </div>
-            {b.status==='Broken down'&&<Button className="mt-2" disabled={upgrading} onClick={async()=>{setUpgrading(true);try{await repair({data:{companyId,day:company.day,busId:b.id}});toast.success('Bus repaired');refresh();}catch(e){toast.error(e instanceof Error?e.message:'Repair failed');}finally{setUpgrading(false);}}}>Repair · £{busRepairCost(b.condition).toLocaleString()}</Button>}
+            {b.status==='Broken down'&&<Button className="mt-2" disabled={upgrading} onClick={async()=>{setUpgrading(true);try{await repair({data:{companyId,day:company.day,busId:b.id}});toast.success('Bus repaired');refresh();}catch(e){toast.error(e instanceof Error?e.message:'Repair failed');}finally{setUpgrading(false);}}}>Repair · {cur}{busRepairCost(b.condition).toLocaleString()}</Button>}
             <FeaturePicker value={b.features} disabled={upgrading} onChange={(v) => upgrade(b, v)} />
-            <p className="mt-2 text-xs text-muted-foreground">Extras upkeep · £{upgradeUpkeep(b.features)}/day</p>
+            <p className="mt-2 text-xs text-muted-foreground">Extras upkeep · {cur}{upgradeUpkeep(b.features)}/day</p>
             </div>
           </div>
         ))}
@@ -179,6 +181,7 @@ function Fleet({ companyId, company, buses, routes, refresh, spend }: { companyI
 }
 
 function AddBus({ companyId, company, routes, refresh, spend }: { companyId: string; company: Co; routes: Rt[]; refresh: () => void; spend: (n: number) => Promise<boolean> }) {
+  const cur = useCur();
   const purchase=useServerFn(purchaseBusOrFeatures);
   const [saving,setSaving]=useState(false);
   const [open, setOpen] = useState(false);
@@ -226,8 +229,8 @@ function AddBus({ companyId, company, routes, refresh, spend }: { companyId: str
           </div>
           <div><Label>Spec & extras</Label><FeaturePicker value={f.features} onChange={(v) => setF({ ...f, features: v })} /></div>
           <BusPhoto model={f.model} presetKey={company.preset_key} className="overflow-hidden rounded-md" />
-          <p className="text-sm text-muted-foreground">Extras £{upgradeCost(f.features).toLocaleString()} each · Upkeep £{upgradeUpkeep(f.features)}/day each{f.quantity > 1 ? ` · ${f.quantity} buses at £${each.toLocaleString()} each` : ""}</p>
-          <Button disabled={saving} onClick={save}>{f.quantity > 1 ? `Buy ${f.quantity} for £${price.toLocaleString()}` : `Buy for £${price.toLocaleString()}`}</Button>
+          <p className="text-sm text-muted-foreground">Extras {cur}{upgradeCost(f.features).toLocaleString()} each · Upkeep {cur}{upgradeUpkeep(f.features)}/day each{f.quantity > 1 ? ` · ${f.quantity} buses at ${cur}${each.toLocaleString()} each` : ""}</p>
+          <Button disabled={saving} onClick={save}>{f.quantity > 1 ? `Buy ${f.quantity} for ${cur}${price.toLocaleString()}` : `Buy for ${cur}${price.toLocaleString()}`}</Button>
         </div>
       </DialogContent>
     </Dialog>
@@ -235,6 +238,7 @@ function AddBus({ companyId, company, routes, refresh, spend }: { companyId: str
 }
 
 function Routes({ companyId, routes, buses, drivers, refresh }: { companyId: string; routes: Rt[]; buses: Bus[]; drivers: Drv[]; refresh: () => void }) {
+  const cur = useCur();
   const [f, setF] = useState({ number: "", origin: "Hertford", destination: "Stevenage", via: "", frequency_mins: 30, fare: 2, journey_minutes:30, turnaround_minutes:5, recovery_percent:10 });
   async function add() {
     if (!f.number) { toast.error("Route number needed"); return; }
@@ -255,7 +259,7 @@ function Routes({ companyId, routes, buses, drivers, refresh }: { companyId: str
             <span className="blind min-w-16 px-2 py-1 text-center text-3xl">{r.number}</span>
             <div className="min-w-0 flex-1 basis-40">
               <p className="font-semibold">{r.origin} → {r.destination}</p>
-              <p className="break-words text-xs text-muted-foreground">{r.service_type} · {r.via && `via ${r.via} · `}every {r.frequency_mins} min · £{Number(r.fare).toFixed(2)} · {n} bus{n === 1 ? "" : "es"}{r.contract_end_day != null && ` · Contract ends day ${r.contract_end_day}`}</p>
+              <p className="break-words text-xs text-muted-foreground">{r.service_type} · {r.via && `via ${r.via} · `}every {r.frequency_mins} min · {cur}{Number(r.fare).toFixed(2)} · {n} bus{n === 1 ? "" : "es"}{r.contract_end_day != null && ` · Contract ends day ${r.contract_end_day}`}</p>
             </div>
             {r.stop_ids.length === 0 && <EditStops route={r} refresh={refresh} />}
             <RouteFrequency route={r} count={n} refresh={refresh}/>
@@ -284,13 +288,14 @@ function Routes({ companyId, routes, buses, drivers, refresh }: { companyId: str
 }
 
 function FeaturePicker({ value, onChange, disabled=false }: { value: string[]; onChange: (v: string[]) => void; disabled?:boolean }) {
+  const cur = useCur();
   return (
     <div className="mt-2 flex flex-wrap gap-1">
       {FEATURES.map((ft) => {
         const on = value.includes(ft);
         return (
           <Button key={ft} type="button" size="sm" variant={on?'default':'outline'} disabled={disabled} onClick={() => onChange(on ? value.filter((x) => x !== ft) : [...value, ft])} className="h-auto whitespace-normal text-xs">
-            {ft}{!on && ` · £${UPGRADE_PRICES[ft]?.install.toLocaleString()}`}
+            {ft}{!on && ` · ${cur}${UPGRADE_PRICES[ft]?.install.toLocaleString()}`}
           </Button>
         );
       })}
