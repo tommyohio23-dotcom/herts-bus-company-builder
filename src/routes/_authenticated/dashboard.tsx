@@ -152,7 +152,7 @@ function Dashboard() {
               <p className="font-display text-2xl">{p.name}</p>
               <p className="text-xs text-muted-foreground">{p.livery} · {p.routes.length} routes · {starterFleet(p).length} buses</p>
               {COMPANY_INFO[p.key] && <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-2 text-xs">
-                {COMPANY_INFO[p.key]!.founded && <><dt className="font-semibold">Established</dt><dd>{COMPANY_INFO[p.key]!.founded}</dd></>}
+                <dt className="font-semibold">Established</dt><dd>{COMPANY_INFO[p.key]!.founded}</dd>
                 <dt className="font-semibold">Owner</dt><dd>{COMPANY_INFO[p.key]!.owner}</dd>
                 <dt className="font-semibold">Based</dt><dd>{p.hq}</dd>
               </dl>}
