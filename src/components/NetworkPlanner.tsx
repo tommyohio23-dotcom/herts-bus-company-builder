@@ -33,7 +33,7 @@ export function NetworkPlanner({companyId,refresh}: {companyId:string;refresh:()
   const container=useRef<HTMLDivElement>(null),map=useRef<google.maps.Map | null>(null);
   const [ready,setReady]=useState(false);
   const area=MAP_AREAS.find(a=>a.key===areaKey) ?? MAP_AREAS[0];
-  const stops=useQuery({queryKey:['real-stops',areaKey],queryFn:async()=>{const r=await fetch(`/data/stops-${areaKey}.json`);if(!r.ok)throw new Error('Stop data could not load');return await r.json() as RealStop[];},staleTime:Infinity});
+  const stops=useQuery({queryKey:['real-stops',areaKey],queryFn:async()=>{const r=await fetch(`/data/stops-${area?.file ?? areaKey}.json`);if(!r.ok)throw new Error('Stop data could not load');const all=await r.json() as RealStop[];const b=area?.bounds;return b?all.filter(s=>s.lat>=b[0]&&s.lat<=b[1]&&s.lng>=b[2]&&s.lng<=b[3]):all;},staleTime:Infinity});
   const matches=(stops.data ?? []).filter(s => stopLabel(s).toLowerCase().includes(search.toLowerCase())).slice(0,60);
   const selectedRef=useRef(selected);selectedRef.current=selected;
   useEffect(()=>{let cancelled=false;loadMaps().then(()=>{if(cancelled || !container.current)return;map.current=new google.maps.Map(container.current,{center:{lat:51.85,lng:-.28},zoom:10,clickableIcons:false,mapTypeControl:true,streetViewControl:false});setReady(true);}).catch(e=>setError(e.message));return()=>{cancelled=true;};},[]);
