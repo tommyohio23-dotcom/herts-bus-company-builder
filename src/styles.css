@@ -64,6 +64,9 @@
 
 @layer base {
   * { border-color: var(--color-border); }
+  html, body { overflow-x: clip; overscroll-behavior-x: none; max-width: 100%; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; touch-action: manipulation; }
+  img, video, canvas, svg { max-width: 100%; }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);

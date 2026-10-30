@@ -124,7 +124,7 @@ function Dashboard() {
         <Tabs value={mode} onValueChange={setMode} className="mt-4"><TabsList className="h-12 w-full sm:w-auto"><TabsTrigger className="flex-1 gap-2" value="bus"><Bus className="size-5"/>Bus companies</TabsTrigger><TabsTrigger className="flex-1 gap-2" value="train"><TrainFront className="size-5"/>Train companies</TabsTrigger></TabsList></Tabs>
         {mode==='bus'&&<Tabs value={area} onValueChange={v=>setArea(v as AreaKey)} className="mt-3"><TabsList className="h-auto flex-wrap">{AREAS.map(a=><TabsTrigger key={a.key} value={a.key}>{a.label}</TabsTrigger>)}</TabsList></Tabs>}
         {companies.length === 0 && <p className="text-muted-foreground">None yet — pick a classic operator or found your own below.</p>}
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
           {companies.filter(c=>c.transport_mode===mode&&(mode!=='bus'||companyArea(c,LONDON_KEYS)===area)).map((c) => (
             <div key={c.id} className="card-raised rounded-lg bg-card p-3">
             <Link to={c.transport_mode==='train'?'/rail/$id':'/company/$id'} params={{ id: c.id }} className="block">
@@ -142,9 +142,9 @@ function Dashboard() {
           <h2 className="text-4xl">{AREAS.find(a=>a.key===area)?.label} operators</h2>
           <CustomCompany key={area} area={area} onDone={(id) => navigate({ to: "/company/$id", params: { id } })} />
         </div>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
           {areaPresets(area).map((p) => (
-            <div key={p.key} className="rounded-lg border bg-card p-3">
+            <div key={p.key} className="min-w-0 rounded-lg border bg-card p-3">
               <BusPhoto model={p.name} presetKey={p.key} credit={realOperatorPhoto(p.key)} className="overflow-hidden rounded-md" />
               <p className="font-display text-2xl">{p.name}</p>
               <p className="text-xs text-muted-foreground">{p.livery} · {p.routes.length} routes · {p.fleet.length} buses</p>
