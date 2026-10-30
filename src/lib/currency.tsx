@@ -5,3 +5,5 @@ import type { AreaKey } from './areas';
 export const AREA_CURRENCY: Record<AreaKey, string> = { herts: '£', london: '£', beds: '£', bucks: '£', essex: '£', boston: '$', nyc: '$', berlin: '€' };
 export const CurrencyContext = createContext('£');
 export const useCur = () => useContext(CurrencyContext);
+export const AreaContext = createContext<AreaKey>('herts');
+export const useArea = () => useContext(AreaContext);

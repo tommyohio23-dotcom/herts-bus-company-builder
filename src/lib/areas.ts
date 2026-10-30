@@ -1,6 +1,7 @@
 import data from './area-presets.json';
 import type { Preset } from './herts';
-import { HERTS_TOWNS } from './herts';
+import { BUS_MODELS, HERTS_TOWNS, PRESETS } from './herts';
+import { LONDON_PRESETS } from './london';
 import { WORLD_PRESETS } from './world';
 
 export const AREAS = [
@@ -42,4 +43,23 @@ export function companyArea(c: { preset_key: string | null; hq_town: string | nu
   if (c.preset_key && londonKeys.includes(c.preset_key)) return 'london';
   for (const a of ['london', ...OTHER] as const) if (c.hq_town && AREA_TOWNS[a].includes(c.hq_town)) return a;
   return 'herts';
+}
+
+const LONDON_KEYS = LONDON_PRESETS.map(p => p.key);
+/** Area of a saved company using the built-in London operator list. */
+export const areaOf = (c: { preset_key: string | null; hq_town: string | null }) => companyArea(c, LONDON_KEYS);
+const presetsIn = (a: AreaKey): Preset[] => a === 'herts' ? PRESETS.filter(p => !LONDON_KEYS.includes(p.key)) : a === 'london' ? LONDON_PRESETS : AREA_PRESETS[a];
+/** Towns and depot sites a company in this area may use: area towns plus its operators' real depot names. */
+export function areaTowns(a: AreaKey): string[] {
+  return [...new Set([...AREA_TOWNS[a], ...presetsIn(a).flatMap(p => [p.hq, ...p.depots])])].filter(Boolean).sort((x, y) => x.localeCompare(y));
+}
+const WORLD_MODELS: Record<'boston' | 'nyc' | 'berlin', string[]> = {
+  boston: ['New Flyer Xcelsior XDE40', 'New Flyer Xcelsior XDE60', 'New Flyer Xcelsior XE40 (battery electric)', 'New Flyer Xcelsior XE60 (battery electric)', 'Neoplan AN460LF (dual-mode)', 'Nova Bus LFS', 'MCI D4500 (coach)'],
+  nyc: ['New Flyer Xcelsior XD40', 'New Flyer Xcelsior XD60', 'New Flyer Xcelsior XE40 (battery electric)', 'Nova Bus LFS', 'Nova Bus LFS Artic', 'Nova Bus LFSe+ (battery electric)', 'Orion VII Hybrid', 'Prevost X3-45 (express coach)', 'MCI D4500 (coach)'],
+  berlin: ['ADL Enviro500 MMC', "MAN Lion's City Hybrid", "MAN Lion's City 12 E", "MAN Lion's City 18 (articulated)", 'Mercedes-Benz Citaro', 'Mercedes-Benz Citaro G (bendy)', 'Mercedes-Benz eCitaro', 'Mercedes-Benz eCitaro G', 'Solaris Urbino 12 electric', 'Solaris Urbino 18', 'Scania Citywide'],
+};
+const NON_UK = new Set(Object.values(WORLD_MODELS).flat().filter(m => !['ADL Enviro500 MMC', "MAN Lion's City Hybrid", 'Mercedes-Benz Citaro', 'Mercedes-Benz Citaro G (bendy)'].includes(m)));
+/** Bus models sold in an area: city-specific lists abroad, British models at home. */
+export function areaModels(a: AreaKey): string[] {
+  return a === 'boston' || a === 'nyc' || a === 'berlin' ? WORLD_MODELS[a] : BUS_MODELS.filter(m => !NON_UK.has(m));
 }
