@@ -38,3 +38,7 @@ describe('Boston, New York and Berlin operators', () => {
     }
   });
 });
+import { areaModels as uk } from './areas';
+describe('UK model list', () => {
+  it('does not sell Berlin-only Enviro500 MMC or US buses in Herts', () => { const m = uk('herts'); expect(m).not.toContain('ADL Enviro500 MMC'); expect(m).not.toContain('Nova Bus LFS'); expect(m).toContain('Mercedes-Benz Citaro'); });
+});
